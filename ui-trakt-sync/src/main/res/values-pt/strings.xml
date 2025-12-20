@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="textTraktLoginSuccess">Você foi autorizado com sucesso.</string>
+    <string name="textTraktVipLoginSuccess">Foi autorizado com sucesso. Como um Trakt VIP, pode agora usar todos os recursos do Showly Premium gratuitamente!</string>
   <string name="textTraktSyncStarted">Sincronização iniciada. Ela continuará sendo executada em segundo plano.</string>
   <string name="textTraktSyncStart">Sincronizar agora</string>
   <string name="textTraktSyncSchedule">Programação</string>

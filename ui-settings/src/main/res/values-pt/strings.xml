@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="textTraktLoginSuccess">Você foi autorizado com sucesso.</string>
+    <string name="textTraktVipLoginSuccess">Você foi autorizado com sucesso. Como um Trakt VIP, você agora pode usar todos os recursos do Showly Premium de graça!</string>
   <string name="textTraktLogoutSuccess">Você foi desconectado.</string>
   <string name="textImagesCacheCleared">O cache foi liberado.</string>
   <string name="textTurnOff">Desativar</string>
@@ -67,7 +68,7 @@
   <string name="textSettingsTabletColumnsSummary">Selecione o número desejado de colunas para as listas.</string>
   <string name="textSettingsBackup">Backup &amp; restauração</string>
   <string name="textSettingsBackupExportTitle">Exportar</string>
-  <string name="textSettingsBackupExportDescription">Exporte os seus dados para criar um backup ou transferí-los para um novo dispositivo.</string>
+    <string name="textSettingsBackupExportDescription">Exporte seus dados para criar um backup ou transferi-los para um novo dispositivo.</string>
   <string name="textSettingsBackupImportTitle">Importar</string>
   <string name="textSettingsBackupImportDescription">Importe seu arquivo de backup para restaurar dados neste dispositivo.</string>
   <string name="textSettingsSpoilers">Spoilers</string>
