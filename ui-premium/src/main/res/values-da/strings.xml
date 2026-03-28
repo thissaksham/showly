@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="textPremium">Showly Premium</string>
+  <string name="textPremium">Showly+ Premium</string>
   <string name="textLightThemeTitle">Lyst tema</string>
   <string name="textLightThemeDesc">Slut dig til den lyse side af kraften med et ekstra lyst tema, der kan bruges i hovedappen og widgets.</string>
   <string name="textCustomImagesTitle">Brugerdefinerede billeder</string>
@@ -12,5 +12,5 @@
   <string name="textNewsTitle">Nyhedssektion</string>
   <string name="textNewsDesc">Aktiver nyhedssektionen med de nyeste serier- og film artikler, nyheder og trailere. Drevet af Reddit.</string>
   <string name="textViewsTitle">Listevisninger</string>
-  <string name="textViewsDesc">Aktiver ekstra listevisninger såsom kompakt liste eller gittervisning.</string>
+  <string name="textViewsDesc">Aktiver ekstra listevisninger såsom kompakt liste oder gittervisning.</string>
 </resources>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="textPremium">Showly Premium</string>
-  <string name="textPremiumAdFull">Tue Showlya ja auta sen kehitystä, niin saat käyttöösi hienoja lisätoimintoja!</string>
+  <string name="textPremium">Showly+ Premium</string>
+  <string name="textPremiumAdFull">Tue Showly+:aa ja auta sen kehitystä, niin saat käyttöösi hienoja lisätoimintoja!</string>
   <string name="textLightThemeTitle">Vaalea teema</string>
   <string name="textLightThemeDesc">Liity voiman valoisalle puolelle sovelluksen ja widgettien vaalealla teemalla.</string>
   <string name="textCustomImagesTitle">Omat kuvat</string>

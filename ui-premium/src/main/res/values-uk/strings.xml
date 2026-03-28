@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="textPremium">Showly Premium</string>
-  <string name="textPremiumAdFull">Станьте підписником додатку Showly, допоможіть його розробці та отримайте доступ до крутих бонусних функцій!</string>
+  <string name="textPremium">Showly+ Premium</string>
+  <string name="textPremiumAdFull">Станьте підписником додатку Showly+, допоможіть його розробці та отримайте доступ до крутих бонусних функцій!</string>
   <string name="textLightThemeTitle">Світла тема</string>
   <string name="textLightThemeDesc">Приєднуйтесь до сил світла з додатковою світлою темою для головного додатку і віджетів.</string>
   <string name="textCustomImagesTitle">Користувацькі зображення</string>

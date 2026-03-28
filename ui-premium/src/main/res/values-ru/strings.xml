@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="textPremium">Showly Premium</string>
-  <string name="textPremiumAdFull">Станьте спонсором Showly, помогите его развитию и получите доступ к крутым бонусным функциям!</string>
+  <string name="textPremium">Showly+ Premium</string>
+  <string name="textPremiumAdFull">Станьте спонсором Showly+, помогите его развитию и получите доступ к крутым бонусным функциям!</string>
   <string name="textLightThemeTitle">Светлая тема</string>
   <string name="textLightThemeDesc">Присоединитесь к светлой стороне силы с цветом темы, применимой к главному приложению и виджетам.</string>
   <string name="textCustomImagesTitle">Пользовательские изображения</string>
