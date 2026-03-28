@@ -36,6 +36,7 @@
   <string name="textPleaseWait">Bitte warten…</string>
   <string name="textRate">Bewerten</string>
   <string name="textLink">Link</string>
+  <string name="textDisabled">Deaktiviert</string>
   <string name="textRateSaved">Deine Bewertung wurde gespeichert.</string>
   <string name="textRateRemoved">Deine Bewertung wurde gelöscht.</string>
   <string name="textDays">%1$d Tage</string>
@@ -52,7 +53,7 @@
   <string name="textPeople">Besetzung &amp; Crew</string>
   <string name="textDirecting">Regie</string>
   <string name="textDirector">Regisseur</string>
-  <string name="textWriting">Drehbuchautor</string>
+  <string name="textWriting">Drehbuchauthor</string>
   <string name="textScreenplay">Drehbuch</string>
   <string name="textSound">Ton</string>
   <string name="textMusic">Musik</string>
@@ -100,6 +101,7 @@
   <string name="textTraktSyncErrorFull">Trakt.tv Synchronisation fehlgeschlagen. Bitte überprüfe deine Internetverbindung und versuch es erneut oder kontaktiere uns, wenn der Fehler weiterhin besteht.</string>
   <string name="textTraktQuickSyncError">Sofortige Synchronisation fehlgeschlagen.</string>
   <string name="textTraktQuickSyncErrorFull">Sofortige Synchronisation fehlgeschlagen. Wir versuchen es erneut beim nächsten Öffnen der App. Bitte überprüfe deine Internetverbindung.</string>
+  <string name="textTraktNotificationsRationale">Bitte erteilen Sie der Anwendung die Erlaubnis, Informationen über den Fortschritt und die Ergebnisse der Synchronisierung anzuzeigen.\n\nMöchten Sie dies jetzt tun?</string>
   <string name="textRemoveFromTrakt">Von Trakt.tv entfernen?</string>
   <string name="textRemoveFromTraktHidden">Möchtest du dieses Element aus den \'Versteckten Elementen\' deines Trakt.tv-Accounts entfernen?</string>
   <string name="textRemoveFromTraktWatchlist">Möchtest du dieses Element aus der \'Watchlist\' deines Trakt.tv-Accounts entfernen?</string>

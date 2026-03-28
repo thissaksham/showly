@@ -11,6 +11,8 @@ import com.bumptech.glide.Glide
 import com.michaldrabik.common.Config.SPOILERS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_RATINGS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_REGEX
+import com.michaldrabik.common.extensions.dateFromMillis
+import com.michaldrabik.common.extensions.toLocalZone
 import com.michaldrabik.ui_base.common.views.MovieView
 import com.michaldrabik.ui_base.utilities.extensions.capitalizeWords
 import com.michaldrabik.ui_base.utilities.extensions.dimenToPx
@@ -64,20 +66,19 @@ class MyMovieAllView : MovieView<MyMoviesItem> {
 
     with(binding) {
       collectionMovieProgress.visibleIf(item.isLoading)
-      collectionMovieTitle.text =
-        if (item.translation?.title.isNullOrBlank()) {
-          item.movie.title
-        } else {
-          item.translation?.title
-        }
+      collectionMovieTitle.text = item.translation?.title.let {
+        if (it.isNullOrBlank()) item.movie.title else it
+      }
 
       bindDescription(item)
       bindRating(item)
 
-      collectionMovieYear.visibleIf(item.movie.released != null || item.movie.year > 0)
-      collectionMovieYear.text = when {
-        item.movie.released != null -> item.dateFormat?.format(item.movie.released)?.capitalizeWords()
-        else -> String.format(ENGLISH, "%d", item.movie.year)
+      collectionMovieYear.visibleIf(item.movie.year > 0)
+      collectionMovieYear.text = String.format(ENGLISH, "%d", item.movie.year)
+
+      item.movie.createdAt.takeIf { it > 0 }?.let {
+        collectionMovieReleaseDate.visible()
+        collectionMovieReleaseDate.text = item.dateFormat?.format(dateFromMillis(it).toLocalZone())?.capitalizeWords()
       }
 
       item.userRating?.let {
@@ -96,17 +97,14 @@ class MyMovieAllView : MovieView<MyMoviesItem> {
   }
 
   private fun bindDescription(item: MyMoviesItem) {
-    var description =
-      if (item.translation?.overview.isNullOrBlank()) {
-        item.movie.overview
-      } else {
-        item.translation?.overview
-      }
+    var description = item.translation?.overview.let {
+      if (it.isNullOrBlank()) item.movie.overview else it
+    }
 
     with(binding) {
       if (item.spoilers.isSpoilerHidden) {
-        collectionMovieDescription.tag = description.toString()
-        description = SPOILERS_REGEX.replace(description.toString(), SPOILERS_HIDE_SYMBOL)
+        collectionMovieDescription.tag = description
+        description = SPOILERS_REGEX.replace(description, SPOILERS_HIDE_SYMBOL)
 
         if (item.spoilers.isSpoilerTapToReveal) {
           collectionMovieDescription.onClick { view ->
@@ -161,6 +159,7 @@ class MyMovieAllView : MovieView<MyMoviesItem> {
       collectionMovieRuntime.gone()
       collectionMovieRuntimeIcon.gone()
       collectionMoviePlaceholder.gone()
+      collectionMovieReleaseDate.gone()
       Glide.with(this@MyMovieAllView).clear(collectionMovieImage)
     }
   }

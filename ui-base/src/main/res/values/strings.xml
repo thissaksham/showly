@@ -69,17 +69,17 @@
   <string name="textAirsNow">Airs Now</string>
 
   <plurals name="textDaysToAir">
-    <item quantity="one">Airs tomorrow</item>
+    <item quantity="one">Airs in %d day</item>
     <item quantity="other">Airs in %d days</item>
   </plurals>
 
   <plurals name="textHoursToAir">
-    <item quantity="one">Airs in 1 hour</item>
+    <item quantity="one">Airs in %d hour</item>
     <item quantity="other">Airs in %d hours</item>
   </plurals>
 
   <plurals name="textMinutesToAir">
-    <item quantity="one">Airs now</item>
+    <item quantity="one">Airs in %d minute</item>
     <item quantity="other">Airs in %d minutes</item>
   </plurals>
 
@@ -122,15 +122,15 @@
   <string name="textRemoveFromTraktWatchlist">Would you like to remove this item from your Trakt.tv account \'Watchlist\'?</string>
   <string name="textRemoveFromTraktProgress">Would you like to remove this item from your Trakt.tv account \'Progress\'?</string>
 
-  <string name="textAddToMyShows">Add to Watched</string>
+  <string name="textAddToMyShows">Add to my shows</string>
   <string name="textAddToMyMovies">Add to History</string>
   <string name="textAddToWatchlist">Add to Watchlist</string>
   <string name="textAddToHidden">Add to Dropped</string>
-  <string name="textMoveToMyShows">Move to Watched</string>
+  <string name="textMoveToMyShows">Move to my shows</string>
   <string name="textMoveToMyMovies">Move to History</string>
   <string name="textMoveToWatchlist">Move to Watchlist</string>
   <string name="textMoveToHidden">Move to Dropped</string>
-  <string name="textRemoveFromMyShows">Remove from Watched</string>
+  <string name="textRemoveFromMyShows">Remove from my shows</string>
   <string name="textRemoveFromMyMovies">Remove from History</string>
   <string name="textRemoveFromWatchlist">Remove from Watchlist</string>
   <string name="textRemoveFromHidden">Remove from Dropped</string>
@@ -164,5 +164,6 @@
   <string name="errorAccountListsLimitsReached" translatable="false">Sorry, you have reached your Trakt account limit for personal lists!\n\nPlease contact us if you need more assistance.</string>
   <string name="errorTraktSyncListsLimitsReached" translatable="false">You have reached your Trakt account limit for personal lists! Not all of your personal lists were synchronized.</string>
   <string name="errorTraktSyncWatchlistLimitsReached" translatable="false">You have reached your Trakt account limit for watchlist items! Please contact us if you need more assistance.</string>
+  <string name="errorSubscriptionsNotAvailable">Google Play subscriptions are not available on this device.</string>
 
 </resources>

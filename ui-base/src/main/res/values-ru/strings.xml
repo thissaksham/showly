@@ -5,11 +5,11 @@
   <string name="textNo">Нет</string>
   <string name="textApply">Применить</string>
   <string name="textCancel">Отменить</string>
-  <string name="textContinue">Продолжить</string>
   <string name="textClose">Закрыть</string>
   <string name="textShare">Поделиться</string>
   <string name="textNow">Сейчас</string>
   <string name="textNotNow">Позже</string>
+  <string name="textReleaseDay">День выхода</string>
   <string name="textNew">Новое</string>
   <string name="textSelect">Выбрать</string>
   <string name="textSubmit">Отправить</string>
@@ -64,24 +64,24 @@
   <string name="textAirsNow">Уже вышло</string>
   <plurals name="textDaysToAir">
     <item quantity="one">Выходит через %d день</item>
-    <item quantity="few">Выходит через %d дней</item>
+    <item quantity="few">Выходит через %d дня</item>
     <item quantity="many">Выходит через %d дней</item>
     <item quantity="other">Выходит через %d дней</item>
   </plurals>
   <plurals name="textHoursToAir">
-    <item quantity="one">Выходит через 1 час</item>
+    <item quantity="one">Выходит через %d час</item>
     <item quantity="few">Выходит через %d часа</item>
     <item quantity="many">Выходит через %d часов</item>
     <item quantity="other">Выходит через %d часов</item>
   </plurals>
   <plurals name="textMinutesToAir">
-    <item quantity="one">Уже вышло</item>
-    <item quantity="few">Выходит через %d минут</item>
+    <item quantity="one">Выходит через %d минуту</item>
+    <item quantity="few">Выходит через %d минуты</item>
     <item quantity="many">Выходит через %d минут</item>
     <item quantity="other">Выходит через %d минут</item>
   </plurals>
   <plurals name="textTraktQuickSyncComplete">
-    <item quantity="one">1 элемент успешно синхронизирован.</item>
+    <item quantity="one">%d элемент успешно синхронизирован.</item>
     <item quantity="few">%d элементов успешно синхронизировано.</item>
     <item quantity="many">%d элементов успешно синхронизировано.</item>
     <item quantity="other">%d элементов успешно синхронизировано.</item>
@@ -116,18 +116,18 @@
   <string name="textRemoveFromTraktHidden">Вы хотите удалить этот предмет из вашего аккаунта Trakt.tv \'Скрытое\'?</string>
   <string name="textRemoveFromTraktWatchlist">Вы хотите удалить этот предмет из вашего аккаунта Trakt.tv \'Буду смотреть\'?</string>
   <string name="textRemoveFromTraktProgress">Вы хотите удалить этот предмет из вашего аккаунта Trakt.tv \'Прогресс\'?</string>
-  <string name="textAddToMyShows">Добавить в Мои Сериалы</string>
+  <string name="textAddToMyShows">Добавить в мои сериалы</string>
   <string name="textAddToMyMovies">Добавить в историю просмотров</string>
-  <string name="textAddToWatchlist">Добавить в Буду Смотреть</string>
-  <string name="textAddToHidden">Добавить в Скрытое</string>
-  <string name="textMoveToMyShows">Переместить в Мои Сериалы</string>
+  <string name="textAddToWatchlist">Добавить в буду смотреть</string>
+  <string name="textAddToHidden">Добавить в скрытое</string>
+  <string name="textMoveToMyShows">Переместить в мои сериалы</string>
   <string name="textMoveToMyMovies">Переместить в историю просмотров</string>
-  <string name="textMoveToWatchlist">Переместить в Буду Смотреть</string>
-  <string name="textMoveToHidden">Переместить в Скрытое</string>
-  <string name="textRemoveFromMyShows">Удалить из Моих Сериалов</string>
+  <string name="textMoveToWatchlist">Переместить в буду смотреть</string>
+  <string name="textMoveToHidden">Переместить в скрытое</string>
+  <string name="textRemoveFromMyShows">Удалить из моих сериалов</string>
   <string name="textRemoveFromMyMovies">Удалить из истории просмотров</string>
-  <string name="textRemoveFromWatchlist">Удалить из Буду Смотреть</string>
-  <string name="textRemoveFromHidden">Удалить из Скрытое</string>
+  <string name="textRemoveFromWatchlist">Удалить из буду смотреть</string>
+  <string name="textRemoveFromHidden">Удалить из скрытое</string>
   <string name="textWatchlist">Буду смотреть</string>
   <string name="textWatchlistIncoming">Предстоящие</string>
   <string name="textNewAlwaysAtTop">Новые серии всегда первыми</string>
@@ -150,5 +150,5 @@
   <string name="errorNoInternetConnection">Нет интернет соединения. Проверьте своё подключение.</string>
   <string name="errorTraktSyncGeneral">Ошибка синхронизации Trakt.tv. \nПроверьте доступ в Интернет и повторите попытку.</string>
   <string name="errorTraktLocked">Ваша учетная запись Trakt.tv в настоящее время заблокирована.\nПожалуйста, свяжитесь со службой поддержки Trakt.tv по адресу https://support.trakt.tv/ для разблокировки вашей учетной записи.</string>
-  <string name="errorSubscriptionsNotAvailable">Сервисы Google Play недоступны на этом устройстве.</string>
+  <string name="errorSubscriptionsNotAvailable">Подписки Google Play недоступны на этом устройстве.</string>
 </resources>

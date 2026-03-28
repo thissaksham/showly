@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.michaldrabik.common.errors.ErrorHelper
 import com.michaldrabik.common.errors.ShowlyError.CoroutineCancellation
 import com.michaldrabik.common.errors.ShowlyError.ResourceNotFoundError
+import com.michaldrabik.repository.OnHoldItemsRepository
 import com.michaldrabik.repository.UserTraktManager
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
@@ -23,6 +24,7 @@ import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.ImageType.FANART
 import com.michaldrabik.ui_model.RatingState
 import com.michaldrabik.ui_model.Show
+import com.michaldrabik.ui_model.ShowStatus
 import com.michaldrabik.ui_model.SpoilersSettings
 import com.michaldrabik.ui_model.TraktRating
 import com.michaldrabik.ui_model.Translation
@@ -64,6 +66,7 @@ class ShowDetailsViewModel @Inject constructor(
   private val userManager: UserTraktManager,
   private val seasonsCache: SeasonsCache,
   private val imagesProvider: ShowImagesProvider,
+  private val onHoldItemsRepository: OnHoldItemsRepository,
 ) : ViewModel(),
   ChannelsDelegate by DefaultChannelsDelegate() {
 
@@ -98,7 +101,7 @@ class ShowDetailsViewModel @Inject constructor(
         val isWatchLater = async { watchlistCase.isWatchlist(show) }
         val isArchived = async { hiddenCase.isHidden(show) }
         val isFollowed = FollowedState(
-          isMyShows = isMyShow.await(),
+          isMyShows = isMyShow.await() || onHoldItemsRepository.isOnHold(show),
           isWatchlist = isWatchLater.await(),
           isHidden = isArchived.await(),
           withAnimation = false,
@@ -187,12 +190,22 @@ class ShowDetailsViewModel @Inject constructor(
     viewModelScope.launch {
       if (!checkSeasonsLoaded()) return@launch
 
-      val seasonItems = seasonsCache.loadSeasons(show.ids.trakt) ?: emptyList()
-      val seasons = seasonItems.map { it.season }
-      val episodes = seasonItems.flatMap { it.episodes.map { e -> e.episode } }
+      val isWatchlist = when (show.status) {
+        ShowStatus.ENDED, ShowStatus.CANCELED -> true
+        else -> false
+      }
 
-      myShowsCase.addToMyShows(show, seasons, episodes)
-      followedState.value = FollowedState.inMyShows()
+      if (isWatchlist) {
+        watchlistCase.addToWatchlist(show)
+        followedState.value = FollowedState.inWatchlist()
+      } else {
+        val seasonItems = seasonsCache.loadSeasons(show.ids.trakt) ?: emptyList()
+        val seasons = seasonItems.map { it.season }
+        val episodes = seasonItems.flatMap { it.episodes.map { e -> e.episode } }
+        myShowsCase.addToMyShows(show, seasons, episodes)
+        onHoldItemsRepository.addItem(show)
+        followedState.value = FollowedState.inMyShows()
+      }
     }
   }
 
@@ -219,13 +232,17 @@ class ShowDetailsViewModel @Inject constructor(
     viewModelScope.launch {
       if (!checkSeasonsLoaded()) return@launch
 
-      val isMyShows = myShowsCase.isMyShows(show)
+      val isMyShows = myShowsCase.isMyShows(show) || onHoldItemsRepository.isOnHold(show)
       val isWatchlist = watchlistCase.isWatchlist(show)
       val isArchived = hiddenCase.isHidden(show)
       val areSeasonsLocal = seasonsCache.areSeasonsLocal(show.ids.trakt)
 
+      if (onHoldItemsRepository.isOnHold(show)) {
+        onHoldItemsRepository.removeItem(show)
+      }
+
       when {
-        isMyShows -> myShowsCase.removeFromMyShows(show, removeLocalData = !areSeasonsLocal)
+        myShowsCase.isMyShows(show) -> myShowsCase.removeFromMyShows(show, removeLocalData = !areSeasonsLocal)
         isWatchlist -> watchlistCase.removeFromWatchlist(show)
         isArchived -> hiddenCase.removeFromHidden(show)
       }

@@ -17,6 +17,7 @@ import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Season
 import com.michaldrabik.ui_model.SeasonBundle
 import com.michaldrabik.ui_model.Show
+import com.michaldrabik.ui_model.ShowStatus
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -72,6 +73,7 @@ class EpisodesManager @Inject constructor(
       val finalDate = toAdd.lastOrNull()?.lastWatchedAt ?: defaultDate
       showsRepository.myShows.updateWatchedAt(show.traktId, finalDate.toMillis())
       onHoldItemsRepository.removeItem(show)
+      checkWatchlistToMyShows(show)
     }
     return toAdd.map { mappers.episode.fromDatabase(it) }
   }
@@ -136,6 +138,7 @@ class EpisodesManager @Inject constructor(
       episodesLocalSource.upsert(listOf(dbEpisode))
       showsRepository.myShows.updateWatchedAt(show.traktId, date.toMillis())
       onHoldItemsRepository.removeItem(show)
+      checkWatchlistToMyShows(show)
       onEpisodeSet(season, show)
     }
   }
@@ -252,6 +255,19 @@ class EpisodesManager @Inject constructor(
       }
 
       Timber.d("Episodes updated: ${episodesToAdd.size} Seasons updated: ${seasonsToAdd.size}")
+    }
+  }
+
+  private suspend fun checkWatchlistToMyShows(show: Show) {
+    val isEnded = when (show.status) {
+      ShowStatus.ENDED, ShowStatus.CANCELED -> true
+      else -> false
+    }
+    if (isEnded && showsRepository.watchlistShows.exists(show.ids.trakt)) {
+      val watchedAt = episodesLocalSource.getAllByShowId(show.traktId)
+        .filter { it.isWatched }
+        .maxOfOrNull { it.lastWatchedAt?.toMillis() ?: 0L } ?: 0L
+      showsRepository.myShows.insert(show.ids.trakt, watchedAt)
     }
   }
 
