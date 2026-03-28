@@ -64,6 +64,7 @@ class ProgressMoviesWidgetProvider : BaseWidgetProvider() {
     appWidgetManager: AppWidgetManager,
     widgetId: Int,
   ) {
+    val isLight = settingsRepository.widgets.widgetsTheme == MODE_NIGHT_NO
     val intent = Intent(context, ProgressMoviesWidgetService::class.java).apply {
       putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
       data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
@@ -79,8 +80,8 @@ class ProgressMoviesWidgetProvider : BaseWidgetProvider() {
       setViewPadding(R.id.progressWidgetMoviesList, 0, paddingTop, 0, spaceTiny)
       setViewVisibility(R.id.progressWidgetMoviesLabel, labelVisibility)
 
-      setInt(R.id.progressWidgetMoviesNightRoot, "setBackgroundResource", getBackgroundResId())
-      setInt(R.id.progressWidgetMoviesDayRoot, "setBackgroundResource", getBackgroundResId())
+      val rootId = if (isLight) R.id.progressWidgetMoviesDayRoot else R.id.progressWidgetMoviesNightRoot
+      setInt(rootId, "setBackgroundResource", getBackgroundResId())
     }
 
     val mainIntent = PendingIntent.getActivity(

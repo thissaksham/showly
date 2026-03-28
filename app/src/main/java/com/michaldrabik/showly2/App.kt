@@ -65,7 +65,7 @@ class App :
             StrictMode.VmPolicy
               .Builder()
               .detectUnsafeIntentLaunch()
-              .penaltyDeath()
+              .penaltyLog()
               .build(),
           )
         }

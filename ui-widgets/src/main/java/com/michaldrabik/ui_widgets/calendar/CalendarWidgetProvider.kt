@@ -65,6 +65,7 @@ class CalendarWidgetProvider : BaseWidgetProvider() {
     appWidgetManager: AppWidgetManager,
     widgetId: Int,
   ) {
+    val isLight = settingsRepository.widgets.widgetsTheme == MODE_NIGHT_NO
     val intent = Intent(context, CalendarWidgetService::class.java).apply {
       putExtra(EXTRA_APPWIDGET_ID, widgetId)
       data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
@@ -81,8 +82,8 @@ class CalendarWidgetProvider : BaseWidgetProvider() {
       setViewPadding(R.id.calendarWidgetEmptyView, 0, paddingTop, 0, 0)
       setViewVisibility(R.id.calendarWidgetLabel, labelVisibility)
 
-      setInt(R.id.calendarWidgetNightRoot, "setBackgroundResource", getBackgroundResId())
-      setInt(R.id.calendarWidgetDayRoot, "setBackgroundResource", getBackgroundResId())
+      val rootId = if (isLight) R.id.calendarWidgetDayRoot else R.id.calendarWidgetNightRoot
+      setInt(rootId, "setBackgroundResource", getBackgroundResId())
 
       when (settingsRepository.widgets.getWidgetCalendarMode(Mode.SHOWS, widgetId)) {
         CalendarMode.PRESENT_FUTURE -> {

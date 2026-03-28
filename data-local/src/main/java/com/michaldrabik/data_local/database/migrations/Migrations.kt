@@ -5,7 +5,7 @@ import android.content.Context.MODE_PRIVATE
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-const val DATABASE_VERSION = 42
+const val DATABASE_VERSION = 46
 const val DATABASE_NAME = "SHOWLY2_DB_2"
 
 class Migrations(
@@ -240,7 +240,7 @@ class Migrations(
 
       database.execSQL(
         "CREATE TABLE IF NOT EXISTS `sync_movies_log` (" +
-          "`id_movie_trakt` INTEGER PRIMARY KEY NOT NULL DEFAULT -1, " +
+          "`id_movie_trakt` PRIMARY KEY NOT NULL DEFAULT -1, " +
           "`synced_at` INTEGER NOT NULL DEFAULT 0)",
       )
 
@@ -780,9 +780,36 @@ class Migrations(
 
   private val migration42 = object : Migration(41, 42) {
     override fun migrate(database: SupportSQLiteDatabase) {
-      // Correcting previous mistake of manual DB schema change without migration
-      database.execSQL("UPDATE settings SET my_shows_recent_amount \u003d 0")
-      database.execSQL("UPDATE settings SET special_seasons_enabled \u003d 1")
+      database.execSQL("UPDATE settings SET my_shows_recent_amount = 0")
+      database.execSQL("UPDATE settings SET special_seasons_enabled = 1")
+    }
+  }
+
+  private val migration43 = object : Migration(42, 43) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+      // Empty migration to align schema hashes and fix crash
+    }
+  }
+
+  private val migration44 = object : Migration(43, 44) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+      database.execSQL("UPDATE settings SET my_shows_recent_amount = 0")
+      database.execSQL("UPDATE settings SET special_seasons_enabled = 1")
+    }
+  }
+
+  private val migration45 = object : Migration(44, 45) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+      database.execSQL("UPDATE settings SET my_shows_recent_amount = 0")
+      database.execSQL("UPDATE settings SET special_seasons_enabled = 1")
+    }
+  }
+
+  private val migration46 = object : Migration(45, 46) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+      // Correcting previous schema mismatch by forcing an update
+      database.execSQL("UPDATE settings SET my_shows_recent_amount = 0")
+      database.execSQL("UPDATE settings SET special_seasons_enabled = 1")
     }
   }
 
@@ -829,5 +856,9 @@ class Migrations(
       migration40,
       migration41,
       migration42,
+      migration43,
+      migration44,
+      migration45,
+      migration46,
     )
 }

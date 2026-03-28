@@ -68,6 +68,7 @@ class ProgressWidgetProvider : BaseWidgetProvider() {
     appWidgetManager: AppWidgetManager,
     widgetId: Int,
   ) {
+    val isLight = settingsRepository.widgets.widgetsTheme == MODE_NIGHT_NO
     val intent = Intent(context, ProgressWidgetService::class.java).apply {
       putExtra(EXTRA_APPWIDGET_ID, widgetId)
       data = Uri.parse(toUri(URI_INTENT_SCHEME))
@@ -83,8 +84,8 @@ class ProgressWidgetProvider : BaseWidgetProvider() {
       setViewPadding(R.id.progressWidgetList, 0, paddingTop, 0, spaceTiny)
       setViewVisibility(R.id.progressWidgetLabel, labelVisibility)
 
-      setInt(R.id.progressWidgetNightRoot, "setBackgroundResource", getBackgroundResId())
-      setInt(R.id.progressWidgetDayRoot, "setBackgroundResource", getBackgroundResId())
+      val rootId = if (isLight) R.id.progressWidgetDayRoot else R.id.progressWidgetNightRoot
+      setInt(rootId, "setBackgroundResource", getBackgroundResId())
     }
 
     val mainIntent = PendingIntent.getActivity(
