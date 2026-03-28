@@ -35,6 +35,7 @@ class EpisodesManager @Inject constructor(
   private val syncLogLocalSource: EpisodesSyncLogLocalDataSource,
   private val transactions: TransactionsProvider,
   private val mappers: Mappers,
+  private val onHoldItemsRepository: OnHoldItemsRepository,
 ) {
 
   suspend fun getWatchedSeasonsIds(show: Show) = seasonsLocalSource.getAllWatchedIdsForShows(listOf(show.traktId))
@@ -70,6 +71,7 @@ class EpisodesManager @Inject constructor(
       seasonsLocalSource.update(listOf(dbSeason))
       val finalDate = toAdd.lastOrNull()?.lastWatchedAt ?: defaultDate
       showsRepository.myShows.updateWatchedAt(show.traktId, finalDate.toMillis())
+      onHoldItemsRepository.removeItem(show)
     }
     return toAdd.map { mappers.episode.fromDatabase(it) }
   }
@@ -133,6 +135,7 @@ class EpisodesManager @Inject constructor(
       }
       episodesLocalSource.upsert(listOf(dbEpisode))
       showsRepository.myShows.updateWatchedAt(show.traktId, date.toMillis())
+      onHoldItemsRepository.removeItem(show)
       onEpisodeSet(season, show)
     }
   }
