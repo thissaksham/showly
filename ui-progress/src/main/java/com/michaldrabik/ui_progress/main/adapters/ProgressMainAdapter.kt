@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 import com.michaldrabik.ui_progress.R
 import com.michaldrabik.ui_progress.calendar.CalendarFragment
 import com.michaldrabik.ui_progress.history.HistoryFragment
+import com.michaldrabik.ui_progress.onhold.OnHoldFragment
 import com.michaldrabik.ui_progress.progress.ProgressFragment
 
 class ProgressMainAdapter(
@@ -17,7 +18,7 @@ class ProgressMainAdapter(
 ) : FragmentPagerAdapter(fragManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
   companion object {
-    const val PAGES_COUNT = 3
+    const val PAGES_COUNT = 4
   }
 
   override fun getItem(position: Int): Fragment =
@@ -25,6 +26,7 @@ class ProgressMainAdapter(
       0 -> ProgressFragment()
       1 -> CalendarFragment()
       2 -> HistoryFragment()
+      3 -> OnHoldFragment()
       else -> throw IllegalStateException("Unknown position")
     }
 
@@ -35,6 +37,7 @@ class ProgressMainAdapter(
       0 -> context.getString(R.string.tabProgress)
       1 -> context.getString(R.string.tabCalendar)
       2 -> context.getString(R.string.tabHistory)
+      3 -> context.getString(R.string.tabOnHold)
       else -> throw IllegalStateException()
     }
 }

@@ -51,8 +51,13 @@ class ProgressItemsCase @Inject constructor(
   private val sorter: ProgressItemsSorter,
 ) {
 
+  enum class ListType {
+    PROGRESS, ON_HOLD
+  }
+
   suspend fun loadItems(
     searchQuery: String,
+    listType: ListType = ListType.PROGRESS,
     isWidget: Boolean = false,
   ): List<ProgressListItem> =
     withContext(dispatchers.IO) {
@@ -64,7 +69,7 @@ class ProgressItemsCase @Inject constructor(
       val progressUpcomingDays = settingsRepository.progressUpcomingDays
       val isUpcomingEnabled = progressUpcomingDays > 0
       val upcomingLimit = nowUtc.plusDays(progressUpcomingDays).toMillis()
-      val filtersItem = loadFiltersItem(isUpcomingEnabled)
+      val filtersItem = loadFiltersItem(isUpcomingEnabled, listType)
       val spoilers = settingsRepository.spoilers.getAll()
 
       val items = showsRepository.myShows
@@ -156,10 +161,11 @@ class ProgressItemsCase @Inject constructor(
       val groupedItems = groupItems(
         items = filteredItems,
         filters = filtersItem,
+        listType = listType,
         isWidget = isWidget,
       )
 
-      if (groupedItems.isNotEmpty() || filtersItem.hasActiveFilters()) {
+      if (groupedItems.isNotEmpty() || (listType == ListType.PROGRESS && filtersItem.hasActiveFilters())) {
         listOf(filtersItem) + groupedItems
       } else {
         groupedItems
@@ -216,12 +222,13 @@ class ProgressItemsCase @Inject constructor(
   private suspend fun groupItems(
     items: List<ProgressListItem.Episode>,
     filters: ProgressListItem.Filters,
+    listType: ListType,
     isWidget: Boolean,
   ): List<ProgressListItem> =
     coroutineScope {
       val (newItems, pinnedItems, onHoldItems) = awaitAll(
         async {
-          if (filters.newAtTop) {
+          if (filters.newAtTop && listType == ListType.PROGRESS) {
             items
               .filter { it.isNew() && !it.isOnHold && !it.isPinned }
               .sortedWith(sorter.sort(filters.sortOrder, filters.sortType))
@@ -230,12 +237,16 @@ class ProgressItemsCase @Inject constructor(
           }
         },
         async {
-          items
-            .filter { it.isPinned }
-            .sortedWith(
-              compareByDescending<ProgressListItem.Episode> { it.isNew() }
-                then sorter.sort(filters.sortOrder, filters.sortType),
-            )
+          if (listType == ListType.PROGRESS) {
+            items
+              .filter { it.isPinned }
+              .sortedWith(
+                compareByDescending<ProgressListItem.Episode> { it.isNew() }
+                  then sorter.sort(filters.sortOrder, filters.sortType),
+              )
+          } else {
+            emptyList()
+          }
         },
         async {
           items
@@ -252,46 +263,52 @@ class ProgressItemsCase @Inject constructor(
 
       val (airedItems, upcomingItems) = awaitAll(
         async {
-          ((groupedItems[true] ?: emptyList()))
-            .sortedWith(sorter.sort(filters.sortOrder, filters.sortType))
+          if (listType == ListType.PROGRESS) {
+            ((groupedItems[true] ?: emptyList()))
+              .sortedWith(sorter.sort(filters.sortOrder, filters.sortType))
+          } else {
+            emptyList()
+          }
         },
         async {
-          ((groupedItems[false] ?: emptyList()))
-            .sortedBy { it.episode?.firstAired?.toMillis() }
+          if (listType == ListType.PROGRESS) {
+            ((groupedItems[false] ?: emptyList()))
+              .sortedBy { it.episode?.firstAired?.toMillis() }
+          } else {
+            emptyList()
+          }
         },
       )
 
       buildList {
-        val hasNoFiltersActive = !filters.hasActiveFilters()
-        if (pinnedItems.isNotEmpty() && (hasNoFiltersActive || isWidget)) {
-          addAll(pinnedItems)
-        }
-        if (newItems.isNotEmpty() && (hasNoFiltersActive || isWidget)) {
-          addAll(newItems)
-        }
-        if (airedItems.isNotEmpty() && (hasNoFiltersActive || isWidget)) {
-          addAll(airedItems)
-        }
-        if (upcomingItems.isNotEmpty() && (filters.isUpcoming || hasNoFiltersActive || isWidget)) {
-          val isCollapsed = settingsRepository.isProgressUpcomingCollapsed
-          val upcomingHeader = ProgressListItem.Header.create(
-            Type.UPCOMING,
-            R.string.textWatchlistIncoming,
-            isCollapsed,
-          )
-          addAll(listOf(upcomingHeader))
-          if (!isCollapsed) addAll(upcomingItems)
-        }
-        if (onHoldItems.isNotEmpty() && (filters.isOnHold || hasNoFiltersActive || isWidget)) {
-          val isCollapsed = settingsRepository.isProgressOnHoldCollapsed
-          val onHoldHeader = ProgressListItem.Header.create(Type.ON_HOLD, R.string.textOnHold, isCollapsed)
-          addAll(listOf(onHoldHeader))
-          if (!isCollapsed) addAll(onHoldItems)
+        if (listType == ListType.PROGRESS) {
+          val hasNoFiltersActive = !filters.hasActiveFilters()
+          if (pinnedItems.isNotEmpty() && (hasNoFiltersActive || isWidget)) {
+            addAll(pinnedItems)
+          }
+          if (newItems.isNotEmpty() && (hasNoFiltersActive || isWidget)) {
+            addAll(newItems)
+          }
+          if (airedItems.isNotEmpty() && (hasNoFiltersActive || isWidget)) {
+            addAll(airedItems)
+          }
+          if (upcomingItems.isNotEmpty() && (filters.isUpcoming || hasNoFiltersActive || isWidget)) {
+            val isCollapsed = settingsRepository.isProgressUpcomingCollapsed
+            val upcomingHeader = ProgressListItem.Header.create(
+              Type.UPCOMING,
+              R.string.textWatchlistIncoming,
+              isCollapsed,
+            )
+            addAll(listOf(upcomingHeader))
+            if (!isCollapsed) addAll(upcomingItems)
+          }
+        } else if (listType == ListType.ON_HOLD) {
+          addAll(onHoldItems)
         }
       }
     }
 
-  private fun loadFiltersItem(isUpcomingEnabled: Boolean): ProgressListItem.Filters =
+  private fun loadFiltersItem(isUpcomingEnabled: Boolean, listType: ListType): ProgressListItem.Filters =
     ProgressListItem.Filters(
       newAtTop = settingsRepository.sorting.progressShowsNewAtTop,
       sortOrder = settingsRepository.sorting.progressShowsSortOrder,
@@ -299,5 +316,7 @@ class ProgressItemsCase @Inject constructor(
       isUpcoming = settingsRepository.filters.progressShowsUpcoming,
       isUpcomingEnabled = isUpcomingEnabled,
       isOnHold = settingsRepository.filters.progressShowsOnHold,
+      isUpcomingVisible = listType == ListType.PROGRESS,
+      isOnHoldVisible = false,
     )
 }

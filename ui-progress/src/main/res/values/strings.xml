@@ -3,6 +3,7 @@
   <string name="tabCalendar">Calendar</string>
   <string name="tabProgress">Progress</string>
   <string name="tabHistory">History</string>
+  <string name="tabOnHold">On Hold</string>
 
   <string name="textCalendarEmpty">There are no new episodes on the way.</string>
   <string name="textRecentsEmpty">There are no recently aired episodes.</string>
@@ -13,6 +14,7 @@
   <string name="textEpisodeInfo">Details</string>
   <string name="textTraktSynchronize">Import from Trakt.tv</string>
   <string name="textProgressEmpty">Your <b>Progress</b> is currently empty.\n\nVisit <b>Discover</b> tab to add shows or import your Trakt.tv collection.</string>
+  <string name="textOnHoldEmpty">Your <b>On Hold</b> list is currently empty.</string>
   <string name="textNewSeason">Season Premiere</string>
   <string name="textPremieres">Premieres</string>
 </resources>

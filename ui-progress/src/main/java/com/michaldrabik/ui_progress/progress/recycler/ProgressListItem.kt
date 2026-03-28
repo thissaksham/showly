@@ -88,6 +88,8 @@ sealed class ProgressListItem(
     val isUpcoming: Boolean,
     val isUpcomingEnabled: Boolean,
     val isOnHold: Boolean,
+    val isUpcomingVisible: Boolean = true,
+    val isOnHoldVisible: Boolean = true,
     val newAtTop: Boolean,
   ) : ProgressListItem(
       show = Show.EMPTY,
@@ -95,6 +97,6 @@ sealed class ProgressListItem(
       isLoading = false,
     ) {
 
-    fun hasActiveFilters() = isUpcoming || isOnHold
+    fun hasActiveFilters() = (isUpcoming && isUpcomingVisible) || (isOnHold && isOnHoldVisible)
   }
 }

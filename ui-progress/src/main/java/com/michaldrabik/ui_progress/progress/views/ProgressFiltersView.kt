@@ -55,8 +55,9 @@ class ProgressFiltersView : FrameLayout {
       }
       progressFiltersSortingChip.closeIcon = ContextCompat.getDrawable(context, sortIcon)
       progressFiltersSortingChip.text = context.getText(filters.sortOrder.displayString)
-      progressFiltersUpcomingChip.visibleIf(filters.isUpcomingEnabled)
+      progressFiltersUpcomingChip.visibleIf(filters.isUpcomingEnabled && filters.isUpcomingVisible)
       progressFiltersUpcomingChip.isSelected = filters.isUpcoming
+      progressFiltersOnHoldChip.visibleIf(filters.isOnHoldVisible)
       progressFiltersOnHoldChip.isSelected = filters.isOnHold
     }
   }
