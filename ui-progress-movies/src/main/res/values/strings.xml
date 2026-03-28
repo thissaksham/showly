@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="tabMoviesCalendar">Calendar</string>
-  <string name="tabMoviesProgress">Progress</string>
+  <string name="tabMoviesProgress">Released</string>
   <string name="textMoviesCalendarEmpty">There are no new movies on the way.</string>
   <string name="textMoviesCalendarRecentsEmpty">There are no recently aired movies.</string>
 

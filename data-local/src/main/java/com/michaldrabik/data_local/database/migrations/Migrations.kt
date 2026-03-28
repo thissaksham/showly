@@ -5,7 +5,7 @@ import android.content.Context.MODE_PRIVATE
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-const val DATABASE_VERSION = 41
+const val DATABASE_VERSION = 42
 const val DATABASE_NAME = "SHOWLY2_DB_2"
 
 class Migrations(
@@ -778,6 +778,14 @@ class Migrations(
     }
   }
 
+  private val migration42 = object : Migration(41, 42) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+      // Correcting previous mistake of manual DB schema change without migration
+      database.execSQL("UPDATE settings SET my_shows_recent_amount \u003d 0")
+      database.execSQL("UPDATE settings SET special_seasons_enabled \u003d 1")
+    }
+  }
+
   fun getAll() =
     listOf(
       migration2,
@@ -820,5 +828,6 @@ class Migrations(
       migration39,
       migration40,
       migration41,
+      migration42,
     )
 }
