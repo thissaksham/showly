@@ -44,8 +44,9 @@ class EpisodesManager @Inject constructor(
   suspend fun setSeasonWatched(
     seasonBundle: SeasonBundle,
     customDate: ZonedDateTime?,
+    useReleaseDates: Boolean = false,
   ): List<Episode> {
-    val date = customDate?.toUtcZone() ?: nowUtc()
+    val defaultDate = customDate?.toUtcZone() ?: nowUtc()
     val toAdd = mutableListOf<EpisodeDb>()
     transactions.withTransaction {
       val (season, show) = seasonBundle
@@ -59,14 +60,16 @@ class EpisodesManager @Inject constructor(
       val watchedEpisodes = episodesLocalSource.getAllForSeason(season.ids.trakt.id).filter { it.isWatched }
       season.episodes.forEach { ep ->
         if (watchedEpisodes.none { it.idTrakt == ep.ids.trakt.id }) {
-          val dbEpisode = mappers.episode.toDatabase(ep, season, show.ids.trakt, true, null, date)
+          val episodeDate = if (useReleaseDates) ep.firstAired?.toUtcZone() ?: defaultDate else defaultDate
+          val dbEpisode = mappers.episode.toDatabase(ep, season, show.ids.trakt, true, null, episodeDate)
           toAdd.add(dbEpisode)
         }
       }
 
       episodesLocalSource.upsert(toAdd)
       seasonsLocalSource.update(listOf(dbSeason))
-      showsRepository.myShows.updateWatchedAt(show.traktId, date.toMillis())
+      val finalDate = toAdd.lastOrNull()?.lastWatchedAt ?: defaultDate
+      showsRepository.myShows.updateWatchedAt(show.traktId, finalDate.toMillis())
     }
     return toAdd.map { mappers.episode.fromDatabase(it) }
   }

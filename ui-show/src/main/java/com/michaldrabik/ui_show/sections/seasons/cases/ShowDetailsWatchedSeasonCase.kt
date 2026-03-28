@@ -27,6 +27,7 @@ class ShowDetailsWatchedSeasonCase @Inject constructor(
     isChecked: Boolean,
     isLocal: Boolean,
     customDate: ZonedDateTime?,
+    useReleaseDates: Boolean = false,
   ): Result {
     val bundle = SeasonBundle(season, show)
 
@@ -37,7 +38,7 @@ class ShowDetailsWatchedSeasonCase @Inject constructor(
 
     when {
       isChecked -> {
-        val episodesAdded = episodesManager.setSeasonWatched(bundle, customDate)
+        val episodesAdded = episodesManager.setSeasonWatched(bundle, customDate, useReleaseDates)
         if (isMyShows) {
           quickSyncManager.scheduleEpisodes(
             showId = show.traktId,

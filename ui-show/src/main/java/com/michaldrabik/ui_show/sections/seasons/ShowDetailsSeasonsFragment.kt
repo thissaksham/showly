@@ -194,7 +194,7 @@ class ShowDetailsSeasonsFragment : BaseFragment<ShowDetailsSeasonsViewModel>(R.l
       when (val result = bundle.requireParcelable<Result>(RESULT_DATE_SELECTION)) {
         is Result.Now -> viewModel.setSeasonWatched(season, true)
         is Result.CustomDate -> viewModel.setSeasonWatched(season, true, result.date)
-        is Result.ReleaseDate -> viewModel.setSeasonWatched(season, true, result.date)
+        is Result.ReleaseDate -> viewModel.setSeasonWatched(season, true, result.date, useReleaseDates = true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(season.firstAired)

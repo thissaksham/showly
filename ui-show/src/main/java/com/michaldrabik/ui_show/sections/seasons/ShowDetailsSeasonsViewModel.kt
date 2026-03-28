@@ -93,6 +93,7 @@ class ShowDetailsSeasonsViewModel @Inject constructor(
     season: Season,
     isChecked: Boolean,
     customDate: ZonedDateTime? = null,
+    useReleaseDates: Boolean = false,
   ) {
     viewModelScope.launch {
       val result = watchedSeasonCase.setSeasonWatched(
@@ -101,6 +102,7 @@ class ShowDetailsSeasonsViewModel @Inject constructor(
         isChecked = isChecked,
         isLocal = areSeasonsLocal,
         customDate = customDate,
+        useReleaseDates = useReleaseDates,
       )
       if (result == Result.REMOVE_FROM_TRAKT) {
         val ids = season.episodes.map { it.ids.trakt }
