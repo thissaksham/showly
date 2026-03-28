@@ -160,7 +160,10 @@ class MainActivity :
         }
       }
       bottomMenuView.isModeMenuEnabled = hasMoviesEnabled()
-      bottomMenuView.onModeSelected = { setMode(it) }
+      bottomMenuView.setupLongPressToggle {
+        val newMode = if (getMode() == SHOWS) MOVIES else SHOWS
+        setMode(newMode)
+      }
       viewMask.onClick { /* NOOP */ }
     }
   }
