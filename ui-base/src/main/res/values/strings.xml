@@ -118,22 +118,22 @@
   <string name="textTraktNotificationsRationale">Please grant the application a permission to display information about synchronization progress and results.\n\nWould you like to do it now?</string>
 
   <string name="textRemoveFromTrakt">Remove from Trakt.tv?</string>
-  <string name="textRemoveFromTraktHidden">Would you like to remove this item from your Trakt.tv account \'Hidden Items\'?</string>
+  <string name="textRemoveFromTraktHidden">Would you like to remove this item from your Trakt.tv account \'Dropped Items\'?</string>
   <string name="textRemoveFromTraktWatchlist">Would you like to remove this item from your Trakt.tv account \'Watchlist\'?</string>
   <string name="textRemoveFromTraktProgress">Would you like to remove this item from your Trakt.tv account \'Progress\'?</string>
 
-  <string name="textAddToMyShows">Add to My Shows</string>
+  <string name="textAddToMyShows">Add to Watched</string>
   <string name="textAddToMyMovies">Add to History</string>
   <string name="textAddToWatchlist">Add to Watchlist</string>
-  <string name="textAddToHidden">Add to Hidden</string>
-  <string name="textMoveToMyShows">Move to My Shows</string>
+  <string name="textAddToHidden">Add to Dropped</string>
+  <string name="textMoveToMyShows">Move to Watched</string>
   <string name="textMoveToMyMovies">Move to History</string>
   <string name="textMoveToWatchlist">Move to Watchlist</string>
-  <string name="textMoveToHidden">Move to Hidden</string>
-  <string name="textRemoveFromMyShows">Remove from My Shows</string>
+  <string name="textMoveToHidden">Move to Dropped</string>
+  <string name="textRemoveFromMyShows">Remove from Watched</string>
   <string name="textRemoveFromMyMovies">Remove from History</string>
   <string name="textRemoveFromWatchlist">Remove from Watchlist</string>
-  <string name="textRemoveFromHidden">Remove from Hidden</string>
+  <string name="textRemoveFromHidden">Remove from Dropped</string>
   <string name="textWatchlist">Watchlist</string>
   <string name="textWatchlistIncoming">Upcoming</string>
   <string name="textNewAlwaysAtTop">New episodes always first</string>

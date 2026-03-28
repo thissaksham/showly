@@ -24,16 +24,16 @@ class FollowedPagesAdapter(
 
   override fun getItem(position: Int): Fragment =
     when (position) {
-      0 -> MyMoviesFragment()
-      1 -> WatchlistFragment()
+      0 -> WatchlistFragment()
+      1 -> MyMoviesFragment()
       2 -> HiddenFragment()
       else -> throw IllegalStateException("Unknown position")
     }
 
   override fun getPageTitle(position: Int) =
     when (position) {
-      0 -> context.getString(R.string.menuMyMovies)
-      1 -> context.getString(R.string.menuWatchlistMovies)
+      0 -> context.getString(R.string.menuWatchlistMovies)
+      1 -> context.getString(R.string.menuMyMovies)
       2 -> context.getString(R.string.menuHidden)
       else -> throw IllegalStateException()
     }
