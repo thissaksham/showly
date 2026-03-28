@@ -38,30 +38,6 @@
     tools:layout_width="300dp"
     />
 
-  <FrameLayout
-    android:id="@+id/progressMainSideIcons"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="end"
-    android:layout_marginTop="@dimen/progressSearchViewPadding"
-    android:layout_marginEnd="@dimen/screenMarginHorizontal"
-    app:layout_behavior="com.michaldrabik.ui_base.common.behaviour.ScrollableViewBehaviour"
-    >
-
-    <com.michaldrabik.ui_base.common.views.ScrollableImageView
-      android:id="@+id/progressMainSearchIcon"
-      android:layout_width="36dp"
-      android:layout_height="36dp"
-      android:layout_gravity="end"
-      android:paddingStart="14dp"
-      android:visibility="visible"
-      app:srcCompat="@drawable/ic_search"
-      app:tint="?android:attr/textColorPrimary"
-      tools:visibility="visible"
-      />
-
-  </FrameLayout>
-
   <com.michaldrabik.ui_base.common.views.SearchLocalView
     android:id="@+id/progressMainSearchLocalView"
     android:layout_width="match_parent"

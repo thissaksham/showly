@@ -74,7 +74,6 @@ class ProgressMainFragment :
 
   private var searchViewTranslation = 0F
   private var tabsTranslation = 0F
-  private var sideIconTranslation = 0F
   private var currentPage = 0
   private var isSearching = false
 
@@ -83,7 +82,6 @@ class ProgressMainFragment :
     savedInstanceState?.let {
       searchViewTranslation = it.getFloat("ARG_SEARCH_POSITION")
       tabsTranslation = it.getFloat("ARG_TABS_POSITION")
-      sideIconTranslation = it.getFloat("ARG_SIDE_ICON_POSITION")
       currentPage = it.getInt("ARG_PAGE")
     }
   }
@@ -109,7 +107,6 @@ class ProgressMainFragment :
     super.onSaveInstanceState(outState)
     outState.putFloat("ARG_SEARCH_POSITION", searchViewTranslation)
     outState.putFloat("ARG_TABS_POSITION", tabsTranslation)
-    outState.putFloat("ARG_SIDE_ICON_POSITION", sideIconTranslation)
     outState.putInt("ARG_PAGE", currentPage)
   }
 
@@ -123,7 +120,6 @@ class ProgressMainFragment :
     with(binding) {
       tabsTranslation = progressMainTabs.translationY
       searchViewTranslation = progressMainSearchView.translationY
-      sideIconTranslation = progressMainSideIcons.translationY
     }
     super.onPause()
   }
@@ -139,18 +135,15 @@ class ProgressMainFragment :
 
   private fun setupView() {
     with(binding) {
-      with(progressMainSearchIcon) {
-        onClick { if (!isSearching) enterSearch() else exitSearch() }
-      }
-
       with(progressMainSearchView) {
         hint = getString(R.string.textSearchFor)
         settingsIconVisible = true
-        traktIconVisible = true
+        statsIconVisible = true
+        traktIconVisible = false
         isClickable = false
         onClick { openMainSearch() }
         onSettingsClickListener = { openSettings() }
-        onTraktClickListener = { openTraktSync() }
+        onStatsClickListener = { openStatistics() }
       }
 
       with(progressMainSearchLocalView) {
@@ -166,7 +159,6 @@ class ProgressMainFragment :
       progressMainTabs.translationY = tabsTranslation
       progressMainPagerModeTabs.translationY = tabsTranslation
       progressMainSearchView.translationY = searchViewTranslation
-      progressMainSideIcons.translationY = sideIconTranslation
     }
   }
 
@@ -185,24 +177,19 @@ class ProgressMainFragment :
   private fun setupInsets() {
     with(binding) {
       progressMainRoot.doOnApplyWindowInsets { _, insets, _, _ ->
-        val tabletOffset = if (isTablet) dimenToPx(R.dimen.spaceMedium) else 0
+        val tabletOffset = if (isTablet) dimenToPx(com.michaldrabik.ui_base.R.dimen.spaceMedium) else 0
         val statusBarSize = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top + tabletOffset
-        val progressTabsMargin = if (moviesEnabled) {
-          R.dimen.progressSearchViewPadding
-        } else {
-          R.dimen.progressSearchViewPaddingNoModes
-        }
 
         val progressMainSearchLocalMargin =
           if (moviesEnabled) R.dimen.progressSearchLocalViewPadding else R.dimen.progressSearchLocalViewPaddingNoModes
         (progressMainSearchView.layoutParams as ViewGroup.MarginLayoutParams)
-          .updateMargins(top = statusBarSize + dimenToPx(R.dimen.spaceMedium))
+          .updateMargins(top = statusBarSize + dimenToPx(com.michaldrabik.ui_base.R.dimen.spaceMedium))
         (progressMainSearchLocalView.layoutParams as ViewGroup.MarginLayoutParams)
           .updateMargins(top = statusBarSize + dimenToPx(progressMainSearchLocalMargin))
         (progressMainPagerModeTabs.layoutParams as ViewGroup.MarginLayoutParams)
-          .updateMargins(top = statusBarSize + dimenToPx(R.dimen.collectionTabsMargin))
-        arrayOf(progressMainTabs, progressMainSideIcons).forEach {
-          val margin = statusBarSize + dimenToPx(progressTabsMargin)
+          .updateMargins(top = statusBarSize + dimenToPx(com.michaldrabik.ui_base.R.dimen.collectionTabsMargin))
+        arrayOf(progressMainTabs).forEach {
+          val margin = statusBarSize + dimenToPx(R.dimen.progressSearchViewPadding)
           (it.layoutParams as ViewGroup.MarginLayoutParams).updateMargins(top = margin)
         }
       }
@@ -227,7 +214,6 @@ class ProgressMainFragment :
       hideNavigation()
       progressMainPagerModeTabs.fadeOut(duration = 200).add(animations)
       progressMainTabs.fadeOut(duration = 200).add(animations)
-      progressMainSideIcons.fadeOut(duration = 200).add(animations)
       progressMainPager
         .fadeOut(duration = 200) {
           navigateToSafe(R.id.actionProgressFragmentToSearch)
@@ -307,6 +293,12 @@ class ProgressMainFragment :
     navigateToSafe(R.id.actionProgressFragmentToSettingsFragment)
   }
 
+  private fun openStatistics() {
+    hideNavigation()
+    exitSearch()
+    navigateToSafe(R.id.actionProgressFragmentToStatisticsFragment)
+  }
+
   private fun enterSearch() {
     resetTranslations()
     with(binding) {
@@ -361,7 +353,6 @@ class ProgressMainFragment :
         progressMainSearchView,
         progressMainTabs,
         progressMainPagerModeTabs,
-        progressMainSideIcons,
         progressMainSearchLocalView,
       ).forEach {
         it
@@ -379,7 +370,7 @@ class ProgressMainFragment :
 
   private fun render(uiState: ProgressMainUiState) {
     with(binding) {
-      progressMainSearchView.setTraktProgress(uiState.isSyncing, withIcon = true)
+      progressMainSearchView.setTraktProgress(uiState.isSyncing, withIcon = false)
       progressMainSearchView.isEnabled = !uiState.isSyncing
     }
   }
