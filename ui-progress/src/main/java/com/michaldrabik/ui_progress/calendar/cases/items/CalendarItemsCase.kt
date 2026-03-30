@@ -7,6 +7,7 @@ import com.michaldrabik.common.extensions.toLocalZone
 import com.michaldrabik.data_local.LocalDataSource
 import com.michaldrabik.data_local.database.model.Episode
 import com.michaldrabik.data_local.database.model.Season
+import com.michaldrabik.repository.OnHoldItemsRepository
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.mappers.Mappers
@@ -37,6 +38,7 @@ abstract class CalendarItemsCase(
   private val translationsRepository: TranslationsRepository,
   private val spoilersRepository: SettingsSpoilersRepository,
   private val filtersRepository: SettingsFiltersRepository,
+  private val onHoldItemsRepository: OnHoldItemsRepository,
   private val imagesProvider: ShowImagesProvider,
   private val dateFormatProvider: DateFormatProvider,
   private val watchlistAppender: WatchlistAppender,
@@ -98,8 +100,15 @@ abstract class CalendarItemsCase(
         filteredEpisodes,
       )
 
+      val showsOnHoldIds = onHoldItemsRepository.getAll().map { it.id }
+
       val elements = filteredEpisodes
         .filter { filter.filter(now, it, premieresOnly) }
+        .filter { episode ->
+          val isOnHold = episode.idShowTrakt in showsOnHoldIds
+          val isSeasonPremiere = episode.episodeNumber == 1
+          !isOnHold || isSeasonPremiere
+        }
         .sortedWith(sortEpisodes())
         .map { episode ->
           async {

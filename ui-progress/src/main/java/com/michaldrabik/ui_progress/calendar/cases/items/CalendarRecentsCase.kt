@@ -3,6 +3,7 @@ package com.michaldrabik.ui_progress.calendar.cases.items
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
 import com.michaldrabik.data_local.LocalDataSource
 import com.michaldrabik.data_local.database.model.Episode
+import com.michaldrabik.repository.OnHoldItemsRepository
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.mappers.Mappers
@@ -25,6 +26,7 @@ class CalendarRecentsCase @Inject constructor(
   translationsRepository: TranslationsRepository,
   spoilersRepository: SettingsSpoilersRepository,
   filtersRepository: SettingsFiltersRepository,
+  onHoldItemsRepository: OnHoldItemsRepository,
   imagesProvider: ShowImagesProvider,
   dateFormatProvider: DateFormatProvider,
   watchlistAppender: WatchlistAppender,
@@ -38,6 +40,7 @@ class CalendarRecentsCase @Inject constructor(
     translationsRepository,
     spoilersRepository,
     filtersRepository,
+    onHoldItemsRepository,
     imagesProvider,
     dateFormatProvider,
     watchlistAppender,
