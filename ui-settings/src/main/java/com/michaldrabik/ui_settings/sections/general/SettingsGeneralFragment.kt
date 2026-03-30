@@ -113,7 +113,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
     with(binding) {
       settingsThemeValue.setText(theme.displayName)
       settingsTheme.onClick {
-        onPremiumAction(tag)
+        onPremiumAction(settingsTheme.tag)
       }
     }
   }
@@ -196,7 +196,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
   }
 
   private fun showLanguageDialog(language: AppLanguage) {
-    val options = AppLanguage.values()
+    val options = AppLanguage.entries.toTypedArray()
     val selected = options.indexOf(language)
 
     MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialog)
@@ -249,7 +249,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
   }
 
   private fun showCountryDialog(country: AppCountry) {
-    val options = AppCountry.values()
+    val options = AppCountry.entries.toTypedArray()
     val selected = options.indexOf(country)
 
     MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialog)
@@ -263,7 +263,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
   }
 
   private fun showProgressTypeDialog(type: ProgressNextEpisodeType) {
-    val options = ProgressNextEpisodeType.values()
+    val options = ProgressNextEpisodeType.entries.toTypedArray()
     val displayOptions = options.map {
       val option = when (it) {
         LAST_WATCHED -> R.string.textNextEpisodeLastWatched
@@ -284,7 +284,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
   }
 
   private fun showDateSelectionTypeDialog(type: ProgressDateSelectionType) {
-    val options = ProgressDateSelectionType.values()
+    val options = ProgressDateSelectionType.entries.toTypedArray()
     val displayOptions = options.map {
       val option = when (it) {
         ALWAYS_ASK -> R.string.textDateSelectionAsk
@@ -308,7 +308,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
     format: AppDateFormat,
     language: AppLanguage,
   ) {
-    val options = AppDateFormat.values()
+    val options = AppDateFormat.entries.toTypedArray()
     val selected = options.indexOf(format)
 
     MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialog_SmallText)
@@ -344,7 +344,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
   private fun restartApp() {
     try {
       ProcessPhoenix.triggerRebirth(requireAppContext())
-    } catch (error: Throwable) {
+    } catch (_: Throwable) {
       Runtime.getRuntime().exit(0)
     }
   }
