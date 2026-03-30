@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 
 object BackupFileName {
 
-  val prefix = "showly_export_"
+  val prefix = "showly+_export_"
   val fileType = ".json"
   val dateTimePattern = "yyyyMMddHHmmss"
   val memeType = "application/json"

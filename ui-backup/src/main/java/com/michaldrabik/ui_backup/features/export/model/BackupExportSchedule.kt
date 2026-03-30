@@ -25,12 +25,33 @@ enum class BackupExportSchedule(
     R.string.textBackupExportOptionOffMessage,
     R.string.textBackupExportSchedule,
   ),
+  EVERY_HOUR(
+    1,
+    HOURS,
+    R.string.textBackupExportOption1Hour,
+    R.string.textBackupExportOptionConfirmMessage,
+    R.string.textBackupExportOption1HourButton,
+  ),
+  EVERY_3_HOURS(
+    3,
+    HOURS,
+    R.string.textBackupExportOption3Hours,
+    R.string.textBackupExportOptionConfirmMessage,
+    R.string.textBackupExportOption3HoursButton,
+  ),
   EVERY_6_HOURS(
     6,
     HOURS,
     R.string.textBackupExportOption6Hours,
     R.string.textBackupExportOptionConfirmMessage,
     R.string.textBackupExportOption6HoursButton,
+  ),
+  EVERY_12_HOURS(
+    12,
+    HOURS,
+    R.string.textBackupExportOption12Hours,
+    R.string.textBackupExportOptionConfirmMessage,
+    R.string.textBackupExportOption12HoursButton,
   ),
   EVERY_DAY(
     1,
