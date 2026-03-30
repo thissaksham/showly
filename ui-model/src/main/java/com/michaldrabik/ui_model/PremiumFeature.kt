@@ -4,10 +4,9 @@ import android.content.Context
 import androidx.annotation.StringRes
 
 enum class PremiumFeature(
-  @StringRes val tag: Int,
+  @param:StringRes val tag: Int,
 ) {
   THEME(R.string.tagTheme),
-  NEWS(R.string.tagNews),
   WIDGET_TRANSPARENCY(R.string.tagWidgetTransparency),
   QUICK_RATING(R.string.tagQuickRating),
   VIEW_TYPES(R.string.tagViewsTypes),
@@ -17,6 +16,6 @@ enum class PremiumFeature(
     fun fromTag(
       context: Context,
       tag: String,
-    ) = values().firstOrNull { context.getString(it.tag) == tag }
+    ) = entries.firstOrNull { context.getString(it.tag) == tag }
   }
 }

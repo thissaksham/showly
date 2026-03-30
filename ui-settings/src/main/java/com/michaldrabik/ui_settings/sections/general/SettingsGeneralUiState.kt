@@ -17,7 +17,6 @@ data class SettingsGeneralUiState(
   val country: AppCountry? = null,
   val dateFormat: AppDateFormat? = null,
   val moviesEnabled: Boolean = true,
-  val newsEnabled: Boolean = false,
   val streamingsEnabled: Boolean = true,
   val restartApp: Boolean = false,
   val progressNextType: ProgressNextEpisodeType? = null,
