@@ -13,6 +13,7 @@ import com.michaldrabik.ui_model.ShowStatus.ENDED
 import com.michaldrabik.ui_model.ShowStatus.UNKNOWN
 import kotlinx.coroutines.delay
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -30,6 +31,7 @@ class ShowsSyncRunner @Inject constructor(
 
   companion object {
     private const val DELAY_MS = 10L
+    private val ENDED_SHOW_SYNC_COOLDOWN = TimeUnit.DAYS.toMillis(3)
   }
 
   suspend fun run(): Int {
@@ -39,8 +41,8 @@ class ShowsSyncRunner @Inject constructor(
     val watchlistShows = showsRepository.watchlistShows.loadAll()
     val watchlistShowsIds = watchlistShows.map { it.traktId }
 
+    // We sync all shows in My Shows (to catch new seasons) and only non-ended shows in Watchlist.
     val showsToSync = (myShows + watchlistShows)
-      .filter { it.status !in arrayOf(ENDED, CANCELED, UNKNOWN) }
 
     Timber.i("Shows to sync: ${showsToSync.size}.")
     if (showsToSync.isEmpty()) {
@@ -52,9 +54,12 @@ class ShowsSyncRunner @Inject constructor(
     val syncLog = localSource.episodesSyncLog.getAll()
     showsToSync.forEach { show ->
       val isInWatchlist = show.traktId in watchlistShowsIds
+      val isEnded = show.status in arrayOf(ENDED, CANCELED, UNKNOWN)
 
       val lastSync = syncLog.find { it.idTrakt == show.traktId }?.syncedAt ?: 0
-      if (nowUtcMillis() - lastSync < SHOW_SYNC_COOLDOWN) {
+      val cooldown = if (isEnded) ENDED_SHOW_SYNC_COOLDOWN else SHOW_SYNC_COOLDOWN
+      
+      if (nowUtcMillis() - lastSync < cooldown) {
         Timber.i("${show.title} is on cooldown. No need to sync.")
         return@forEach
       }

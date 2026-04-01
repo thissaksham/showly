@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy.KEEP
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
@@ -20,6 +22,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 @HiltWorker
 class ShowsMoviesSyncWorker @AssistedInject constructor(
@@ -33,19 +36,26 @@ class ShowsMoviesSyncWorker @AssistedInject constructor(
 
   companion object {
     private const val TAG = "ShowsMoviesSyncWorker"
+    private const val TAG_PERIODIC = "ShowsMoviesSyncWorker_periodic"
 
     fun schedule(workManager: WorkManager) {
-      val request = OneTimeWorkRequestBuilder<ShowsMoviesSyncWorker>()
-        .setConstraints(
-          Constraints
-            .Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build(),
-        ).addTag(TAG)
+      val constraints = Constraints.Builder()
+        .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()
 
-      workManager.enqueueUniqueWork(TAG, KEEP, request)
-      Timber.i("ShowsMoviesSyncWorker scheduled.")
+      val oneTimeRequest = OneTimeWorkRequestBuilder<ShowsMoviesSyncWorker>()
+        .setConstraints(constraints)
+        .addTag(TAG)
+        .build()
+
+      val periodicRequest = PeriodicWorkRequestBuilder<ShowsMoviesSyncWorker>(12, TimeUnit.HOURS)
+        .setConstraints(constraints)
+        .addTag(TAG_PERIODIC)
+        .build()
+
+      workManager.enqueueUniqueWork(TAG, KEEP, oneTimeRequest)
+      workManager.enqueueUniquePeriodicWork(TAG_PERIODIC, ExistingPeriodicWorkPolicy.KEEP, periodicRequest)
+      Timber.i("ShowsMoviesSyncWorker scheduled (OneTime + Periodic).")
     }
   }
 
