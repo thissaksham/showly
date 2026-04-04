@@ -39,10 +39,9 @@ class ShowsSyncRunner @Inject constructor(
 
     val myShows = showsRepository.myShows.loadAll()
     val watchlistShows = showsRepository.watchlistShows.loadAll()
-    val watchlistShowsIds = watchlistShows.map { it.traktId }
 
-    // We sync all shows in My Shows (to catch new seasons) and only non-ended shows in Watchlist.
-    val showsToSync = (myShows + watchlistShows)
+    // Deduplicate shows to sync.
+    val showsToSync = (myShows + watchlistShows).distinctBy { it.traktId }
 
     Timber.i("Shows to sync: ${showsToSync.size}.")
     if (showsToSync.isEmpty()) {
@@ -53,7 +52,6 @@ class ShowsSyncRunner @Inject constructor(
     var syncCount = 0
     val syncLog = localSource.episodesSyncLog.getAll()
     showsToSync.forEach { show ->
-      val isInWatchlist = show.traktId in watchlistShowsIds
       val isEnded = show.status in arrayOf(ENDED, CANCELED, UNKNOWN)
 
       val lastSync = syncLog.find { it.idTrakt == show.traktId }?.syncedAt ?: 0
@@ -73,9 +71,11 @@ class ShowsSyncRunner @Inject constructor(
         Timber.e("${show.title}(${show.ids.trakt}) show sync error. Skipping... \n$t")
       }
 
-      if (isInWatchlist) {
-        localSource.episodesSyncLog.upsert(EpisodesSyncLog(show.traktId, nowUtcMillis()))
-      } else {
+      // We sync episodes for all "My Shows" and for active (non-ended) Watchlist shows.
+      val isInMyShows = myShows.any { it.traktId == show.traktId }
+      val shouldSyncEpisodes = isInMyShows || !isEnded
+
+      if (shouldSyncEpisodes) {
         try {
           Timber.i("Syncing ${show.title}(${show.ids.trakt}) episodes...")
 
@@ -89,8 +89,11 @@ class ShowsSyncRunner @Inject constructor(
         } catch (t: Throwable) {
           Timber.e("${show.title}(${show.ids.trakt}) episodes sync error. Skipping... \n$t")
         } finally {
+          localSource.episodesSyncLog.upsert(EpisodesSyncLog(show.traktId, nowUtcMillis()))
           delay(DELAY_MS)
         }
+      } else {
+        localSource.episodesSyncLog.upsert(EpisodesSyncLog(show.traktId, nowUtcMillis()))
       }
     }
 
