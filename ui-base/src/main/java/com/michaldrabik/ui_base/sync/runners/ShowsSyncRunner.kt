@@ -34,8 +34,8 @@ class ShowsSyncRunner @Inject constructor(
     private val ENDED_SHOW_SYNC_COOLDOWN = TimeUnit.DAYS.toMillis(3)
   }
 
-  suspend fun run(): Int {
-    Timber.i("Shows sync initialized.")
+  suspend fun run(force: Boolean = false): Int {
+    Timber.i("Shows sync initialized. Force: $force")
 
     val myShows = showsRepository.myShows.loadAll()
     val watchlistShows = showsRepository.watchlistShows.loadAll()
@@ -57,7 +57,7 @@ class ShowsSyncRunner @Inject constructor(
       val lastSync = syncLog.find { it.idTrakt == show.traktId }?.syncedAt ?: 0
       val cooldown = if (isEnded) ENDED_SHOW_SYNC_COOLDOWN else SHOW_SYNC_COOLDOWN
       
-      if (nowUtcMillis() - lastSync < cooldown) {
+      if (!force && nowUtcMillis() - lastSync < cooldown) {
         Timber.i("${show.title} is on cooldown. No need to sync.")
         return@forEach
       }

@@ -28,8 +28,8 @@ class MoviesSyncRunner @Inject constructor(
     private const val DELAY_MS = 10L
   }
 
-  suspend fun run(): Int {
-    Timber.i("Movies sync initialized.")
+  suspend fun run(force: Boolean = false): Int {
+    Timber.i("Movies sync initialized. Force: $force")
 
     if (!settingsRepository.isMoviesEnabled) {
       Timber.i("Movies are disabled. Exiting...")
@@ -49,7 +49,7 @@ class MoviesSyncRunner @Inject constructor(
     val syncLog = localSource.moviesSyncLog.getAll()
     moviesToSync.forEach { movie ->
       val lastSync = syncLog.find { it.idTrakt == movie.ids.trakt.id }?.syncedAt ?: 0
-      if (nowUtcMillis() - lastSync < MOVIE_SYNC_COOLDOWN) {
+      if (!force && nowUtcMillis() - lastSync < MOVIE_SYNC_COOLDOWN) {
         Timber.i("${movie.title} is on cooldown. No need to sync.")
         return@forEach
       }

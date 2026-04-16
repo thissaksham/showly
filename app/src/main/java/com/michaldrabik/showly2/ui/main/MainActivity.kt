@@ -6,6 +6,7 @@ import android.graphics.Color.TRANSPARENT
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
+import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
 import androidx.activity.SystemBarStyle
 import androidx.activity.addCallback
@@ -165,6 +166,10 @@ class MainActivity :
         setMode(newMode)
       }
       viewMask.onClick { /* NOOP */ }
+      buttonRefresh.onClick {
+        viewModel.syncNow(workManager)
+        provideSnackbarLayout().showInfoSnackbar(getString(R.string.textTraktSyncRunning))
+      }
     }
   }
 
@@ -191,7 +196,6 @@ class MainActivity :
         val destination = when (viewModel.getMode()) {
           SHOWS -> R.id.progressMainFragment
           MOVIES -> R.id.progressMoviesMainFragment
-          else -> throw IllegalStateException()
         }
         setStartDestination(destination)
       }
@@ -237,8 +241,8 @@ class MainActivity :
               bottomMenuView.binding.bottomNavigationView.selectedItemId = R.id.menuProgress
             }
             else -> {
-              remove()
-              super.onBackPressed()
+              isEnabled = false
+              onBackPressedDispatcher.onBackPressed()
             }
           }
         }
@@ -315,6 +319,13 @@ class MainActivity :
         }
         showMask.let {
           viewMask.visibleIf(it)
+        }
+        buttonRefresh.isEnabled = !isSyncing
+        if (isSyncing) {
+          val rotation = AnimationUtils.loadAnimation(this@MainActivity, R.anim.anim_rotate)
+          buttonRefresh.startAnimation(rotation)
+        } else {
+          buttonRefresh.clearAnimation()
         }
         isInitialRun?.let {
           if (it.consume() == true) {
@@ -405,6 +416,7 @@ class MainActivity :
   private fun handleEvent(event: Event) {
     when (event) {
       is ShowsMoviesSyncComplete -> {
+        viewModel.onSyncFinished()
         if (event.count > 0) {
           doForFragments { (it as? OnShowsMoviesSyncedListener)?.onShowsMoviesSyncFinished() }
         }
@@ -439,7 +451,6 @@ class MainActivity :
         val action = when (viewModel.getMode()) {
           SHOWS -> R.id.actionDiscoverFragmentToSearchFragment
           MOVIES -> R.id.actionDiscoverMoviesFragmentToSearchFragment
-          else -> throw IllegalStateException()
         }
         findNavControl()?.navigate(action)
       }
@@ -483,21 +494,18 @@ class MainActivity :
     when (viewModel.getMode()) {
       SHOWS -> R.id.actionNavigateDiscoverFragment
       MOVIES -> R.id.actionNavigateDiscoverMoviesFragment
-      else -> throw IllegalStateException()
     }
 
   private fun getMenuCollectionAction() =
     when (viewModel.getMode()) {
       SHOWS -> R.id.actionNavigateFollowedShowsFragment
       MOVIES -> R.id.actionNavigateFollowedMoviesFragment
-      else -> throw IllegalStateException()
     }
 
   private fun getMenuProgressAction() =
     when (viewModel.getMode()) {
       SHOWS -> R.id.actionNavigateProgressFragment
       MOVIES -> R.id.actionNavigateProgressMoviesFragment
-      else -> throw IllegalStateException()
     }
 
   private fun handleDeepLink(intent: Intent?) {

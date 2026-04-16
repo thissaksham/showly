@@ -5,7 +5,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy.KEEP
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
@@ -37,8 +37,9 @@ class ShowsMoviesSyncWorker @AssistedInject constructor(
   companion object {
     private const val TAG = "ShowsMoviesSyncWorker"
     private const val TAG_PERIODIC = "ShowsMoviesSyncWorker_periodic"
+    private const val ARG_FORCE = "ARG_FORCE"
 
-    fun schedule(workManager: WorkManager) {
+    fun schedule(workManager: WorkManager, force: Boolean = false) {
       val constraints = Constraints.Builder()
         .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()
@@ -46,6 +47,7 @@ class ShowsMoviesSyncWorker @AssistedInject constructor(
       val oneTimeRequest = OneTimeWorkRequestBuilder<ShowsMoviesSyncWorker>()
         .setConstraints(constraints)
         .addTag(TAG)
+        .setInputData(androidx.work.Data.Builder().putBoolean(ARG_FORCE, force).build())
         .build()
 
       val periodicRequest = PeriodicWorkRequestBuilder<ShowsMoviesSyncWorker>(12, TimeUnit.HOURS)
@@ -53,9 +55,10 @@ class ShowsMoviesSyncWorker @AssistedInject constructor(
         .addTag(TAG_PERIODIC)
         .build()
 
-      workManager.enqueueUniqueWork(TAG, KEEP, oneTimeRequest)
+      val policy = if (force) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP
+      workManager.enqueueUniqueWork(TAG, policy, oneTimeRequest)
       workManager.enqueueUniquePeriodicWork(TAG_PERIODIC, ExistingPeriodicWorkPolicy.KEEP, periodicRequest)
-      Timber.i("ShowsMoviesSyncWorker scheduled (OneTime + Periodic).")
+      Timber.i("ShowsMoviesSyncWorker scheduled (OneTime + Periodic). Force: $force")
     }
   }
 
@@ -63,10 +66,12 @@ class ShowsMoviesSyncWorker @AssistedInject constructor(
     withContext(dispatchers.IO) {
       Timber.d("Doing work...")
 
+      val force = inputData.getBoolean(ARG_FORCE, false)
+
       val showsAsync = async {
         try {
           Timber.d("Starting shows runner...")
-          showsSyncRunner.run()
+          showsSyncRunner.run(force)
         } catch (error: Throwable) {
           Timber.e(error)
           0
@@ -76,7 +81,7 @@ class ShowsMoviesSyncWorker @AssistedInject constructor(
       val moviesAsync = async {
         try {
           Timber.d("Starting movies runner...")
-          moviesSyncRunner.run()
+          moviesSyncRunner.run(force)
         } catch (error: Throwable) {
           Timber.e(error)
           0

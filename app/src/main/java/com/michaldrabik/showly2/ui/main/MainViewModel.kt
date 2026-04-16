@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkManager
 import com.michaldrabik.common.Mode
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.showly2.ui.main.cases.MainAnnouncementsCase
@@ -24,6 +25,7 @@ import com.michaldrabik.ui_base.utilities.extensions.combine
 import com.michaldrabik.ui_base.utilities.extensions.launchDelayed
 import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
 import com.michaldrabik.ui_model.Tip
+import com.michaldrabik.ui_base.sync.ShowsMoviesSyncWorker
 import com.michaldrabik.ui_settings.helpers.AppLanguage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancelAndJoin
@@ -53,6 +55,7 @@ class MainViewModel @Inject constructor(
   private val initialLanguageEvent = MutableStateFlow<Event<AppLanguage>?>(null)
   private val whatsNewEvent = MutableStateFlow<Event<Boolean>?>(null)
   private val openLinkEvent = MutableStateFlow<Event<DeepLinkBundle>?>(null)
+  private val syncState = MutableStateFlow(false)
 
   fun initialize() {
     viewModelScope.launch {
@@ -113,6 +116,15 @@ class MainViewModel @Inject constructor(
     }
   }
 
+  fun syncNow(workManager: WorkManager) {
+    syncState.value = true
+    ShowsMoviesSyncWorker.schedule(workManager, force = true)
+  }
+
+  fun onSyncFinished() {
+    syncState.value = false
+  }
+
   fun refreshBackupExportSchedule() {
     backupCase.run {
       refreshBackupExportSchedule()
@@ -169,7 +181,8 @@ class MainViewModel @Inject constructor(
     openLinkEvent,
     loadingState,
     maskState,
-  ) { s1, s2, s3, s4, s5, s6 ->
+    syncState,
+  ) { s1, s2, s3, s4, s5, s6, s7 ->
     MainUiState(
       isInitialRun = s1,
       initialLanguage = s2,
@@ -177,6 +190,7 @@ class MainViewModel @Inject constructor(
       openLink = s4,
       isLoading = s5,
       showMask = s6,
+      isSyncing = s7,
     )
   }.stateIn(
     scope = viewModelScope,

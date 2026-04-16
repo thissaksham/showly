@@ -52,6 +52,21 @@
       tools:visibility="visible"
       />
 
+    <ImageButton
+      android:id="@+id/buttonRefresh"
+      android:layout_width="40dp"
+      android:layout_height="40dp"
+      android:layout_gravity="end"
+      android:layout_marginEnd="@dimen/spaceSmall"
+      android:layout_marginBottom="@dimen/spaceSmall"
+      android:background="@drawable/bg_bottom_menu"
+      android:contentDescription="@null"
+      android:elevation="2dp"
+      android:padding="8dp"
+      android:src="@drawable/ic_sync"
+      app:tint="?colorAccent"
+      />
+
     <com.michaldrabik.showly2.ui.views.BottomMenuView
       android:id="@+id/bottomMenuView"
       android:layout_width="match_parent"
