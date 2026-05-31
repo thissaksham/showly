@@ -3,7 +3,6 @@ package com.michaldrabik.ui_my_shows.main
 import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
-import androidx.core.os.bundleOf
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.clearFragmentResultListener
@@ -32,7 +31,6 @@ import com.michaldrabik.ui_base.utilities.extensions.showKeyboard
 import com.michaldrabik.ui_base.utilities.extensions.updateTopMargin
 import com.michaldrabik.ui_base.utilities.extensions.visible
 import com.michaldrabik.ui_base.utilities.viewBinding
-import com.michaldrabik.ui_model.PremiumFeature
 import com.michaldrabik.ui_model.Show
 import com.michaldrabik.ui_my_shows.R
 import com.michaldrabik.ui_my_shows.databinding.FragmentFollowedShowsBinding
@@ -175,7 +173,7 @@ class FollowedShowsFragment :
         exitSearch()
       } else {
         isEnabled = false
-        activity?.onBackPressed()
+        requireActivity().onBackPressedDispatcher.onBackPressed()
       }
     }
   }
@@ -245,13 +243,6 @@ class FollowedShowsFragment :
     }
     val bundle = ContextMenuBottomSheet.createBundle(show.ids.trakt)
     navigateToSafe(R.id.actionFollowedShowsFragmentToItemMenu, bundle)
-  }
-
-  fun openPremium() {
-    hideNavigation()
-    exitSearch()
-    val args = bundleOf(ARG_ITEM to PremiumFeature.VIEW_TYPES)
-    navigateToSafe(R.id.actionFollowedShowsFragmentToPremium, args)
   }
 
   private fun openSettings() {

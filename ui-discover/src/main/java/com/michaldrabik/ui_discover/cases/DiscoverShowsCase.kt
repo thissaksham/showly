@@ -1,7 +1,6 @@
 package com.michaldrabik.ui_discover.cases
 
 import com.michaldrabik.common.Config
-import com.michaldrabik.common.ConfigVariant
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
 import com.michaldrabik.common.extensions.isSameDayOrAfter
 import com.michaldrabik.common.extensions.nowUtc
@@ -32,7 +31,6 @@ internal class DiscoverShowsCase @Inject constructor(
   private val imageTypeProvider: ImageTypeProvider,
   private val imagesProvider: ShowImagesProvider,
   private val translationsRepository: TranslationsRepository,
-  private val settingsRepository: SettingsRepository,
 ) {
 
   suspend fun isCacheValid() =
@@ -119,22 +117,6 @@ internal class DiscoverShowsCase @Inject constructor(
           )
         }
       }.awaitAll()
-      .toMutableList()
-      .apply { insertTwitterAdItem(this) }
-      .toList()
-  }
-
-  private fun insertTwitterAdItem(items: MutableList<DiscoverListItem>) {
-    val isEnabled = settingsRepository.isTwitterAdEnabled
-    val isTimePassed = (nowUtcMillis() - settingsRepository.installTimestamp) > ConfigVariant.TWITTER_AD_DELAY
-    if (!isEnabled || !isTimePassed) return
-
-    val twitterAd = DiscoverListItem(Show.EMPTY, Image.createUnknown(ImageType.TWITTER))
-    if (items.size >= imageTypeProvider.twitterAdPosition) {
-      items.add(imageTypeProvider.twitterAdPosition, twitterAd)
-    } else {
-      items.add(twitterAd)
-    }
   }
 
   private suspend fun loadTranslation(

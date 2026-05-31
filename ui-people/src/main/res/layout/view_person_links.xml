@@ -140,20 +140,6 @@
     custom:text="YouTube"
     />
 
-  <com.michaldrabik.ui_base.common.sheets.links.views.LinkItemView
-    android:id="@+id/viewPersonLinksTwitter"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/spaceNormal"
-    android:layout_marginTop="@dimen/spaceMedium"
-    android:layout_marginEnd="@dimen/spaceSmall"
-    app:layout_constraintEnd_toEndOf="@id/viewPersonLinksGuideline"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/viewPersonLinksTmdb"
-    custom:icon="@drawable/ic_twitter"
-    custom:text="Twitter"
-    />
-
   <com.google.android.material.button.MaterialButton
     android:id="@+id/viewPersonLinksButtonClose"
     style="@style/RoundMaterialButton"
@@ -169,7 +155,7 @@
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/viewPersonLinksTwitter"
+    app:layout_constraintTop_toBottomOf="@id/viewPersonLinksYouTube"
     app:rippleColor="?android:attr/textColorPrimary"
     />
 

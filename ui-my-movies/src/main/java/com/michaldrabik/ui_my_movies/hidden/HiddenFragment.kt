@@ -91,9 +91,9 @@ class HiddenFragment :
       itemLongClickListener = { openMovieMenu(it.movie) },
       sortChipClickListener = ::openSortOrderDialog,
       genreChipClickListener = ::openGenresDialog,
+      listViewChipClickListener = { },
       missingImageListener = viewModel::loadMissingImage,
       missingTranslationListener = viewModel::loadMissingTranslation,
-      listViewChipClickListener = { (requireParentFragment() as? FollowedMoviesFragment)?.openPremium() },
       upcomingChipVisible = false,
       upcomingChipClickListener = {},
       listChangeListener = {
@@ -175,7 +175,9 @@ class HiddenFragment :
     val args = SortOrderBottomSheet.createBundle(options, order, type)
 
     requireParentFragment().setFragmentResultListener(NavigationArgs.REQUEST_SORT_ORDER) { _, bundle ->
+      @Suppress("DEPRECATION")
       val sortOrder = bundle.getSerializable(NavigationArgs.ARG_SELECTED_SORT_ORDER) as SortOrder
+      @Suppress("DEPRECATION")
       val sortType = bundle.getSerializable(NavigationArgs.ARG_SELECTED_SORT_TYPE) as SortType
       viewModel.setSortOrder(sortOrder, sortType)
     }

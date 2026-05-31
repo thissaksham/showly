@@ -70,8 +70,9 @@ class SettingsFragment :
   private fun setupView() {
     with(binding) {
       settingsToolbar.setOnClickListener { activity?.onBackPressed() }
-      settingsPremium.onClick { navigateTo(R.id.actionSettingsFragmentToPremium) }
-      settingsFilters.onFilterClick = { viewModel.setFilter(it) }
+      with(settingsFilters) {
+        onFilterClick = { viewModel.setFilter(it) }
+      }
     }
   }
 

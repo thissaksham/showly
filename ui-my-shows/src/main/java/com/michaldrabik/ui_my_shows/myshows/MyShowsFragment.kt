@@ -97,7 +97,7 @@ class MyShowsFragment :
       itemLongClickListener = { item -> openShowMenu(item.show) },
       onSortOrderClickListener = { section, order, type -> openSortOrderDialog(section, order, type) },
       onTypeClickListener = { navigateToSafe(R.id.actionFollowedShowsFragmentToMyShowsFilters) },
-      onListViewModeClickListener = { (requireParentFragment() as? FollowedShowsFragment)?.openPremium() },
+      onListViewModeClickListener = { },
       onNetworksClickListener = ::openNetworksDialog,
       onGenresClickListener = ::openGenresDialog,
       missingImageListener = { item, force -> viewModel.loadMissingImage(item as MyShowsItem, force) },
@@ -194,7 +194,7 @@ class MyShowsFragment :
       val sortOrder = bundle.getSerializable(NavigationArgs.ARG_SELECTED_SORT_ORDER) as SortOrder
       val sortType = bundle.getSerializable(NavigationArgs.ARG_SELECTED_SORT_TYPE) as SortType
       MyShowsSection
-        .values()
+        .entries
         .find { NavigationArgs.requestSortOrderSection(it.name) == requestKey }
         ?.let { viewModel.setSortOrder(sortOrder, sortType) }
     }

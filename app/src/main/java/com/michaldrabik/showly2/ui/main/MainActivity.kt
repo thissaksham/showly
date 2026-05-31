@@ -1,6 +1,7 @@
 package com.michaldrabik.showly2.ui.main
 
 import android.annotation.SuppressLint
+import android.Manifest
 import android.content.Intent
 import android.graphics.Color.TRANSPARENT
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.view.animation.DecelerateInterpolator
 import androidx.activity.SystemBarStyle
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsCompat
@@ -48,6 +50,7 @@ import com.michaldrabik.ui_base.utilities.ModeHost
 import com.michaldrabik.ui_base.utilities.MoviesStatusHost
 import com.michaldrabik.ui_base.utilities.NavigationHost
 import com.michaldrabik.ui_base.utilities.SnackbarHost
+import com.michaldrabik.ui_base.utilities.extensions.withApiAtLeast
 import com.michaldrabik.ui_base.utilities.extensions.dimenToPx
 import com.michaldrabik.ui_base.utilities.extensions.doOnApplyWindowInsets
 import com.michaldrabik.ui_base.utilities.extensions.fadeIn
@@ -94,6 +97,8 @@ class MainActivity :
   @Inject lateinit var deepLinkResolver: DeepLinkResolver
   @Inject lateinit var settingsRepository: SettingsRepository
   @Inject lateinit var networkStatusProvider: NetworkStatusProvider
+
+  private val requestPermissionLauncher = registerForActivityResult(RequestPermission()) { /* NOOP */ }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -316,6 +321,9 @@ class MainActivity :
         isInitialRun?.let {
           if (it.consume() == true) {
             viewModel.checkInitialLanguage()
+            withApiAtLeast(33) {
+              requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
           }
         }
         showWhatsNew?.let {
@@ -479,7 +487,6 @@ class MainActivity :
       .setView(WhatsNewView(this))
       .setCancelable(false)
       .setPositiveButton(R.string.textClose) { _, _ -> }
-      .setNeutralButton("Twitter") { _, _ -> openWebUrl(Config.TWITTER_URL) }
       .show()
   }
 

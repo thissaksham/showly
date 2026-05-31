@@ -92,9 +92,6 @@ class LinksBottomSheet : BaseBottomSheetFragment(R.layout.view_links) {
       viewLinksGif.onClick {
         openWebUrl("https://giphy.com/search/${getQuery()}")
       }
-      viewLinksTwitter.onClick {
-        openWebUrl("https://twitter.com/search?q=${getQuery()}&src=typed_query")
-      }
       viewLinksButtonClose.onClick { closeSheet() }
     }
     setWebLink()

@@ -9,7 +9,7 @@ import com.michaldrabik.ui_settings.views.SettingsFiltersView.SettingsFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -18,20 +18,15 @@ class SettingsViewModel @Inject constructor() :
   ViewModel(),
   ChannelsDelegate by DefaultChannelsDelegate() {
 
-    private val premiumState = MutableStateFlow(false)
     private val filterState = MutableStateFlow<SettingsFilter?>(null)
 
     fun setFilter(filter: SettingsFilter?) {
       filterState.value = filter
     }
 
-    val uiState = combine(
-      premiumState,
-      filterState,
-    ) { s1, s2 ->
+    val uiState = filterState.map {
       SettingsUiState(
-        isPremium = s1,
-        filter = s2,
+        filter = it,
       )
     }.stateIn(
       scope = viewModelScope,

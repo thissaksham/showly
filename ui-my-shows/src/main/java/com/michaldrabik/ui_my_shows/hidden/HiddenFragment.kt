@@ -96,10 +96,10 @@ class HiddenFragment :
       sortChipClickListener = ::openSortOrderDialog,
       missingImageListener = viewModel::loadMissingImage,
       missingTranslationListener = viewModel::loadMissingTranslation,
-      listViewChipClickListener = { (requireParentFragment() as? FollowedShowsFragment)?.openPremium() },
       networksChipClickListener = ::openNetworksDialog,
       genresChipClickListener = ::openGenresDialog,
       upcomingChipClickListener = {},
+      listViewChipClickListener = { },
       listChangeListener = {
         binding.hiddenRecycler.scrollToPosition(0)
         (requireParentFragment() as FollowedShowsFragment).resetTranslations()
@@ -188,7 +188,9 @@ class HiddenFragment :
     val args = SortOrderBottomSheet.createBundle(options, order, type)
 
     requireParentFragment().setFragmentResultListener(REQUEST_SORT_ORDER) { _, bundle ->
+      @Suppress("DEPRECATION")
       val sortOrder = bundle.getSerializable(ARG_SELECTED_SORT_ORDER) as SortOrder
+      @Suppress("DEPRECATION")
       val sortType = bundle.getSerializable(ARG_SELECTED_SORT_TYPE) as SortType
       viewModel.setSortOrder(sortOrder, sortType)
     }

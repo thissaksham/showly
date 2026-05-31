@@ -3,7 +3,6 @@ package com.michaldrabik.ui_settings.sections.general
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.processphoenix.ProcessPhoenix
@@ -18,7 +17,6 @@ import com.michaldrabik.ui_base.utilities.extensions.launchAndRepeatStarted
 import com.michaldrabik.ui_base.utilities.extensions.onClick
 import com.michaldrabik.ui_base.utilities.extensions.visibleIf
 import com.michaldrabik.ui_base.utilities.viewBinding
-import com.michaldrabik.ui_model.PremiumFeature
 import com.michaldrabik.ui_model.ProgressDateSelectionType
 import com.michaldrabik.ui_model.ProgressDateSelectionType.ALWAYS_ASK
 import com.michaldrabik.ui_model.ProgressDateSelectionType.NOW
@@ -26,7 +24,6 @@ import com.michaldrabik.ui_model.ProgressNextEpisodeType
 import com.michaldrabik.ui_model.ProgressNextEpisodeType.LAST_WATCHED
 import com.michaldrabik.ui_model.ProgressNextEpisodeType.OLDEST
 import com.michaldrabik.ui_model.Settings
-import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_ITEM
 import com.michaldrabik.ui_settings.R
 import com.michaldrabik.ui_settings.databinding.FragmentSettingsGeneralBinding
 import com.michaldrabik.ui_settings.helpers.AppLanguage
@@ -76,19 +73,13 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
         settingsStreamingsEnabledSwitch.isChecked = streamingsEnabled
 
         renderSettings(settings)
-        renderLanguage(language)
-        renderTheme(theme)
+        renderLanguage()
         renderCountry(country)
         renderProgressType(progressNextType)
         renderDateSelection(progressDateSelectionType)
         renderProgressUpcoming(progressUpcomingDays)
         renderDateFormat(dateFormat, language)
         renderTabletColumns(tabletColumns)
-
-        settingsTheme.alpha = if (isPremium) 1F else 0.5F
-        if (isPremium) {
-          settingsThemeTitle.setCompoundDrawables(null, null, null, null)
-        }
 
         if (restartApp) restartApp()
       }
@@ -102,17 +93,8 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
     }
   }
 
-  private fun renderLanguage(language: AppLanguage) {
+  private fun renderLanguage() {
     with(binding) {
-    }
-  }
-
-  private fun renderTheme(theme: AppTheme) {
-    with(binding) {
-      settingsThemeValue.setText(theme.displayName)
-      settingsTheme.onClick {
-        onPremiumAction(tag)
-      }
     }
   }
 
@@ -182,19 +164,6 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
     }
   }
 
-  private fun onPremiumAction(tag: Any?) {
-    val args = bundleOf()
-    if (tag != null) {
-      val feature = PremiumFeature.fromTag(requireContext(), tag.toString())
-      feature?.let {
-        args.putSerializable(ARG_ITEM, feature)
-      }
-    }
-    navigateTo(R.id.actionSettingsFragmentToPremium, args)
-  }
-
-
-
   private fun showProgressUpcomingDialog(days: Long) {
     val options = Config.PROGRESS_UPCOMING_OPTIONS
     val selected = options.indexOfFirst { it.toLong() == days }
@@ -235,7 +204,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
   }
 
   private fun showCountryDialog(country: AppCountry) {
-    val options = AppCountry.values()
+    val options = AppCountry.entries
     val selected = options.indexOf(country)
 
     MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialog)
@@ -249,7 +218,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
   }
 
   private fun showProgressTypeDialog(type: ProgressNextEpisodeType) {
-    val options = ProgressNextEpisodeType.values()
+    val options = ProgressNextEpisodeType.entries
     val displayOptions = options.map {
       val option = when (it) {
         LAST_WATCHED -> R.string.textNextEpisodeLastWatched
@@ -270,7 +239,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
   }
 
   private fun showDateSelectionTypeDialog(type: ProgressDateSelectionType) {
-    val options = ProgressDateSelectionType.values()
+    val options = ProgressDateSelectionType.entries
     val displayOptions = options.map {
       val option = when (it) {
         ALWAYS_ASK -> R.string.textDateSelectionAsk
@@ -294,7 +263,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
     format: AppDateFormat,
     language: AppLanguage,
   ) {
-    val options = AppDateFormat.values()
+    val options = AppDateFormat.entries
     val selected = options.indexOf(format)
 
     MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialog_SmallText)
@@ -330,7 +299,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
   private fun restartApp() {
     try {
       ProcessPhoenix.triggerRebirth(requireAppContext())
-    } catch (error: Throwable) {
+    } catch (_: Throwable) {
       Runtime.getRuntime().exit(0)
     }
   }

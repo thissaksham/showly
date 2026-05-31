@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.work.WorkManager
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
 import com.michaldrabik.data_local.sources.TraktSyncLogLocalDataSource
-import com.michaldrabik.repository.RatingsRepository
 import com.michaldrabik.repository.UserTraktManager
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.ui_base.trakt.TraktSyncWorker
@@ -18,7 +17,6 @@ import javax.inject.Inject
 class SettingsTraktCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val settingsRepository: SettingsRepository,
-  private val ratingsRepository: RatingsRepository,
   private val syncLogLocalSource: TraktSyncLogLocalDataSource,
   private val userManager: UserTraktManager,
   private val workManager: WorkManager,
@@ -36,6 +34,14 @@ class SettingsTraktCase @Inject constructor(
     val settings = settingsRepository.load()
     settings.let {
       val new = it.copy(traktQuickRemoveEnabled = enable)
+      settingsRepository.update(new)
+    }
+  }
+
+  suspend fun enableTraktQuickRate(enable: Boolean) {
+    val settings = settingsRepository.load()
+    settings.let {
+      val new = it.copy(traktQuickRateEnabled = enable)
       settingsRepository.update(new)
     }
   }

@@ -3,7 +3,6 @@ package com.michaldrabik.ui_my_movies.main
 import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
-import androidx.core.os.bundleOf
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.clearFragmentResultListener
@@ -33,7 +32,6 @@ import com.michaldrabik.ui_base.utilities.extensions.updateTopMargin
 import com.michaldrabik.ui_base.utilities.extensions.visible
 import com.michaldrabik.ui_base.utilities.viewBinding
 import com.michaldrabik.ui_model.Movie
-import com.michaldrabik.ui_model.PremiumFeature
 import com.michaldrabik.ui_my_movies.R
 import com.michaldrabik.ui_my_movies.databinding.FragmentFollowedMoviesBinding
 import com.michaldrabik.ui_navigation.java.NavigationArgs
@@ -170,7 +168,7 @@ class FollowedMoviesFragment :
         exitSearch()
       } else {
         isEnabled = false
-        activity?.onBackPressed()
+        requireActivity().onBackPressedDispatcher.onBackPressed()
       }
     }
   }
@@ -236,13 +234,6 @@ class FollowedMoviesFragment :
     }
     val bundle = ContextMenuBottomSheet.createBundle(movie.ids.trakt)
     navigateToSafe(R.id.actionFollowedMoviesFragmentToItemMenu, bundle)
-  }
-
-  fun openPremium() {
-    hideNavigation()
-    exitSearch()
-    val args = bundleOf(ARG_ITEM to PremiumFeature.VIEW_TYPES)
-    navigateToSafe(R.id.actionFollowedMoviesFragmentToPremium, args)
   }
 
   private fun openSettings() {

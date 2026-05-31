@@ -12,7 +12,6 @@ import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.showly2.BuildConfig
 import com.michaldrabik.ui_base.common.AppCountry
-import com.michaldrabik.ui_base.utilities.extensions.withApiAtLeast
 import com.michaldrabik.ui_settings.helpers.AppLanguage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -51,7 +50,7 @@ class MainInitialsCase @Inject constructor(
       }
     }
     if (!country.isNullOrBlank()) {
-      AppCountry.values().forEach { appCountry ->
+      AppCountry.entries.forEach { appCountry ->
         if (appCountry.code.equals(country, ignoreCase = true)) {
           settingsRepository.country = appCountry.code
           return
@@ -61,11 +60,9 @@ class MainInitialsCase @Inject constructor(
   }
 
   suspend fun setInitialNotifications() {
-    withApiAtLeast(33) {
-      val settings = settingsRepository.load()
-      settings.let {
-        settingsRepository.update(it.copy(episodesNotificationsEnabled = false))
-      }
+    val settings = settingsRepository.load()
+    settings.let {
+      settingsRepository.update(it.copy(episodesNotificationsEnabled = true))
     }
   }
 
@@ -77,9 +74,9 @@ class MainInitialsCase @Inject constructor(
 
   fun checkInitialLanguage(): AppLanguage {
     val locales = LocaleListCompat.getAdjustedDefault()
-    val appLanguages = AppLanguage.values()
+    val appLanguages = AppLanguage.entries
 
-    if (locales.size() == 1 && !locales[0]?.language.equals(Locale("en").language)) {
+    if (locales.size() == 1 && !locales[0]?.language.equals(Locale.forLanguageTag("en").language)) {
       appLanguages.forEach { appLanguage ->
         if (appLanguage.code.equals(locales[0]?.language, ignoreCase = true)) {
           return appLanguage
@@ -91,7 +88,7 @@ class MainInitialsCase @Inject constructor(
       val languagesCodes = arrayOf(locales[0], locales[1])
         .filterNotNull()
         .map { it.language.lowercase() }
-      if (languagesCodes.any { it != Locale(Config.DEFAULT_LANGUAGE).language }) {
+      if (languagesCodes.any { it != Locale.forLanguageTag(Config.DEFAULT_LANGUAGE).language }) {
         val languageCodes = appLanguages.map { it.code }
         languagesCodes.forEach { language ->
           if (language in languageCodes) {

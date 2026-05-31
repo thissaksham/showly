@@ -68,9 +68,6 @@ class PersonLinksBottomSheet : BaseBottomSheetFragment(R.layout.view_person_link
       viewPersonLinksDuckDuck.onClick {
         openWebUrl("https://duckduckgo.com/?q=$name")
       }
-      viewPersonLinksTwitter.onClick {
-        openWebUrl("https://twitter.com/search?q=$name&src=typed_query&f=user")
-      }
       viewPersonLinksButtonClose.onClick { closeSheet() }
     }
     setWebLink()

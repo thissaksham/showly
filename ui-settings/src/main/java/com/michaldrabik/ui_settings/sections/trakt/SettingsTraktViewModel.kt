@@ -38,7 +38,6 @@ class SettingsTraktViewModel @Inject constructor(
 
   private val settingsState = MutableStateFlow<Settings?>(null)
 
-  private val premiumState = MutableStateFlow(false)
   private val signedInTraktState = MutableStateFlow(false)
   private val signingInState = MutableStateFlow(false)
   private val traktNameState = MutableStateFlow("")
@@ -111,6 +110,13 @@ class SettingsTraktViewModel @Inject constructor(
     }
   }
 
+  fun enableQuickRate(enable: Boolean) {
+    viewModelScope.launch {
+      traktCase.enableTraktQuickRate(enable)
+      refreshSettings()
+    }
+  }
+
   fun enableQuickSync(enable: Boolean) {
     viewModelScope.launch {
       traktCase.enableTraktQuickSync(enable)
@@ -130,14 +136,12 @@ class SettingsTraktViewModel @Inject constructor(
     signingInState,
     signedInTraktState,
     traktNameState,
-    premiumState,
-  ) { s1, s2, s3, s4, s5 ->
+  ) { s1, s2, s3, s4 ->
     SettingsTraktUiState(
       settings = s1,
       isSigningIn = s2,
       isSignedInTrakt = s3,
       traktUsername = s4,
-      isPremium = s5,
     )
   }.stateIn(
     scope = viewModelScope,

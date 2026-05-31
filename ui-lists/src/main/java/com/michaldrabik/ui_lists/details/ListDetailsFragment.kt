@@ -51,7 +51,6 @@ import com.michaldrabik.ui_lists.details.recycler.helpers.ListDetailsLayoutManag
 import com.michaldrabik.ui_lists.details.recycler.helpers.ListDetailsListItemDecoration
 import com.michaldrabik.ui_lists.details.views.ListDetailsDeleteConfirmView
 import com.michaldrabik.ui_model.CustomList
-import com.michaldrabik.ui_model.PremiumFeature
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortOrder.DATE_ADDED
 import com.michaldrabik.ui_model.SortOrder.NAME
@@ -164,10 +163,6 @@ class ListDetailsFragment :
         translationY = headerTranslation
       }
       fragmentListDetailsManageButton.onClick { toggleReorderMode() }
-      fragmentListDetailsViewModeButton.onClick {
-        val args = bundleOf(ARG_ITEM to PremiumFeature.VIEW_TYPES)
-        navigateToSafe(R.id.actionListDetailsFragmentToPremium, args)
-      }
     }
   }
 
@@ -228,7 +223,7 @@ class ListDetailsFragment :
         toggleReorderMode()
       } else {
         isEnabled = false
-        findNavControl()?.popBackStack()
+        requireActivity().onBackPressedDispatcher.onBackPressed()
       }
     }
   }
@@ -241,7 +236,9 @@ class ListDetailsFragment :
     val args = SortOrderBottomSheet.createBundle(options, order, type)
 
     setFragmentResultListener(REQUEST_SORT_ORDER) { _, bundle ->
+      @Suppress("DEPRECATION")
       val sortOrder = bundle.getSerializable(ARG_SELECTED_SORT_ORDER) as SortOrder
+      @Suppress("DEPRECATION")
       val sortType = bundle.getSerializable(ARG_SELECTED_SORT_TYPE) as SortType
       viewModel.setSortOrder(list.id, sortOrder, sortType)
     }
@@ -257,8 +254,8 @@ class ListDetailsFragment :
       .setTitle(R.string.textConfirmDeleteListTitle)
       .setMessage(R.string.textConfirmDeleteListSubtitle)
       .setPositiveButton(R.string.textYes) { _, _ ->
-        val removeFromTrakt = view.binding.viewListDeleteConfirmCheckbox?.isChecked
-        viewModel.deleteList(list.id, removeFromTrakt == true)
+        val removeFromTrakt = view.binding.viewListDeleteConfirmCheckbox.isChecked
+        viewModel.deleteList(list.id, removeFromTrakt)
       }.setNegativeButton(R.string.textNo) { _, _ -> }
       .show()
   }
@@ -332,11 +329,6 @@ class ListDetailsFragment :
               recycler.layoutManager = layoutManager
               recycler.adapter = adapter
             }
-            fragmentListDetailsViewModeButton.setImageResource(
-              when (it) {
-                LIST_NORMAL -> R.drawable.ic_view_list
-              },
-            )
           }
         }
         listDetails?.let { details ->
@@ -349,7 +341,6 @@ class ListDetailsFragment :
           val isRealEmpty = it.isEmpty() && listDetails?.filterTypeLocal?.containsAll(Mode.getAll()) == true
           fragmentListDetailsEmptyView.root.fadeIf(it.isEmpty())
           fragmentListDetailsManageButton.visibleIf(!isRealEmpty)
-          fragmentListDetailsViewModeButton.visibleIf(!isRealEmpty)
 
           val scrollTop = resetScroll?.consume() == true
           view?.post {
@@ -371,7 +362,6 @@ class ListDetailsFragment :
 
           fragmentListDetailsManageButton.visibleIf(!isManageMode)
           fragmentListDetailsMoreButton.visibleIf(!isManageMode)
-          fragmentListDetailsViewModeButton.visibleIf(!isManageMode)
 
           if (isManageMode) {
             fragmentListDetailsToolbar.title = getString(R.string.textChangeRanks)

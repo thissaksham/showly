@@ -1,7 +1,6 @@
 package com.michaldrabik.ui_settings.sections.general
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,7 +35,6 @@ class SettingsGeneralViewModel @Inject constructor(
   private val dateFormatState = MutableStateFlow<AppDateFormat?>(null)
   private val moviesEnabledState = MutableStateFlow(true)
   private val streamingsEnabledState = MutableStateFlow(true)
-  private val premiumState = MutableStateFlow(false)
   private val restartAppState = MutableStateFlow(false)
   private val progressTypeState = MutableStateFlow<ProgressNextEpisodeType?>(null)
   private val progressDateSelectionState = MutableStateFlow<ProgressDateSelectionType?>(null)
@@ -92,14 +90,6 @@ class SettingsGeneralViewModel @Inject constructor(
     }
   }
 
-  fun setLanguage(language: AppLanguage) {
-    viewModelScope.launch {
-      mainCase.setLanguage(language)
-      val locales = LocaleListCompat.forLanguageTags(language.code)
-      AppCompatDelegate.setApplicationLocales(locales)
-    }
-  }
-
   fun setTabletColumns(columns: Int) {
     viewModelScope.launch {
       mainCase.setTabletsColumns(columns)
@@ -148,7 +138,6 @@ class SettingsGeneralViewModel @Inject constructor(
 
   val uiState = combine(
     settingsState,
-    premiumState,
     languageState,
     countryState,
     dateFormatState,
@@ -159,20 +148,19 @@ class SettingsGeneralViewModel @Inject constructor(
     progressUpcomingDaysState,
     tabletsColumnsState,
     progressDateSelectionState,
-  ) { s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12 ->
+  ) { s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11 ->
     SettingsGeneralUiState(
       settings = s1,
-      isPremium = s2,
-      language = s3,
-      country = s4,
-      dateFormat = s5,
-      moviesEnabled = s6,
-      streamingsEnabled = s7,
-      progressNextType = s8,
-      restartApp = s9,
-      progressUpcomingDays = s10,
-      tabletColumns = s11,
-      progressDateSelectionType = s12,
+      language = s2,
+      country = s3,
+      dateFormat = s4,
+      moviesEnabled = s5,
+      streamingsEnabled = s6,
+      progressNextType = s7,
+      restartApp = s8,
+      progressUpcomingDays = s9,
+      tabletColumns = s10,
+      progressDateSelectionType = s11,
     )
   }.stateIn(
     scope = viewModelScope,

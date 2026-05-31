@@ -183,20 +183,6 @@
     />
 
   <com.michaldrabik.ui_base.common.sheets.links.views.LinkItemView
-    android:id="@+id/viewLinksTwitter"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/spaceSmall"
-    android:layout_marginTop="@dimen/spaceMedium"
-    android:layout_marginEnd="@dimen/spaceNormal"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/viewLinksGuideline"
-    app:layout_constraintTop_toBottomOf="@id/viewLinksYouTube"
-    custom:icon="@drawable/ic_twitter"
-    custom:text="Twitter"
-    />
-
-  <com.michaldrabik.ui_base.common.sheets.links.views.LinkItemView
     android:id="@+id/viewLinksGif"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
@@ -205,7 +191,7 @@
     android:layout_marginEnd="@dimen/spaceNormal"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/viewLinksGuideline"
-    app:layout_constraintTop_toBottomOf="@id/viewLinksTwitter"
+    app:layout_constraintTop_toBottomOf="@id/viewLinksYouTube"
     custom:icon="@drawable/ic_giphy"
     custom:text="Giphy"
     />

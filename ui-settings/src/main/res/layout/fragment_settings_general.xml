@@ -70,7 +70,7 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/settingsCountry"
     style="@style/Settings.ItemLayout"
-    app:layout_constraintBottom_toTopOf="@+id/settingsTheme"
+    app:layout_constraintBottom_toTopOf="@+id/settingsDateFormat"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/settingsLanguage"
@@ -112,62 +112,13 @@
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 
-  <androidx.constraintlayout.widget.ConstraintLayout
-    android:id="@+id/settingsTheme"
-    style="@style/Settings.ItemLayout"
-    android:tag="@string/tagTheme"
-    app:layout_constraintBottom_toTopOf="@+id/settingsDateFormat"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/settingsCountry"
-    >
-
-    <TextView
-      android:id="@+id/settingsThemeTitle"
-      style="@style/Settings.Title"
-      android:drawablePadding="@dimen/spaceSmall"
-      android:text="@string/textSettingsThemeTitle"
-      app:drawableStartCompat="@drawable/ic_crown_small"
-      app:drawableTint="?android:attr/textColorPrimary"
-      app:layout_constraintBottom_toTopOf="@id/settingsThemeDescription"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintVertical_chainStyle="packed"
-      />
-
-    <TextView
-      android:id="@+id/settingsThemeDescription"
-      style="@style/Settings.Summary"
-      android:layout_marginEnd="@dimen/spaceNormal"
-      android:text="@string/textSettingsThemeSummary"
-      app:layout_constrainedWidth="true"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toStartOf="@id/settingsThemeValue"
-      app:layout_constraintHorizontal_bias="0"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/settingsThemeTitle"
-      />
-
-    <TextView
-      android:id="@+id/settingsThemeValue"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:textColor="?attr/colorAccent"
-      app:layout_constraintBottom_toBottomOf="@id/settingsTheme"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toTopOf="@id/settingsTheme"
-      tools:text="@tools:sample/lorem"
-      />
-
-  </androidx.constraintlayout.widget.ConstraintLayout>
-
   <LinearLayout
     android:id="@+id/settingsDateFormat"
     style="@style/Settings.ItemLayout"
     app:layout_constraintBottom_toTopOf="@id/settingsTabletColumns"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/settingsTheme"
+    app:layout_constraintTop_toBottomOf="@id/settingsCountry"
     >
 
     <TextView
@@ -186,7 +137,6 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/settingsTabletColumns"
     style="@style/Settings.ItemLayout"
-    android:tag="@string/tagTheme"
     app:layout_constraintBottom_toTopOf="@+id/settingsMoviesEnabled"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"

@@ -68,7 +68,7 @@ class SettingsMapper @Inject constructor() {
   fun toDatabase(settings: Settings) =
     SettingsDb(
       isInitialRun = settings.isInitialRun,
-      pushNotificationsEnabled = false,
+      pushNotificationsEnabled = true,
       episodesNotificationsEnabled = settings.episodesNotificationsEnabled,
       episodesNotificationsDelay = settings.episodesNotificationsDelay.delayMs,
       myShowsRunningSortBy = settings.myShowsWatchingSortBy.name,
