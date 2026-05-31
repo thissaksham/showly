@@ -24,6 +24,7 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/settingsLanguage"
     style="@style/Settings.ItemLayout"
+    android:visibility="gone"
     app:layout_constraintBottom_toTopOf="@+id/settingsCountry"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"

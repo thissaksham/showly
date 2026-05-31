@@ -104,8 +104,6 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
 
   private fun renderLanguage(language: AppLanguage) {
     with(binding) {
-      settingsLanguageValue.setText(language.displayName)
-      settingsLanguage.onClick { showLanguageDialog(language) }
     }
   }
 
@@ -195,19 +193,7 @@ class SettingsGeneralFragment : BaseFragment<SettingsGeneralViewModel>(R.layout.
     navigateTo(R.id.actionSettingsFragmentToPremium, args)
   }
 
-  private fun showLanguageDialog(language: AppLanguage) {
-    val options = AppLanguage.values()
-    val selected = options.indexOf(language)
 
-    MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialog)
-      .setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.bg_dialog))
-      .setSingleChoiceItems(options.map { getString(it.displayName) }.toTypedArray(), selected) { dialog, index ->
-        if (index != selected) {
-          viewModel.setLanguage(options[index])
-        }
-        dialog.dismiss()
-      }.show()
-  }
 
   private fun showProgressUpcomingDialog(days: Long) {
     val options = Config.PROGRESS_UPCOMING_OPTIONS
