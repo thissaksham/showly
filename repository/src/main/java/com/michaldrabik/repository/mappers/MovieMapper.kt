@@ -69,7 +69,7 @@ class MovieMapper @Inject constructor(
       movie.votes,
       movie.commentCount,
       movie.genres.split(","),
-      movie.updatedAt,
+      if (movie.updatedAt <= 0L) null else movie.updatedAt,
       movie.createdAt,
     )
 
@@ -93,7 +93,7 @@ class MovieMapper @Inject constructor(
       movie.votes,
       movie.commentCount,
       movie.genres.joinToString(","),
-      nowUtcMillis(),
+      movie.updatedAt ?: 0L,
       movie.createdAt,
     )
 }

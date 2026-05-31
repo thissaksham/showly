@@ -27,10 +27,6 @@ import com.michaldrabik.common.Config.SPOILERS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_REGEX
 import com.michaldrabik.common.Mode
 import com.michaldrabik.ui_base.BaseFragment
-import com.michaldrabik.ui_base.common.sheets.links.LinksBottomSheet
-import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet
-import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Operation.REMOVE
-import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Operation.SAVE
 import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Type
 import com.michaldrabik.ui_base.common.sheets.remove_trakt.RemoveTraktBottomSheet
 import com.michaldrabik.ui_base.utilities.SnackbarHost
@@ -55,7 +51,6 @@ import com.michaldrabik.ui_base.utilities.extensions.visibleIf
 import com.michaldrabik.ui_base.utilities.extensions.withFailListener
 import com.michaldrabik.ui_base.utilities.extensions.withSuccessListener
 import com.michaldrabik.ui_base.utilities.viewBinding
-import com.michaldrabik.ui_comments.fragment.CommentsFragment
 import com.michaldrabik.ui_model.Genre
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Image
@@ -161,6 +156,11 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
           showSnack(MessageEvent.Info(R.string.textCopiedToClipboard))
         }
       }
+      showDetailsTrailerButton.onClick {
+        viewModel.uiState.value.show?.let { show ->
+          openWebUrl(show.trailer) ?: showSnack(MessageEvent.Info(R.string.errorCouldNotFindApp))
+        }
+      }
     }
   }
 
@@ -192,27 +192,7 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
           showDetailsStatus.text = getString(show.status.displayName)
           renderTitleDescription(show, translation, followedState, spoilers)
           renderExtraInfo(show)
-          showDetailsActions.trailerChip.run {
-            isEnabled = show.trailer.isNotBlank()
-            alpha = if (isEnabled) 1.0F else 0.35F
-            onClick {
-              openWebUrl(show.trailer) ?: showSnack(MessageEvent.Info(R.string.errorCouldNotFindApp))
-            }
-          }
-          showDetailsActions.linksChip.onClick {
-            val args = LinksBottomSheet.createBundle(show)
-            navigateToSafe(R.id.actionShowDetailsFragmentToLinks, args)
-          }
-          showDetailsActions.shareChip.run {
-            isEnabled = show.ids.imdb.id
-              .isNotBlank()
-            alpha = if (isEnabled) 1.0F else 0.35F
-            onClick { openShareSheet(show) }
-          }
-          showDetailsActions.commentsChip.onClick {
-            val bundle = CommentsFragment.createBundle(show)
-            navigateToSafe(R.id.actionShowDetailsFragmentToComments, bundle)
-          }
+          showDetailsTrailerButton.visibleIf(show.trailer.isNotBlank())
           showDetailsAddButton.isEnabled = true
         }
         showLoading?.let {
@@ -238,7 +218,7 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
           showDetailsManageListsLabel.text = text
         }
         image?.let { renderImage(it) }
-        ratingState?.let { renderRating(it) }
+        renderRating()
       }
     }
   }
@@ -315,21 +295,8 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
     binding.showDetailsExtraInfo.text = extraInfoText
   }
 
-  private fun renderRating(rating: RatingState) {
-    with(binding.showDetailsActions.rateChip) {
-      isEnabled = rating.rateLoading == false
-      alpha = if (isEnabled) 1.0F else 0.35F
-
-      text = if (rating.hasRating()) {
-        "${rating.userRating?.rating} / 10"
-      } else {
-        getString(R.string.textRate)
-      }
-
-      onClick {
-        openRateDialog()
-      }
-    }
+  private fun renderRating() {
+    // Section removed
   }
 
   private fun renderImage(image: Image) {
@@ -384,35 +351,6 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
     }
     val args = RemoveTraktBottomSheet.createBundle(event.traktIds, event.mode)
     navigateToSafe(event.actionId, args)
-  }
-
-  private fun openShareSheet(show: Show) {
-    val intent = Intent().apply {
-      val text = "${show.title}:" +
-        "\n" +
-        "https://www.imdb.com/title/${show.ids.imdb.id}" +
-        "\n" +
-        "https://trakt.tv/shows/${show.ids.slug.id}"
-      action = Intent.ACTION_SEND
-      putExtra(Intent.EXTRA_TEXT, text)
-      type = "text/plain"
-    }
-
-    val shareIntent = Intent.createChooser(intent, "Share ${show.title}")
-    startActivity(shareIntent)
-  }
-
-  private fun openRateDialog() {
-    setFragmentResultListener(NavigationArgs.REQUEST_RATING) { _, bundle ->
-      when (bundle.getParcelable<RatingsBottomSheet.Options.Operation>(NavigationArgs.RESULT)) {
-        SAVE -> renderSnack(MessageEvent.Info(R.string.textRateSaved))
-        REMOVE -> renderSnack(MessageEvent.Info(R.string.textRateRemoved))
-        else -> Timber.w("Unknown result")
-      }
-      viewModel.loadUserRating()
-    }
-    val bundle = RatingsBottomSheet.createBundle(showId, Type.SHOW)
-    navigateToSafe(R.id.actionShowDetailsFragmentToRating, bundle)
   }
 
   private fun openListsDialog() {

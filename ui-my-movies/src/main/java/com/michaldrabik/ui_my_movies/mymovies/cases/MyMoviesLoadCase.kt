@@ -85,7 +85,9 @@ class MyMoviesLoadCase @Inject constructor(
       translationsRepository.loadTranslation(movie, language, onlyLocal)
     }
 
-  fun loadDateFormat() = dateFormatProvider.loadShortDayFormat()
+  fun loadDateFormat() = dateFormatProvider.loadFullHourFormat()
+
+  fun loadShortDateFormat() = dateFormatProvider.loadShortDayFormat()
 
   suspend fun findCachedImage(
     movie: Movie,

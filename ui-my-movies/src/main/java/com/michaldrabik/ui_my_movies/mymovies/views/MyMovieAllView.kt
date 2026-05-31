@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import com.michaldrabik.common.Config.SPOILERS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_RATINGS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_REGEX
+import com.michaldrabik.common.extensions.toLocalZone
 import com.michaldrabik.ui_base.common.views.MovieView
 import com.michaldrabik.ui_base.utilities.extensions.capitalizeWords
 import com.michaldrabik.ui_base.utilities.extensions.dimenToPx
@@ -68,15 +69,15 @@ class MyMovieAllView : MovieView<MyMoviesItem> {
         if (item.translation?.title.isNullOrBlank()) {
           item.movie.title
         } else {
-          item.translation?.title
+          item.translation.title
         }
 
       bindDescription(item)
       bindRating(item)
 
-      collectionMovieYear.visibleIf(item.movie.released != null || item.movie.year > 0)
+      collectionMovieYear.visibleIf((item.movie.released != null) || (item.movie.year > 0))
       collectionMovieYear.text = when {
-        item.movie.released != null -> item.dateFormat?.format(item.movie.released)?.capitalizeWords()
+        item.movie.released != null -> item.shortDateFormat?.format(item.movie.released)?.capitalizeWords()
         else -> String.format(ENGLISH, "%d", item.movie.year)
       }
 
@@ -86,10 +87,18 @@ class MyMovieAllView : MovieView<MyMoviesItem> {
         collectionMovieUserRating.text = String.format(ENGLISH, "%d", it)
       }
 
-      if (item.movie.runtime > 0 && item.sortOrder == SortOrder.RUNTIME) {
+      if ((item.movie.runtime > 0) && (item.sortOrder == SortOrder.RUNTIME)) {
         collectionMovieRuntimeIcon.visible()
         collectionMovieRuntime.visible()
         collectionMovieRuntime.text = "${item.movie.runtime} ${context.getString(R.string.textMinutesShort)}"
+      }
+
+      val isHistory = item.sortOrder == SortOrder.DATE_ADDED
+      val isUnknownDate = item.movie.updatedAt == null || item.movie.updatedAt == 0L
+      collectionMovieReleaseDate.visibleIf(isHistory && !isUnknownDate)
+      if (isHistory && !isUnknownDate) {
+        val date = com.michaldrabik.common.extensions.dateFromMillis(item.movie.updatedAt!!).toLocalZone()
+        collectionMovieReleaseDate.text = item.dateFormat?.format(date)?.capitalizeWords()
       }
     }
     loadImage(item)
@@ -100,7 +109,7 @@ class MyMovieAllView : MovieView<MyMoviesItem> {
       if (item.translation?.overview.isNullOrBlank()) {
         item.movie.overview
       } else {
-        item.translation?.overview
+        item.translation.overview
       }
 
     with(binding) {

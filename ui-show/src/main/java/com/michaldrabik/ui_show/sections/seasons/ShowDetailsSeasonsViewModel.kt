@@ -2,6 +2,7 @@ package com.michaldrabik.ui_show.sections.seasons
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.ui_base.common.sheets.remove_trakt.RemoveTraktBottomSheet.Mode
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
@@ -93,14 +94,16 @@ class ShowDetailsSeasonsViewModel @Inject constructor(
     season: Season,
     isChecked: Boolean,
     customDate: ZonedDateTime? = null,
+    isCustomDateSelected: Boolean = false,
   ) {
     viewModelScope.launch {
+      val date = if (isCustomDateSelected) customDate else nowUtc()
       val result = watchedSeasonCase.setSeasonWatched(
         show = show,
         season = season,
         isChecked = isChecked,
         isLocal = areSeasonsLocal,
-        customDate = customDate,
+        customDate = date,
       )
       if (result == Result.REMOVE_FROM_TRAKT) {
         val ids = season.episodes.map { it.ids.trakt }
@@ -134,14 +137,16 @@ class ShowDetailsSeasonsViewModel @Inject constructor(
   fun setQuickProgress(
     item: QuickSetupListItem?,
     customDate: ZonedDateTime?,
+    isCustomDateSelected: Boolean = false,
   ) {
     viewModelScope.launch {
       if (item == null || !checkSeasonsLoaded()) {
         return@launch
       }
 
+      val date = if (isCustomDateSelected) customDate else nowUtc()
       val seasonItems = seasonsState.value?.toList() ?: emptyList()
-      quickProgressCase.setQuickProgress(item, seasonItems, show, customDate)
+      quickProgressCase.setQuickProgress(item, seasonItems, show, date)
       refreshSeasons()
 
       messageChannel.send(MessageEvent.Info(R.string.textShowQuickProgressDone))

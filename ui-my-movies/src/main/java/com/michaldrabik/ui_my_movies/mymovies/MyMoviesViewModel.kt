@@ -85,6 +85,7 @@ class MyMoviesViewModel @Inject constructor(
     loadItemsJob = viewModelScope.launch {
       val settings = loadMoviesCase.loadSettings()
       val dateFormat = loadMoviesCase.loadDateFormat()
+      val shortDateFormat = loadMoviesCase.loadShortDateFormat()
       val ratings = ratingsCase.loadRatings()
       val sortOrder = sortingCase.loadSortOrder()
       val genresFilter = settingsRepository.filters.myMoviesGenres
@@ -97,6 +98,7 @@ class MyMoviesViewModel @Inject constructor(
             itemType = ALL_MOVIES_ITEM,
             movie = it,
             dateFormat = dateFormat,
+            shortDateFormat = shortDateFormat,
             type = POSTER,
             userRating = ratings[it.ids.trakt],
             sortOrder = sortOrder.first,
@@ -118,6 +120,7 @@ class MyMoviesViewModel @Inject constructor(
               itemType = RECENT_MOVIES,
               movie = it,
               dateFormat = dateFormat,
+              shortDateFormat = shortDateFormat,
               type = ImageType.FANART,
               userRating = ratings[it.ids.trakt],
               sortOrder = sortOrder.first,
@@ -202,6 +205,7 @@ class MyMoviesViewModel @Inject constructor(
     itemType: Type,
     movie: Movie,
     dateFormat: DateTimeFormatter,
+    shortDateFormat: DateTimeFormatter,
     type: ImageType = POSTER,
     userRating: TraktRating?,
     sortOrder: SortOrder?,
@@ -219,6 +223,7 @@ class MyMoviesViewModel @Inject constructor(
       translation = translation,
       userRating = userRating?.rating,
       dateFormat = dateFormat,
+      shortDateFormat = shortDateFormat,
       sortOrder = sortOrder,
       spoilers = MyMoviesItem.Spoilers(
         isSpoilerHidden = spoilers.isMyMoviesHidden,

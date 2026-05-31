@@ -10,6 +10,8 @@ import java.time.temporal.ChronoUnit.DAYS
 
 fun nowUtc(): ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
 
+val UNKNOWN_DATE: ZonedDateTime? = null
+
 fun nowUtcDay(): LocalDate = LocalDate.now()
 
 fun nowUtcMillis(): Long = nowUtc().toMillis()

@@ -3,6 +3,7 @@ package com.michaldrabik.ui_base.common.sheets.context_menu.movie
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.ui_base.R
 import com.michaldrabik.ui_base.common.sheets.context_menu.events.FinishUiEvent
@@ -79,7 +80,8 @@ class MovieContextMenuViewModel @Inject constructor(
           eventChannel.send(Event(SelectDateUiEvent(movie)))
           return@launch
         }
-        val result = myMoviesCase.moveToMyMovies(movieId, customDate)
+        val date = if (isCustomDateSelected) customDate else nowUtc()
+        val result = myMoviesCase.moveToMyMovies(movieId, date)
         checkQuickRemove(result)
       } catch (error: Throwable) {
         onError(error)

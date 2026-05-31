@@ -106,6 +106,22 @@
         app:layout_constraintTop_toTopOf="@+id/showDetailsImage"
         />
 
+      <ImageView
+        android:id="@+id/showDetailsTrailerButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="@dimen/spaceNormal"
+        android:layout_marginBottom="@dimen/spaceNormal"
+        android:background="@drawable/bg_translucent_circle"
+        android:padding="12dp"
+        android:src="@drawable/ic_play"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/showDetailsImageGuideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/colorWhite"
+        tools:visibility="visible"
+        />
+
       <com.michaldrabik.ui_base.common.views.tips.TipView
         android:id="@+id/showDetailsTipGallery"
         android:layout_width="@dimen/tutorialTipSize"
@@ -270,7 +286,7 @@
         android:textAlignment="viewStart"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@id/showDetailsActions"
+        app:layout_constraintBottom_toTopOf="@+id/showDetailsActorsFragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/showDetailsStreamingsFragment"
@@ -279,18 +295,6 @@
         tools:layout_marginTop="@dimen/spaceNormal"
         tools:targetApi="o"
         tools:text="Description"
-        />
-
-      <include
-        android:id="@+id/showDetailsActions"
-        layout="@layout/view_show_action_chips"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spaceNormal"
-        app:layout_constraintBottom_toTopOf="@id/showDetailsActorsFragment"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/showDetailsDescription"
         />
 
       <androidx.fragment.app.FragmentContainerView
@@ -302,7 +306,7 @@
         app:layout_constraintBottom_toTopOf="@id/showDetailsEpisodeFragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/showDetailsActions"
+        app:layout_constraintTop_toBottomOf="@id/showDetailsDescription"
         tools:layout="@layout/fragment_show_details_people"
         />
 

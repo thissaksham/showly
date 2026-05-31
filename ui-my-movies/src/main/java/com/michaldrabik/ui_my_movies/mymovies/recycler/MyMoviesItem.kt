@@ -22,6 +22,7 @@ data class MyMoviesItem(
   val translation: Translation? = null,
   val userRating: Int? = null,
   val dateFormat: DateTimeFormatter? = null,
+  val shortDateFormat: DateTimeFormatter? = null,
   val sortOrder: SortOrder? = null,
 ) : MovieListItem {
 

@@ -31,7 +31,7 @@ internal sealed class HistoryListItem(
   }
 
   data class Header(
-    val date: LocalDateTime,
+    val date: LocalDateTime?,
     val language: String,
   ) : HistoryListItem(
       show = Show.EMPTY,
@@ -40,7 +40,11 @@ internal sealed class HistoryListItem(
     ) {
     override fun isSameAs(other: ListItem): Boolean {
       val otherHeader = (other as? Header) ?: return false
-      return date.isEqual(otherHeader.date)
+      return if (date == null || otherHeader.date == null) {
+        date == otherHeader.date
+      } else {
+        date.isEqual(otherHeader.date)
+      }
     }
   }
 

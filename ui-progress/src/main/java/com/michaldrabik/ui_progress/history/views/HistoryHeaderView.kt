@@ -49,11 +49,13 @@ internal class HistoryHeaderView : FrameLayout {
     position: Int,
   ) {
     with(binding) {
-      text.text = if (now.dayOfYear == item.date.dayOfYear) {
-        context.getString(R.string.textToday)
-      } else {
-        initDateFormat(item.language)
-        item.date.format(dateFormat).capitalizeWords()
+      text.text = when {
+        item.date == null -> context.getString(com.michaldrabik.ui_base.R.string.textUnknown)
+        now.dayOfYear == item.date.dayOfYear && now.year == item.date.year -> context.getString(R.string.textToday)
+        else -> {
+          initDateFormat(item.language)
+          item.date.format(dateFormat).capitalizeWords()
+        }
       }
       updatePadding(
         top = context.dimenToPx(if (position == 1) R.dimen.spaceMedium else R.dimen.spaceBig),

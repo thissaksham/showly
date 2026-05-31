@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.ui_base.events.EventsManager
 import com.michaldrabik.ui_base.events.TraktSyncAuthError
 import com.michaldrabik.ui_base.events.TraktSyncError
@@ -93,13 +94,15 @@ class ProgressMainViewModel @Inject constructor(
   fun setWatchedEpisode(
     bundle: EpisodeBundle,
     customDate: ZonedDateTime? = null,
+    isCustomDateSelected: Boolean = false,
   ) {
     viewModelScope.launch {
       if (!bundle.episode.hasAired(bundle.season)) {
         messageChannel.send(MessageEvent.Info(R.string.errorEpisodeNotAired))
         return@launch
       }
-      episodesCase.setEpisodeWatched(bundle, customDate)
+      val date = if (isCustomDateSelected) customDate else nowUtc()
+      episodesCase.setEpisodeWatched(bundle, date)
       timestampState.value = System.currentTimeMillis()
       scrollState.value = Event(false)
     }

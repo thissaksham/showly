@@ -9,7 +9,9 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.michaldrabik.common.extensions.toLocalZone
+import com.michaldrabik.common.extensions.toMillis
 import com.michaldrabik.ui_base.common.views.ShowView
+import com.michaldrabik.ui_base.utilities.extensions.visibleIf
 import com.michaldrabik.ui_base.utilities.extensions.addRipple
 import com.michaldrabik.ui_base.utilities.extensions.capitalizeWords
 import com.michaldrabik.ui_base.utilities.extensions.expandTouch
@@ -68,6 +70,10 @@ internal class HistoryItemView : ShowView<HistoryListItem.Episode> {
         item.episode.lastWatchedAt
           ?.toLocalZone()
           ?.let { item.dateFormat?.format(it)?.capitalizeWords() }
+
+      val isUnknownDate = item.episode.lastWatchedAt?.toMillis() == 0L
+      itemDate.visibleIf(!isUnknownDate)
+      checkImage.visibleIf(!isUnknownDate)
 
       val episodeTitle = when {
         item.episode.title.isBlank() -> context.getString(R.string.textTba)

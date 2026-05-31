@@ -16,6 +16,8 @@ import com.michaldrabik.ui_base.common.OnScrollResetListener
 import com.michaldrabik.ui_base.common.OnSearchClickListener
 import com.michaldrabik.ui_base.common.OnShowsMoviesSyncedListener
 import com.michaldrabik.ui_base.common.OnTabReselectedListener
+import com.michaldrabik.common.extensions.UNKNOWN_DATE
+import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.ui_base.common.sheets.context_menu.ContextMenuBottomSheet
 import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottomSheet
 import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottomSheet.Companion.REQUEST_DATE_SELECTION
@@ -286,15 +288,12 @@ class ProgressMainFragment :
   }
 
   fun openDateSelectionDialog(episodeBundle: EpisodeBundle) {
-    fun openRateDialogIfNeeded(customDate: ZonedDateTime? = null) {
-      viewModel.setWatchedEpisode(episodeBundle, customDate)
-    }
-
     setFragmentResultListener(REQUEST_DATE_SELECTION) { _, bundle ->
       when (val result = bundle.requireParcelable<Result>(RESULT_DATE_SELECTION)) {
-        is Result.Now -> openRateDialogIfNeeded()
-        is Result.CustomDate -> openRateDialogIfNeeded(result.date)
-        is Result.ReleaseDate -> openRateDialogIfNeeded(result.date)
+        is Result.Now -> viewModel.setWatchedEpisode(episodeBundle, nowUtc(), true)
+        is Result.Unknown -> viewModel.setWatchedEpisode(episodeBundle, UNKNOWN_DATE, true)
+        is Result.CustomDate -> viewModel.setWatchedEpisode(episodeBundle, result.date, true)
+        is Result.ReleaseDate -> viewModel.setWatchedEpisode(episodeBundle, result.date, true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(episodeBundle.episode.firstAired)

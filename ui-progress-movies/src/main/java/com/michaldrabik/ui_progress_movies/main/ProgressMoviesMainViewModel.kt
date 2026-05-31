@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.ui_base.events.Event
+import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.ui_base.events.EventsManager
 import com.michaldrabik.ui_base.events.TraktSyncAuthError
 import com.michaldrabik.ui_base.events.TraktSyncError
@@ -68,9 +70,11 @@ class ProgressMoviesMainViewModel @Inject constructor(
   fun setWatchedMovie(
     movie: Movie,
     customDate: ZonedDateTime? = null,
+    isCustomDateSelected: Boolean = false,
   ) {
     viewModelScope.launch {
-      moviesCase.addToMyMovies(movie, customDate)
+      val date = if (isCustomDateSelected) customDate else nowUtc()
+      moviesCase.addToMyMovies(movie, date)
       timestampState.value = System.currentTimeMillis()
     }
   }

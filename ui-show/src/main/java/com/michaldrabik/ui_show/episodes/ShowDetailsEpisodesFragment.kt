@@ -10,6 +10,8 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.michaldrabik.common.Config
+import com.michaldrabik.common.extensions.UNKNOWN_DATE
+import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.ui_base.BaseFragment
 import com.michaldrabik.ui_base.common.WidgetsProvider
 import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottomSheet
@@ -291,9 +293,10 @@ class ShowDetailsEpisodesFragment :
   private fun openDateSelectionDialog(episode: Episode) {
     setFragmentResultListener(REQUEST_DATE_SELECTION) { _, bundle ->
       when (val result = bundle.requireParcelable<Result>(RESULT_DATE_SELECTION)) {
-        is Result.Now -> viewModel.setEpisodeWatched(episode, true)
-        is Result.CustomDate -> viewModel.setEpisodeWatched(episode, true, result.date)
-        is Result.ReleaseDate -> viewModel.setEpisodeWatched(episode, true, result.date)
+        is Result.Now -> viewModel.setEpisodeWatched(episode, true, nowUtc(), true)
+        is Result.Unknown -> viewModel.setEpisodeWatched(episode, true, UNKNOWN_DATE, true)
+        is Result.CustomDate -> viewModel.setEpisodeWatched(episode, true, result.date, true)
+        is Result.ReleaseDate -> viewModel.setEpisodeWatched(episode, true, result.date, true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(episode.firstAired)
@@ -303,9 +306,10 @@ class ShowDetailsEpisodesFragment :
   private fun openDateSelectionDialog(season: SeasonListItem) {
     setFragmentResultListener(REQUEST_DATE_SELECTION) { _, bundle ->
       when (val result = bundle.requireParcelable<Result>(RESULT_DATE_SELECTION)) {
-        is Result.Now -> viewModel.setSeasonWatched(season, true)
-        is Result.CustomDate -> viewModel.setSeasonWatched(season, true, result.date)
-        is Result.ReleaseDate -> viewModel.setSeasonWatched(season, true, result.date)
+        is Result.Now -> viewModel.setSeasonWatched(season, true, nowUtc(), true)
+        is Result.Unknown -> viewModel.setSeasonWatched(season, true, UNKNOWN_DATE, true)
+        is Result.CustomDate -> viewModel.setSeasonWatched(season, true, result.date, true)
+        is Result.ReleaseDate -> viewModel.setSeasonWatched(season, true, result.date, true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(season.season.firstAired)

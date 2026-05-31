@@ -21,6 +21,7 @@ import com.michaldrabik.common.Config.SPOILERS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_REGEX
 import com.michaldrabik.common.extensions.dateFromMillis
 import com.michaldrabik.common.extensions.toLocalZone
+import com.michaldrabik.common.extensions.toMillis
 import com.michaldrabik.ui_base.BaseBottomSheetFragment
 import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet
 import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Operation
@@ -320,7 +321,8 @@ class EpisodeDetailsBottomSheet : BaseBottomSheetFragment(R.layout.view_episode_
   ) {
     with(binding) {
       dateFormat?.let {
-        episodeDetailsWatchedAt.visibleIf(watchedAt != null)
+        val isUnknownDate = watchedAt?.toMillis() == 0L
+        episodeDetailsWatchedAt.visibleIf(watchedAt != null && !isUnknownDate)
         episodeDetailsWatchedAt.text = watchedAt?.toLocalZone()?.format(it)
       }
     }

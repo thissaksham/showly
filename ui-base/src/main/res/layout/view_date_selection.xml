@@ -48,29 +48,6 @@
     app:layout_constraintTop_toBottomOf="@id/title"
     />
 
-  <TextView
-    android:id="@+id/dateNowButton"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:layout_marginTop="@dimen/spaceNormal"
-    android:background="@drawable/bg_date_selection_button"
-    android:clipToOutline="true"
-    android:foreground="?android:selectableItemBackground"
-    android:gravity="center"
-    android:paddingTop="@dimen/spaceNormal"
-    android:paddingBottom="@dimen/spaceNormal"
-    android:text="@string/textNow"
-    android:textColor="?android:textColorPrimary"
-    android:textSize="14sp"
-    app:drawableTint="?android:textColorPrimary"
-    app:drawableTopCompat="@drawable/ic_check_big"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/subtitle"
-    tools:targetApi="m"
-    />
-
   <LinearLayout
     android:id="@+id/dateReleaseButton"
     android:layout_width="0dp"
@@ -84,11 +61,9 @@
     android:orientation="vertical"
     android:paddingTop="@dimen/spaceMedium"
     android:paddingBottom="@dimen/spaceMedium"
-    app:layout_constraintBottom_toTopOf="@id/defaultsTipText"
-    app:layout_constraintEnd_toStartOf="@id/dateCustomButton"
+    app:layout_constraintEnd_toStartOf="@id/dateNowButton"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/dateNowButton"
-    app:layout_goneMarginBottom="@dimen/spaceNormal"
+    app:layout_constraintTop_toBottomOf="@id/subtitle"
     >
 
     <TextView
@@ -119,6 +94,64 @@
 
   </LinearLayout>
 
+  <TextView
+    android:id="@+id/dateNowButton"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:layout_gravity="center"
+    android:layout_marginStart="@dimen/spaceSmall"
+    android:background="@drawable/bg_date_selection_button"
+    android:clipToOutline="true"
+    android:foreground="?android:selectableItemBackground"
+    android:gravity="center"
+    android:paddingTop="@dimen/spaceNormal"
+    android:paddingBottom="@dimen/spaceNormal"
+    android:text="@string/textNow"
+    android:textColor="?android:textColorPrimary"
+    android:textSize="14sp"
+    app:drawableTint="?android:textColorPrimary"
+    app:drawableTopCompat="@drawable/ic_check_big"
+    app:layout_constraintBottom_toBottomOf="@id/dateReleaseButton"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/dateReleaseButton"
+    app:layout_constraintTop_toTopOf="@id/dateReleaseButton"
+    tools:targetApi="m"
+    />
+
+  <LinearLayout
+    android:id="@+id/dateUnknownButton"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/spaceSmall"
+    android:layout_marginEnd="@dimen/spaceSmall"
+    android:background="@drawable/bg_date_selection_button_secondary"
+    android:clipToOutline="true"
+    android:foreground="?android:selectableItemBackground"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/spaceMedium"
+    android:paddingBottom="@dimen/spaceMedium"
+    app:layout_constraintEnd_toStartOf="@id/dateCustomButton"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/dateReleaseButton"
+    >
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:drawablePadding="0dp"
+      android:gravity="center"
+      android:text="@string/textUnknown"
+      android:textColor="?android:textColorPrimary"
+      android:textSize="14sp"
+      app:drawableTint="?android:textColorPrimary"
+      app:drawableTopCompat="@drawable/ic_info"
+      tools:targetApi="m"
+      />
+
+  </LinearLayout>
+
   <LinearLayout
     android:id="@+id/dateCustomButton"
     android:layout_width="0dp"
@@ -131,10 +164,10 @@
     android:orientation="vertical"
     android:paddingTop="@dimen/spaceMedium"
     android:paddingBottom="@dimen/spaceMedium"
-    app:layout_constraintBottom_toBottomOf="@id/dateReleaseButton"
+    app:layout_constraintBottom_toBottomOf="@id/dateUnknownButton"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/dateReleaseButton"
-    app:layout_constraintTop_toTopOf="@id/dateReleaseButton"
+    app:layout_constraintStart_toEndOf="@id/dateUnknownButton"
+    app:layout_constraintTop_toTopOf="@id/dateUnknownButton"
     >
 
     <TextView
@@ -173,7 +206,7 @@
     app:layout_constraintHorizontal_bias="0"
     app:layout_constraintHorizontal_chainStyle="packed"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/dateReleaseButton"
+    app:layout_constraintTop_toBottomOf="@id/dateUnknownButton"
     tools:visibility="visible"
     />
 
@@ -196,6 +229,7 @@
     style="@style/RoundMaterialButton"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
+    android:layout_marginTop="32dp"
     android:backgroundTint="?attr/colorAccent"
     android:gravity="center"
     android:text="@string/textCancel"

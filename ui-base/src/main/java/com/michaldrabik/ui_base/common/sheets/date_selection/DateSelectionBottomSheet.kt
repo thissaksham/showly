@@ -71,6 +71,13 @@ class DateSelectionBottomSheet : BaseBottomSheetFragment(R.layout.view_date_sele
           result = bundleOf(RESULT_DATE_SELECTION to Result.Now),
         )
       }
+      dateUnknownButton.onClick {
+        closeSheet()
+        setFragmentResult(
+          requestKey = REQUEST_DATE_SELECTION,
+          result = bundleOf(RESULT_DATE_SELECTION to Result.Unknown),
+        )
+      }
       dateCustomButton.onClick { openDateSelectionDialog() }
       with(dateReleaseButton) {
         if (releaseDate != null) {
@@ -186,6 +193,9 @@ class DateSelectionBottomSheet : BaseBottomSheetFragment(R.layout.view_date_sele
 
     @Parcelize
     data object Now : Result
+
+    @Parcelize
+    data object Unknown : Result
 
     @Parcelize
     data class ReleaseDate(

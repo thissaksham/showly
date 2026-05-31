@@ -10,7 +10,6 @@ import com.michaldrabik.ui_base.utilities.extensions.onClick
 import com.michaldrabik.ui_base.utilities.extensions.requireSerializable
 import com.michaldrabik.ui_base.utilities.viewBinding
 import com.michaldrabik.ui_model.HistoryPeriod
-import com.michaldrabik.ui_model.HistoryPeriod.ALL_TIME
 import com.michaldrabik.ui_progress.R
 import com.michaldrabik.ui_progress.databinding.FragmentHistoryPeriodFilterBinding
 import com.michaldrabik.ui_progress.history.filters.views.HistoryPeriodItemView
@@ -47,7 +46,6 @@ class HistoryPeriodFilterBottomSheet : BaseBottomSheetFragment(R.layout.fragment
     with(binding) {
       itemsLayout.removeAllViews()
       HistoryPeriod.entries
-        .filterNot { it == ALL_TIME }
         .forEach { item ->
           val view = HistoryPeriodItemView(requireContext()).apply {
             bind(item, isChecked = item == initialPeriod)

@@ -206,10 +206,11 @@ class MovieDetailsViewModel @Inject constructor(
         eventChannel.send(MovieDetailsEvent.OpenDateSelectionSheet(movie))
         return@launch
       }
-      myMoviesCase.addToMyMovies(movie, customDate)
+      val date = if (isCustomDateSelected) customDate else nowUtc()
+      myMoviesCase.addToMyMovies(movie, date)
       followedState.value = FollowedState
         .inMyMovies()
-        .copy(watchedAt = customDate?.toUtcZone() ?: nowUtc())
+        .copy(watchedAt = date?.toUtcZone())
       eventChannel.send(RequestWidgetsUpdate)
     }
   }

@@ -16,6 +16,7 @@ import com.michaldrabik.ui_base.common.OnScrollResetListener
 import com.michaldrabik.ui_base.common.OnSearchClickListener
 import com.michaldrabik.ui_base.common.OnShowsMoviesSyncedListener
 import com.michaldrabik.ui_base.common.OnTabReselectedListener
+import com.michaldrabik.common.extensions.UNKNOWN_DATE
 import com.michaldrabik.ui_base.common.sheets.context_menu.ContextMenuBottomSheet
 import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottomSheet
 import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottomSheet.Companion.REQUEST_DATE_SELECTION
@@ -216,19 +217,16 @@ class ProgressMoviesMainFragment :
   }
 
   fun openDateSelectionDialog(movie: Movie) {
-    fun openRateDialogIfNeeded(customDate: ZonedDateTime? = null) {
-      viewModel.setWatchedMovie(movie, customDate)
-    }
-
     setFragmentResultListener(REQUEST_DATE_SELECTION) { _, bundle ->
       when (
         val result = bundle.requireParcelable<Result>(
           DateSelectionBottomSheet.RESULT_DATE_SELECTION,
         )
       ) {
-        is Result.Now -> openRateDialogIfNeeded()
-        is Result.CustomDate -> openRateDialogIfNeeded(result.date)
-        is Result.ReleaseDate -> openRateDialogIfNeeded(result.date)
+        is Result.Now -> viewModel.setWatchedMovie(movie, isCustomDateSelected = false)
+        is Result.Unknown -> viewModel.setWatchedMovie(movie, customDate = UNKNOWN_DATE, isCustomDateSelected = true)
+        is Result.CustomDate -> viewModel.setWatchedMovie(movie, customDate = result.date, isCustomDateSelected = true)
+        is Result.ReleaseDate -> viewModel.setWatchedMovie(movie, customDate = result.date, isCustomDateSelected = true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(movie.released?.atStartOfDay(UTC))

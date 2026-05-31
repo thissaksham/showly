@@ -1,6 +1,5 @@
 package com.michaldrabik.repository
 
-import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.common.extensions.toMillis
 import com.michaldrabik.common.extensions.toUtcZone
@@ -45,7 +44,7 @@ class EpisodesManager @Inject constructor(
     seasonBundle: SeasonBundle,
     customDate: ZonedDateTime?,
   ): List<Episode> {
-    val date = customDate?.toUtcZone() ?: nowUtc()
+    val date = customDate?.toUtcZone()
     val toAdd = mutableListOf<EpisodeDb>()
     transactions.withTransaction {
       val (season, show) = seasonBundle
@@ -66,7 +65,7 @@ class EpisodesManager @Inject constructor(
 
       episodesLocalSource.upsert(toAdd)
       seasonsLocalSource.update(listOf(dbSeason))
-      showsRepository.myShows.updateWatchedAt(show.traktId, date.toMillis())
+      showsRepository.myShows.updateWatchedAt(show.traktId, date?.toMillis() ?: 0L)
     }
     return toAdd.map { mappers.episode.fromDatabase(it) }
   }
@@ -119,7 +118,7 @@ class EpisodesManager @Inject constructor(
   ) {
     transactions.withTransaction {
       val (episode, season, show) = episodeBundle
-      val date = customDate?.toUtcZone() ?: nowUtc()
+      val date = customDate?.toUtcZone()
 
       val dbEpisode = mappers.episode.toDatabase(episode, season, show.ids.trakt, true, null, date)
       val dbSeason = mappers.season.toDatabase(season, show.ids.trakt, false)
@@ -129,7 +128,7 @@ class EpisodesManager @Inject constructor(
         seasonsLocalSource.upsert(listOf(dbSeason))
       }
       episodesLocalSource.upsert(listOf(dbEpisode))
-      showsRepository.myShows.updateWatchedAt(show.traktId, date.toMillis())
+      showsRepository.myShows.updateWatchedAt(show.traktId, date?.toMillis() ?: 0L)
       onEpisodeSet(season, show)
     }
   }

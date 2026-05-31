@@ -1,6 +1,5 @@
 package com.michaldrabik.repository.movies
 
-import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.common.extensions.toMillis
 import com.michaldrabik.common.extensions.toUtcZone
 import com.michaldrabik.data_local.LocalDataSource
@@ -45,7 +44,7 @@ class MyMoviesRepository @Inject constructor(
   ) {
     val movie = MyMovie.fromTraktId(
       traktId = id.id,
-      timestamp = customDate?.toUtcZone()?.toMillis() ?: nowUtcMillis(),
+      timestamp = customDate?.toUtcZone()?.toMillis() ?: 0L,
     )
     transactions.withTransaction {
       with(localSource) {

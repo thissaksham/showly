@@ -41,7 +41,9 @@ class MyMoviesSorter @Inject constructor() {
           .thenBy { getTitle(it) }
       }
       DATE_ADDED -> {
-        compareBy { it.movie.updatedAt }
+        compareBy<MyMoviesItem> { it.movie.updatedAt == 0L }
+          .thenBy { it.movie.updatedAt }
+          .thenBy { it.movie.released }
       }
       RUNTIME -> {
         compareBy { it.movie.runtime }
@@ -71,7 +73,9 @@ class MyMoviesSorter @Inject constructor() {
           .thenBy { getTitle(it) }
       }
       DATE_ADDED -> {
-        compareByDescending { it.movie.updatedAt }
+        compareByDescending<MyMoviesItem> { it.movie.updatedAt != 0L }
+          .thenByDescending { it.movie.updatedAt }
+          .thenByDescending { it.movie.released }
       }
       RUNTIME -> {
         compareByDescending { it.movie.runtime }

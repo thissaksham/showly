@@ -44,6 +44,7 @@
   <string name="textCopiedToClipboard" translatable="false">Copied to clipboard</string>
   <string name="textDays">%1$d days</string>
   <string name="textSelectDate">Select Date</string>
+  <string name="textUnknown">Unknown</string>
   <string name="textDateSelectionTitle">Date Selection</string>
   <string name="textDateSelectionDescription">When did you watch it?</string>
 

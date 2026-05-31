@@ -10,6 +10,8 @@ import androidx.fragment.app.viewModels
 import com.michaldrabik.common.Config.SPOILERS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_RATINGS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_REGEX
+import com.michaldrabik.common.extensions.UNKNOWN_DATE
+import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.ui_base.R
 import com.michaldrabik.ui_base.common.sheets.context_menu.ContextMenuBottomSheet
 import com.michaldrabik.ui_base.common.sheets.context_menu.events.FinishUiEvent
@@ -216,7 +218,8 @@ class MovieContextMenuBottomSheet : ContextMenuBottomSheet() {
   private fun openDateSelection(movie: Movie) {
     setFragmentResultListener(DateSelectionBottomSheet.REQUEST_DATE_SELECTION) { _, bundle ->
       when (val result = bundle.requireParcelable<Result>(DateSelectionBottomSheet.RESULT_DATE_SELECTION)) {
-        is Result.Now -> viewModel.moveToMyMovies(isCustomDateSelected = true)
+        is Result.Now -> viewModel.moveToMyMovies(isCustomDateSelected = true, customDate = nowUtc())
+        is Result.Unknown -> viewModel.moveToMyMovies(isCustomDateSelected = true, customDate = UNKNOWN_DATE)
         is Result.CustomDate -> viewModel.moveToMyMovies(isCustomDateSelected = true, customDate = result.date)
         is Result.ReleaseDate -> viewModel.moveToMyMovies(isCustomDateSelected = true, customDate = result.date)
       }

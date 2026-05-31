@@ -71,7 +71,11 @@ internal class GetHistoryItemsCase @Inject constructor(
       val (episodes, seasons) = awaitAll(
         async {
           showsIds.fold(listOf<Episode>()) { acc, ids ->
-            acc.plus(localSource.episodes.getAllWatchedForShows(ids, periodRange.first, periodRange.last))
+            if (periodFilter == ALL_TIME) {
+              acc.plus(localSource.episodes.getAllWatchedForShows(ids))
+            } else {
+              acc.plus(localSource.episodes.getAllWatchedForShows(ids, periodRange.first, periodRange.last))
+            }
           }
         },
         async {

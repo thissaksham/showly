@@ -26,13 +26,14 @@ import com.michaldrabik.common.Config.IMAGE_FADE_DURATION_MS
 import com.michaldrabik.common.Config.SPOILERS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_REGEX
 import com.michaldrabik.common.Mode
+import com.michaldrabik.common.extensions.UNKNOWN_DATE
+import com.michaldrabik.common.extensions.nowUtc
+import com.michaldrabik.common.extensions.toMillis
 import com.michaldrabik.common.extensions.toLocalZone
 import com.michaldrabik.ui_base.BaseFragment
 import com.michaldrabik.ui_base.common.WidgetsProvider
 import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottomSheet
 import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottomSheet.Result
-import com.michaldrabik.ui_base.common.sheets.links.LinksBottomSheet
-import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet
 import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Operation
 import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Type
 import com.michaldrabik.ui_base.common.sheets.remove_trakt.RemoveTraktBottomSheet
@@ -60,7 +61,6 @@ import com.michaldrabik.ui_base.utilities.extensions.visibleIf
 import com.michaldrabik.ui_base.utilities.extensions.withFailListener
 import com.michaldrabik.ui_base.utilities.extensions.withSuccessListener
 import com.michaldrabik.ui_base.utilities.viewBinding
-import com.michaldrabik.ui_comments.fragment.CommentsFragment
 import com.michaldrabik.ui_model.Genre
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Image
@@ -165,6 +165,11 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
         requireContext().copyToClipboard(movieDetailsDescription.text.toString())
         showSnack(MessageEvent.Info(R.string.textCopiedToClipboard))
       }
+      movieDetailsTrailerButton?.onClick {
+        viewModel.uiState.value.movie?.let { movie ->
+          openWebUrl(movie.trailer) ?: showSnack(MessageEvent.Info(R.string.errorCouldNotFindApp))
+        }
+      }
     }
   }
 
@@ -189,29 +194,7 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
           renderTitleDescription(movie, translation, followedState, spoilers)
           renderExtraInfo(movie, meta)
           movieDetailsStatus.text = getString(movie.status.displayName)
-          movieDetailsActions.trailerChip.run {
-            isEnabled = movie.trailer.isNotBlank()
-            alpha = if (isEnabled) 1.0F else 0.35F
-            onClick {
-              openWebUrl(movie.trailer) ?: showSnack(MessageEvent.Info(R.string.errorCouldNotFindApp))
-            }
-          }
-          movieDetailsActions.linksChip.run {
-            onClick {
-              val args = LinksBottomSheet.createBundle(movie)
-              navigateToSafe(R.id.actionMovieDetailsFragmentToLinks, args)
-            }
-          }
-          movieDetailsActions.commentsChip.onClick {
-            val bundle = CommentsFragment.createBundle(movie)
-            navigateToSafe(R.id.actionMovieDetailsFragmentToComments, bundle)
-          }
-          movieDetailsActions.shareChip.run {
-            isEnabled = movie.ids.imdb.id
-              .isNotBlank()
-            alpha = if (isEnabled) 1.0F else 0.35F
-            onClick { openShareSheet(movie) }
-          }
+          movieDetailsTrailerButton?.visibleIf(movie.trailer.isNotBlank())
           movieDetailsAddButton.isEnabled = true
         }
         movieLoading?.let {
@@ -226,9 +209,12 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
             else -> movieDetailsAddButton.setState(ADD, it.withAnimation)
           }
           movieDetailsHideLabel.visibleIf(!it.isHidden)
-          movieDetailsWatchedBadge.visibleIf(it.isMyMovie && it.watchedAt != null)
+          val isUnknownDate = it.watchedAt?.toMillis() == 0L
+          movieDetailsWatchedBadge.visibleIf(it.isMyMovie && it.watchedAt != null && !isUnknownDate)
           it.watchedAt?.let { date ->
-            movieDetailsWatchedBadge.text = uiState.meta?.watchedAtDateFormat?.format(date.toLocalZone())
+            if (!isUnknownDate) {
+              movieDetailsWatchedBadge.text = uiState.meta?.watchedAtDateFormat?.format(date.toLocalZone())
+            }
           }
         }
         image?.let { renderImage(it) }
@@ -329,20 +315,7 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
   }
 
   private fun renderRating(rating: RatingState) {
-    with(binding.movieDetailsActions.rateChip) {
-      isEnabled = rating.rateLoading == false
-      alpha = if (isEnabled) 1.0F else 0.35F
-
-      text = if (rating.hasRating()) {
-        "${rating.userRating?.rating} / 10"
-      } else {
-        getString(R.string.textMovieRate)
-      }
-
-      onClick {
-        openRateDialog()
-      }
-    }
+    // Section removed
   }
 
   private fun renderImage(image: Image) {
@@ -410,42 +383,14 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
   private fun openDateSelectionSheet(movie: Movie) {
     setFragmentResultListener(DateSelectionBottomSheet.REQUEST_DATE_SELECTION) { _, bundle ->
       when (val result = bundle.requireParcelable<Result>(DateSelectionBottomSheet.RESULT_DATE_SELECTION)) {
-        is Result.Now -> viewModel.addToMyMovies(isCustomDateSelected = true)
+        is Result.Now -> viewModel.addToMyMovies(isCustomDateSelected = true, customDate = nowUtc())
+        is Result.Unknown -> viewModel.addToMyMovies(isCustomDateSelected = true, customDate = UNKNOWN_DATE)
         is Result.CustomDate -> viewModel.addToMyMovies(isCustomDateSelected = true, customDate = result.date)
         is Result.ReleaseDate -> viewModel.addToMyMovies(isCustomDateSelected = true, customDate = result.date)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(movie.released?.atStartOfDay(UTC))
     navigateToSafe(R.id.actionMovieDetailsFragmentToDateSelection, options)
-  }
-
-  private fun openShareSheet(movie: Movie) {
-    val intent = Intent().apply {
-      val text = "${movie.title}:" +
-        "\n" +
-        "https://www.imdb.com/title/${movie.ids.imdb.id}" +
-        "\n" +
-        "https://trakt.tv/movies/${movie.ids.slug.id}"
-      action = Intent.ACTION_SEND
-      putExtra(Intent.EXTRA_TEXT, text)
-      type = "text/plain"
-    }
-
-    val shareIntent = Intent.createChooser(intent, "Share ${movie.title}")
-    startActivity(shareIntent)
-  }
-
-  private fun openRateDialog() {
-    setFragmentResultListener(NavigationArgs.REQUEST_RATING) { _, bundle ->
-      when (bundle.getParcelable<Operation>(NavigationArgs.RESULT)) {
-        Operation.SAVE -> renderSnack(MessageEvent.Info(R.string.textRateSaved))
-        Operation.REMOVE -> renderSnack(MessageEvent.Info(R.string.textRateRemoved))
-        else -> Timber.w("Unknown result.")
-      }
-      viewModel.loadUserRating()
-    }
-    val bundle = RatingsBottomSheet.createBundle(movieId, Type.MOVIE)
-    navigateToSafe(R.id.actionMovieDetailsFragmentToRating, bundle)
   }
 
   private fun openListsDialog() {

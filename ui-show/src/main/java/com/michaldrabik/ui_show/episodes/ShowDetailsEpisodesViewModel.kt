@@ -3,6 +3,7 @@ package com.michaldrabik.ui_show.episodes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.ui_base.common.sheets.remove_trakt.RemoveTraktBottomSheet
@@ -192,11 +193,13 @@ class ShowDetailsEpisodesViewModel @Inject constructor(
     episode: Episode,
     isChecked: Boolean,
     customDate: ZonedDateTime? = null,
+    isCustomDateSelected: Boolean = false,
   ) {
     viewModelScope.launch {
       seasonState.value?.let {
         val bundle = EpisodeBundle(episode, it.season, show)
-        val result = episodeWatchedCase.setEpisodeWatched(bundle, isChecked, customDate)
+        val date = if (isCustomDateSelected) customDate else nowUtc()
+        val result = episodeWatchedCase.setEpisodeWatched(bundle, isChecked, date)
         if (result == Result.REMOVE_FROM_TRAKT) {
           val event = ShowDetailsEpisodesEvent.RemoveFromTrakt(
             actionId = R.id.actionEpisodesFragmentToRemoveTraktProgress,
@@ -233,9 +236,11 @@ class ShowDetailsEpisodesViewModel @Inject constructor(
     season: SeasonListItem,
     isChecked: Boolean,
     customDate: ZonedDateTime? = null,
+    isCustomDateSelected: Boolean = false,
   ) {
     viewModelScope.launch {
-      val result = seasonWatchedCase.setSeasonWatched(show, season.season, isChecked, customDate)
+      val date = if (isCustomDateSelected) customDate else nowUtc()
+      val result = seasonWatchedCase.setSeasonWatched(show, season.season, isChecked, date)
       if (result == REMOVE_FROM_TRAKT) {
         val event = ShowDetailsEpisodesEvent.RemoveFromTrakt(
           actionId = R.id.actionEpisodesFragmentToRemoveTraktProgress,

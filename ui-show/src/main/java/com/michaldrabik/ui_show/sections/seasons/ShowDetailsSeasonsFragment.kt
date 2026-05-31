@@ -8,6 +8,8 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.michaldrabik.repository.settings.SettingsViewModeRepository
+import com.michaldrabik.common.extensions.UNKNOWN_DATE
+import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.ui_base.BaseFragment
 import com.michaldrabik.ui_base.common.WidgetsProvider
 import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottomSheet
@@ -200,9 +202,10 @@ class ShowDetailsSeasonsFragment : BaseFragment<ShowDetailsSeasonsViewModel>(R.l
   private fun openDateSelectionDialog(season: Season) {
     requireParentFragment().setFragmentResultListener(REQUEST_DATE_SELECTION) { _, bundle ->
       when (val result = bundle.requireParcelable<Result>(RESULT_DATE_SELECTION)) {
-        is Result.Now -> viewModel.setSeasonWatched(season, true)
-        is Result.CustomDate -> viewModel.setSeasonWatched(season, true, result.date)
-        is Result.ReleaseDate -> viewModel.setSeasonWatched(season, true, result.date)
+        is Result.Now -> viewModel.setSeasonWatched(season, true, nowUtc(), true)
+        is Result.Unknown -> viewModel.setSeasonWatched(season, true, UNKNOWN_DATE, true)
+        is Result.CustomDate -> viewModel.setSeasonWatched(season, true, result.date, true)
+        is Result.ReleaseDate -> viewModel.setSeasonWatched(season, true, result.date, true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(season.firstAired)
@@ -212,9 +215,10 @@ class ShowDetailsSeasonsFragment : BaseFragment<ShowDetailsSeasonsViewModel>(R.l
   private fun openDateSelectionDialog(item: QuickSetupListItem) {
     requireParentFragment().setFragmentResultListener(REQUEST_DATE_SELECTION) { _, bundle ->
       when (val result = bundle.requireParcelable<Result>(RESULT_DATE_SELECTION)) {
-        is Result.Now -> viewModel.setQuickProgress(item, null)
-        is Result.CustomDate -> viewModel.setQuickProgress(item, result.date)
-        is Result.ReleaseDate -> viewModel.setQuickProgress(item, result.date)
+        is Result.Now -> viewModel.setQuickProgress(item, nowUtc(), true)
+        is Result.Unknown -> viewModel.setQuickProgress(item, UNKNOWN_DATE, true)
+        is Result.CustomDate -> viewModel.setQuickProgress(item, result.date, true)
+        is Result.ReleaseDate -> viewModel.setQuickProgress(item, result.date, true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(item.episode.firstAired)
