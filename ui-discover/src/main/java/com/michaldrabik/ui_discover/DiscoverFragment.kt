@@ -131,11 +131,16 @@ internal class DiscoverFragment :
       discoverSearchView.run {
         translationY = searchViewPosition
         settingsIconVisible = true
+        statsIconVisible = true
         isEnabled = false
         onClick { openSearch() }
         onSettingsClickListener = {
           hideNavigation()
           navigateToSafe(R.id.actionDiscoverFragmentToSettingsFragment)
+        }
+        onStatsClickListener = {
+          hideNavigation()
+          navigateToSafe(R.id.actionDiscoverFragmentToStatisticsFragment)
         }
       }
       discoverModeTabsView.run {

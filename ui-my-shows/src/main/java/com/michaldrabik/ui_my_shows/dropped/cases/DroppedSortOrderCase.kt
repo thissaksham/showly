@@ -1,4 +1,4 @@
-package com.michaldrabik.ui_my_movies.hidden.cases
+package com.michaldrabik.ui_my_shows.dropped.cases
 
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.ui_model.SortOrder
@@ -7,7 +7,7 @@ import dagger.hilt.android.scopes.ViewModelScoped
 import javax.inject.Inject
 
 @ViewModelScoped
-class HiddenSortOrderCase @Inject constructor(
+class DroppedSortOrderCase @Inject constructor(
   private val settingsRepository: SettingsRepository,
 ) {
 
@@ -15,7 +15,7 @@ class HiddenSortOrderCase @Inject constructor(
     sortOrder: SortOrder,
     sortType: SortType,
   ) {
-    settingsRepository.sorting.hiddenMoviesSortOrder = sortOrder
-    settingsRepository.sorting.hiddenMoviesSortType = sortType
+    settingsRepository.sorting.droppedShowsSortOrder = sortOrder
+    settingsRepository.sorting.droppedShowsSortType = sortType
   }
 }

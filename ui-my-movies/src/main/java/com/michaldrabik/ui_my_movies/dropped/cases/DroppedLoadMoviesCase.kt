@@ -1,4 +1,4 @@
-package com.michaldrabik.ui_my_movies.hidden.cases
+package com.michaldrabik.ui_my_movies.dropped.cases
 
 import com.michaldrabik.common.Config
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
@@ -28,9 +28,9 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @ViewModelScoped
-class HiddenLoadMoviesCase @Inject constructor(
+class DroppedLoadMoviesCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
-  private val ratingsCase: HiddenRatingsCase,
+  private val ratingsCase: DroppedRatingsCase,
   private val sorter: CollectionItemSorter,
   private val moviesRepository: MoviesRepository,
   private val translationsRepository: TranslationsRepository,
@@ -53,11 +53,11 @@ class HiddenLoadMoviesCase @Inject constructor(
         }
       val spoilersSettings = settingsRepository.spoilers.getAll()
 
-      val sortOrder = settingsRepository.sorting.hiddenMoviesSortOrder
-      val sortType = settingsRepository.sorting.hiddenMoviesSortType
-      val genres = settingsRepository.filters.hiddenMoviesGenres
+      val sortOrder = settingsRepository.sorting.droppedMoviesSortOrder
+      val sortType = settingsRepository.sorting.droppedMoviesSortType
+      val genres = settingsRepository.filters.droppedMoviesGenres
 
-      val moviesItems = moviesRepository.hiddenMovies
+      val droppedItems = moviesRepository.droppedMovies
         .loadAll()
         .map {
           toListItemAsync(
@@ -78,13 +78,13 @@ class HiddenLoadMoviesCase @Inject constructor(
         sortOrder = sortOrder,
         sortType = sortType,
         genres = genres,
-        count = moviesItems.size,
+        count = droppedItems.size,
       )
 
-      if (moviesItems.isNotEmpty() || filtersItem.hasActiveFilters()) {
-        listOf(filtersItem) + moviesItems
+      if (droppedItems.isNotEmpty() || filtersItem.hasActiveFilters()) {
+        listOf(filtersItem) + droppedItems
       } else {
-        moviesItems
+        droppedItems
       }
     }
 
@@ -148,8 +148,8 @@ class HiddenLoadMoviesCase @Inject constructor(
       sortOrder = sortOrder,
       userRating = userRating?.rating,
       spoilers = CollectionListItem.MovieItem.Spoilers(
-        isSpoilerHidden = spoilers.isHiddenMoviesHidden,
-        isSpoilerRatingsHidden = spoilers.isHiddenMoviesRatingsHidden,
+        isSpoilerHidden = spoilers.isDroppedMoviesHidden,
+        isSpoilerRatingsHidden = spoilers.isDroppedMoviesRatingsHidden,
         isSpoilerTapToReveal = spoilers.isTapToReveal,
       ),
     )

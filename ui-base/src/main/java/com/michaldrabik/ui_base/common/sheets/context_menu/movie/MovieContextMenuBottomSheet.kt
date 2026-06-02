@@ -56,8 +56,8 @@ class MovieContextMenuBottomSheet : ContextMenuBottomSheet() {
       contextMenuItemRemoveFromMyButton.onClick { viewModel.removeFromMyMovies() }
       contextMenuItemMoveToWatchlistButton.onClick { viewModel.moveToWatchlist() }
       contextMenuItemRemoveFromWatchlistButton.onClick { viewModel.removeFromWatchlist() }
-      contextMenuItemMoveToHiddenButton.onClick { viewModel.moveToHidden() }
-      contextMenuItemRemoveFromHiddenButton.onClick { viewModel.removeFromHidden() }
+      contextMenuItemMoveToDroppedButton.onClick { viewModel.moveToDropped() }
+      contextMenuItemRemoveFromDroppedButton.onClick { viewModel.removeFromDropped() }
       contextMenuItemPinButton.onClick { viewModel.addToTopPinned() }
       contextMenuItemUnpinButton.onClick { viewModel.removeFromTopPinned() }
     }
@@ -77,11 +77,11 @@ class MovieContextMenuBottomSheet : ContextMenuBottomSheet() {
 
           contextMenuItemMoveToMyButton.visibleIf(!item.isMyMovie && !loading)
           contextMenuItemMoveToWatchlistButton.visibleIf(!item.isWatchlist && !loading)
-          contextMenuItemMoveToHiddenButton.visibleIf(!item.isHidden && !loading)
+          contextMenuItemMoveToDroppedButton.visibleIf(!item.isDropped && !loading)
 
           contextMenuItemRemoveFromMyButton.visibleIf(item.isMyMovie && !loading)
           contextMenuItemRemoveFromWatchlistButton.visibleIf(item.isWatchlist && !loading)
-          contextMenuItemRemoveFromHiddenButton.visibleIf(item.isHidden && !loading)
+          contextMenuItemRemoveFromDroppedButton.visibleIf(item.isDropped && !loading)
 
           contextMenuItemPinButton.visibleIf(!item.isPinnedTop && !loading)
           contextMenuItemUnpinButton.visibleIf(item.isPinnedTop && !loading)
@@ -112,10 +112,10 @@ class MovieContextMenuBottomSheet : ContextMenuBottomSheet() {
 
       val isMyMovieHidden = item.spoilers.isMyMoviesHidden && item.isMyMovie
       val isWatchlistHidden = item.spoilers.isWatchlistMoviesHidden && item.isWatchlist
-      val isHiddenMovieHidden = item.spoilers.isHiddenMoviesHidden && item.isHidden
+      val isDroppedMovieHidden = item.spoilers.isDroppedMoviesHidden && item.isDropped
       val isNotCollectedHidden = item.spoilers.isNotCollectedMoviesHidden && (!item.isInCollection())
 
-      if (isMyMovieHidden || isWatchlistHidden || isHiddenMovieHidden || isNotCollectedHidden) {
+      if (isMyMovieHidden || isWatchlistHidden || isDroppedMovieHidden || isNotCollectedHidden) {
         contextMenuItemDescription.tag = description
         description = SPOILERS_REGEX.replace(description, SPOILERS_HIDE_SYMBOL)
 
@@ -139,10 +139,10 @@ class MovieContextMenuBottomSheet : ContextMenuBottomSheet() {
 
       val isMyMovieHidden = item.spoilers.isMyMoviesRatingsHidden && item.isMyMovie
       val isWatchlistHidden = item.spoilers.isWatchlistMoviesRatingsHidden && item.isWatchlist
-      val isHiddenMovieHidden = item.spoilers.isHiddenMoviesRatingsHidden && item.isHidden
+      val isDroppedMovieHidden = item.spoilers.isDroppedMoviesRatingsHidden && item.isDropped
       val isNotCollectedHidden = item.spoilers.isNotCollectedMoviesRatingsHidden && (!item.isInCollection())
 
-      if (isMyMovieHidden || isWatchlistHidden || isHiddenMovieHidden || isNotCollectedHidden) {
+      if (isMyMovieHidden || isWatchlistHidden || isDroppedMovieHidden || isNotCollectedHidden) {
         contextMenuRating.tag = rating
         contextMenuRating.text = SPOILERS_RATINGS_HIDE_SYMBOL
 

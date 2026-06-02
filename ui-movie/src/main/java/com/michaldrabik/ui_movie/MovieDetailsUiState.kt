@@ -23,21 +23,21 @@ data class MovieDetailsUiState(
   data class FollowedState(
     val isMyMovie: Boolean,
     val isWatchlist: Boolean,
-    val isHidden: Boolean,
+    val isDropped: Boolean,
     val withAnimation: Boolean,
     val watchedAt: ZonedDateTime? = null,
   ) {
 
-    fun isInCollection() = isMyMovie || isWatchlist || isHidden
+    fun isInCollection() = isMyMovie || isWatchlist || isDropped
 
     companion object {
-      fun idle() = FollowedState(isMyMovie = false, isWatchlist = false, isHidden = false, withAnimation = true)
+      fun idle() = FollowedState(isMyMovie = false, isWatchlist = false, isDropped = false, withAnimation = true)
 
-      fun inMyMovies() = FollowedState(isMyMovie = true, isWatchlist = false, isHidden = false, withAnimation = true)
+      fun inMyMovies() = FollowedState(isMyMovie = true, isWatchlist = false, isDropped = false, withAnimation = true)
 
-      fun inHidden() = FollowedState(isMyMovie = false, isWatchlist = false, isHidden = true, withAnimation = true)
+      fun inDropped() = FollowedState(isMyMovie = false, isWatchlist = false, isDropped = true, withAnimation = true)
 
-      fun inWatchlist() = FollowedState(isMyMovie = false, isWatchlist = true, isHidden = false, withAnimation = true)
+      fun inWatchlist() = FollowedState(isMyMovie = false, isWatchlist = true, isDropped = false, withAnimation = true)
     }
   }
 }

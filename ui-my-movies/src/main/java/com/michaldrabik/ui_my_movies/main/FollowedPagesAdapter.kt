@@ -7,7 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.michaldrabik.ui_my_movies.R
-import com.michaldrabik.ui_my_movies.hidden.HiddenFragment
+import com.michaldrabik.ui_my_movies.dropped.DroppedFragment
 import com.michaldrabik.ui_my_movies.mymovies.MyMoviesFragment
 import com.michaldrabik.ui_my_movies.watchlist.WatchlistFragment
 
@@ -26,7 +26,7 @@ class FollowedPagesAdapter(
     when (position) {
       0 -> MyMoviesFragment()
       1 -> WatchlistFragment()
-      2 -> HiddenFragment()
+      2 -> DroppedFragment()
       else -> throw IllegalStateException("Unknown position")
     }
 
@@ -34,7 +34,7 @@ class FollowedPagesAdapter(
     when (position) {
       0 -> context.getString(R.string.menuMyMovies)
       1 -> context.getString(R.string.menuWatchlistMovies)
-      2 -> context.getString(R.string.menuHidden)
+      2 -> context.getString(R.string.menuDropped)
       else -> throw IllegalStateException()
     }
 }

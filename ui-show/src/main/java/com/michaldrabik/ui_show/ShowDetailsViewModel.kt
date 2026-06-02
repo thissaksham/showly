@@ -16,7 +16,7 @@ import com.michaldrabik.ui_model.RatingState
 import com.michaldrabik.ui_model.Show
 import com.michaldrabik.ui_model.SpoilersSettings
 import com.michaldrabik.ui_model.Translation
-import com.michaldrabik.ui_show.cases.ShowDetailsHiddenCase
+import com.michaldrabik.ui_show.cases.ShowDetailsDroppedCase
 import com.michaldrabik.ui_show.cases.ShowDetailsListsCase
 import com.michaldrabik.ui_show.cases.ShowDetailsMainCase
 import com.michaldrabik.ui_show.cases.ShowDetailsMyShowsCase
@@ -41,7 +41,7 @@ class ShowDetailsViewModel @Inject constructor(
   private val translationCase: ShowDetailsTranslationCase,
   private val ratingsCase: ShowDetailsRatingCase,
   private val watchlistCase: ShowDetailsWatchlistCase,
-  private val hiddenCase: ShowDetailsHiddenCase,
+  private val droppedCase: ShowDetailsDroppedCase,
   private val myShowsCase: ShowDetailsMyShowsCase,
   private val listsCase: ShowDetailsListsCase,
   private val settingsRepository: SettingsRepository,
@@ -87,12 +87,12 @@ class ShowDetailsViewModel @Inject constructor(
 
         val isFollowed = myShowsCase.isMyShows(result)
         val isWatchlist = watchlistCase.isWatchlist(result)
-        val isHidden = hiddenCase.isHidden(result)
+        val isDropped = droppedCase.isDropped(result)
 
         followedState.value = ShowDetailsUiState.FollowedState(
           isMyShows = isFollowed,
           isWatchlist = isWatchlist,
-          isHidden = isHidden,
+          isDropped = isDropped,
           withAnimation = false,
         )
         metaState.value = ShowDetailsMeta(isSignedIn = false)
@@ -135,7 +135,7 @@ class ShowDetailsViewModel @Inject constructor(
   fun addFollowedShow() {
     viewModelScope.launch {
       myShowsCase.addToMyShows(show, emptyList(), emptyList())
-      followedState.value = followedState.value?.copy(isMyShows = true, isWatchlist = false, isHidden = false)
+      followedState.value = followedState.value?.copy(isMyShows = true, isWatchlist = false, isDropped = false)
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToMyShows))
     }
   }
@@ -143,16 +143,16 @@ class ShowDetailsViewModel @Inject constructor(
   fun addWatchlistShow() {
     viewModelScope.launch {
       watchlistCase.addToWatchlist(show)
-      followedState.value = followedState.value?.copy(isWatchlist = true, isMyShows = false, isHidden = false)
+      followedState.value = followedState.value?.copy(isWatchlist = true, isMyShows = false, isDropped = false)
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToWatchlist))
     }
   }
 
-  fun addHiddenShow() {
+  fun addDroppedShow() {
     viewModelScope.launch {
-      hiddenCase.addToHidden(show, false)
-      followedState.value = followedState.value?.copy(isHidden = true, isMyShows = false, isWatchlist = false)
-      messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToHidden))
+      droppedCase.addToDropped(show, false)
+      followedState.value = followedState.value?.copy(isDropped = true, isMyShows = false, isWatchlist = false)
+      messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToDropped))
     }
   }
 

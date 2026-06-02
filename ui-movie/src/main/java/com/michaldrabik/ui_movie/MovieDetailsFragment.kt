@@ -72,7 +72,7 @@ import com.michaldrabik.ui_movie.MovieDetailsEvent.RequestWidgetsUpdate
 import com.michaldrabik.ui_movie.databinding.FragmentMovieDetailsBinding
 import com.michaldrabik.ui_movie.helpers.MovieDetailsMeta
 import com.michaldrabik.ui_movie.views.AddToMoviesButton.State.ADD
-import com.michaldrabik.ui_movie.views.AddToMoviesButton.State.IN_HIDDEN
+import com.michaldrabik.ui_movie.views.AddToMoviesButton.State.IN_DROPPED
 import com.michaldrabik.ui_movie.views.AddToMoviesButton.State.IN_MY_MOVIES
 import com.michaldrabik.ui_movie.views.AddToMoviesButton.State.IN_WATCHLIST
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_FAMILY
@@ -150,7 +150,7 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
         onRemoveClickListener = { viewModel.removeFromMyMovies() }
       }
       movieDetailsManageListsLabel.onClick { openListsDialog() }
-      movieDetailsHideLabel.onClick { viewModel.addToHidden() }
+      movieDetailsDropLabel.onClick { viewModel.addToDropped() }
       movieDetailsTitle.onClick {
         requireContext().copyToClipboard(movieDetailsTitle.text.toString())
         showSnack(MessageEvent.Info(R.string.textCopiedToClipboard))
@@ -199,10 +199,10 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
           when {
             it.isMyMovie -> movieDetailsAddButton.setState(IN_MY_MOVIES, it.withAnimation)
             it.isWatchlist -> movieDetailsAddButton.setState(IN_WATCHLIST, it.withAnimation)
-            it.isHidden -> movieDetailsAddButton.setState(IN_HIDDEN, it.withAnimation)
+            it.isDropped -> movieDetailsAddButton.setState(IN_DROPPED, it.withAnimation)
             else -> movieDetailsAddButton.setState(ADD, it.withAnimation)
           }
-          movieDetailsHideLabel.visibleIf(!it.isHidden)
+          movieDetailsDropLabel.visibleIf(!it.isDropped)
           val isUnknownDate = it.watchedAt?.toMillis() == 0L
           movieDetailsWatchedBadge.visibleIf(it.isMyMovie && it.watchedAt != null && !isUnknownDate)
           it.watchedAt?.let { date ->
@@ -251,10 +251,10 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
 
       val isMyMovieHidden = spoilersSettings.isMyMoviesHidden && followedState.isMyMovie
       val isWatchlistHidden = spoilersSettings.isWatchlistMoviesHidden && followedState.isWatchlist
-      val isHiddenMovieHidden = spoilersSettings.isHiddenMoviesHidden && followedState.isHidden
+      val isDroppedMovieHidden = spoilersSettings.isDroppedMoviesHidden && followedState.isDropped
       val isNotCollectedHidden = spoilersSettings.isNotCollectedMoviesHidden && (!followedState.isInCollection())
 
-      if (isMyMovieHidden || isWatchlistHidden || isHiddenMovieHidden || isNotCollectedHidden) {
+      if (isMyMovieHidden || isWatchlistHidden || isDroppedMovieHidden || isNotCollectedHidden) {
         movieDetailsDescription.tag = description
         description = SPOILERS_REGEX.replace(description, SPOILERS_HIDE_SYMBOL)
 

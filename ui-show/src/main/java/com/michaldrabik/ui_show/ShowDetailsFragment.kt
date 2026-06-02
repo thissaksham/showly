@@ -136,7 +136,7 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
         onRemoveClickListener = { viewModel.removeFromFollowed() }
       }
       showDetailsManageListsLabel.onClick { openListsDialog() }
-      showDetailsHideLabel.onClick { viewModel.addHiddenShow() }
+      showDetailsDropLabel.onClick { viewModel.addDroppedShow() }
       showDetailsTitle.onClick {
         requireContext().copyToClipboard(showDetailsTitle.text.toString())
         showSnack(MessageEvent.Info(R.string.textCopiedToClipboard))
@@ -194,10 +194,10 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
           when {
             it.isMyShows -> showDetailsAddButton.setState(AddToShowsButton.State.IN_MY_SHOWS, it.withAnimation)
             it.isWatchlist -> showDetailsAddButton.setState(AddToShowsButton.State.IN_WATCHLIST, it.withAnimation)
-            it.isHidden -> showDetailsAddButton.setState(AddToShowsButton.State.IN_HIDDEN, it.withAnimation)
+            it.isDropped -> showDetailsAddButton.setState(AddToShowsButton.State.IN_DROPPED, it.withAnimation)
             else -> showDetailsAddButton.setState(AddToShowsButton.State.ADD, it.withAnimation)
           }
-          showDetailsHideLabel.visibleIf(!it.isHidden)
+          showDetailsDropLabel.visibleIf(!it.isDropped)
         }
         listsCount?.let {
           val text =
@@ -239,10 +239,10 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
 
       val isMyShowHidden = spoilersSettings.isMyShowsHidden && followedState.isMyShows
       val isWatchlistHidden = spoilersSettings.isWatchlistShowsHidden && followedState.isWatchlist
-      val isHiddenShowHidden = spoilersSettings.isHiddenShowsHidden && followedState.isHidden
+      val isDroppedShowHidden = spoilersSettings.isDroppedShowsHidden && followedState.isDropped
       val isNotCollectedHidden = spoilersSettings.isNotCollectedShowsHidden && (!followedState.isInCollection())
 
-      if (isMyShowHidden || isWatchlistHidden || isHiddenShowHidden || isNotCollectedHidden) {
+      if (isMyShowHidden || isWatchlistHidden || isDroppedShowHidden || isNotCollectedHidden) {
         showDetailsDescription.tag = description
         description = SPOILERS_REGEX.replace(description, SPOILERS_HIDE_SYMBOL)
 

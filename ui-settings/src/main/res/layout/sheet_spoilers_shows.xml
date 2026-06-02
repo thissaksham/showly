@@ -238,70 +238,70 @@
       </androidx.constraintlayout.widget.ConstraintLayout>
 
       <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/hiddenShowsLayout"
+        android:id="@+id/droppedShowsLayout"
         style="@style/Settings.ItemLayout"
         android:layout_width="match_parent"
         android:paddingTop="0dp"
         >
 
         <TextView
-          android:id="@+id/hiddenShowsTitle"
+          android:id="@+id/droppedShowsTitle"
           style="@style/Settings.Title"
-          android:text="@string/textSettingsSpoilersShowsOverviewsHiddenTitle"
+          android:text="@string/textSettingsSpoilersShowsOverviewsDroppedTitle"
           android:textStyle="bold"
-          app:layout_constraintBottom_toTopOf="@id/hiddenShowsDescription"
+          app:layout_constraintBottom_toTopOf="@id/droppedShowsDescription"
           app:layout_constraintStart_toStartOf="parent"
           app:layout_constraintTop_toTopOf="parent"
           app:layout_constraintVertical_chainStyle="spread"
           />
 
         <TextView
-          android:id="@+id/hiddenShowsDescription"
+          android:id="@+id/droppedShowsDescription"
           style="@style/Settings.Summary"
           android:layout_marginEnd="@dimen/spaceNormal"
-          android:text="@string/textSettingsSpoilersShowsOverviewsHiddenDescription"
+          android:text="@string/textSettingsSpoilersShowsOverviewsDroppedDescription"
           app:layout_constrainedWidth="true"
-          app:layout_constraintBottom_toTopOf="@id/hiddenShowsRatingDescription"
-          app:layout_constraintEnd_toStartOf="@id/hiddenShowsSwitch"
+          app:layout_constraintBottom_toTopOf="@id/droppedShowsRatingDescription"
+          app:layout_constraintEnd_toStartOf="@id/droppedShowsSwitch"
           app:layout_constraintHorizontal_bias="0"
           app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintTop_toBottomOf="@id/hiddenShowsTitle"
+          app:layout_constraintTop_toBottomOf="@id/droppedShowsTitle"
           />
 
         <com.google.android.material.checkbox.MaterialCheckBox
-          android:id="@+id/hiddenShowsSwitch"
+          android:id="@+id/droppedShowsSwitch"
           style="@style/ShowlyCheckbox"
           android:layout_width="30dp"
           android:layout_height="30dp"
           android:checked="false"
-          app:layout_constraintBottom_toBottomOf="@id/hiddenShowsDescription"
+          app:layout_constraintBottom_toBottomOf="@id/droppedShowsDescription"
           app:layout_constraintEnd_toEndOf="parent"
-          app:layout_constraintTop_toTopOf="@id/hiddenShowsDescription"
+          app:layout_constraintTop_toTopOf="@id/droppedShowsDescription"
           />
 
         <TextView
-          android:id="@+id/hiddenShowsRatingDescription"
+          android:id="@+id/droppedShowsRatingDescription"
           style="@style/Settings.Summary"
           android:layout_marginTop="@dimen/spaceNormal"
           android:layout_marginEnd="@dimen/spaceNormal"
-          android:text="@string/textSettingsSpoilersShowsRatingsHiddenDescription"
+          android:text="@string/textSettingsSpoilersShowsRatingsDroppedDescription"
           app:layout_constrainedWidth="true"
           app:layout_constraintBottom_toBottomOf="parent"
-          app:layout_constraintEnd_toStartOf="@id/hiddenShowsRatingsSwitch"
+          app:layout_constraintEnd_toStartOf="@id/droppedShowsRatingsSwitch"
           app:layout_constraintHorizontal_bias="0"
           app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintTop_toBottomOf="@id/hiddenShowsDescription"
+          app:layout_constraintTop_toBottomOf="@id/droppedShowsDescription"
           />
 
         <com.google.android.material.checkbox.MaterialCheckBox
-          android:id="@+id/hiddenShowsRatingsSwitch"
+          android:id="@+id/droppedShowsRatingsSwitch"
           style="@style/ShowlyCheckbox"
           android:layout_width="30dp"
           android:layout_height="30dp"
           android:checked="false"
-          app:layout_constraintBottom_toBottomOf="@id/hiddenShowsRatingDescription"
+          app:layout_constraintBottom_toBottomOf="@id/droppedShowsRatingDescription"
           app:layout_constraintEnd_toEndOf="parent"
-          app:layout_constraintTop_toTopOf="@id/hiddenShowsRatingDescription"
+          app:layout_constraintTop_toTopOf="@id/droppedShowsRatingDescription"
           />
       </androidx.constraintlayout.widget.ConstraintLayout>
 

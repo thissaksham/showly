@@ -5,7 +5,7 @@ import com.michaldrabik.repository.settings.SettingsSpoilersRepository
 import com.michaldrabik.ui_model.Movie
 import com.michaldrabik.ui_model.Ratings
 import com.michaldrabik.ui_movie.MovieDetailsUiState.FollowedState
-import com.michaldrabik.ui_movie.cases.MovieDetailsHiddenCase
+import com.michaldrabik.ui_movie.cases.MovieDetailsDroppedCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsMyMoviesCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsWatchlistCase
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -18,7 +18,7 @@ class MovieDetailsRatingSpoilersCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val myMoviesCase: MovieDetailsMyMoviesCase,
   private val watchlistCase: MovieDetailsWatchlistCase,
-  private val hiddenCase: MovieDetailsHiddenCase,
+  private val droppedCase: MovieDetailsDroppedCase,
   private val settingsSpoilersRepository: SettingsSpoilersRepository,
 ) {
 
@@ -31,22 +31,22 @@ class MovieDetailsRatingSpoilersCase @Inject constructor(
 
       val isMy = async { myMoviesCase.getMyMovie(movie) }
       val isWatchlist = async { watchlistCase.isWatchlist(movie) }
-      val isHidden = async { hiddenCase.isHidden(movie) }
+      val isDropped = async { droppedCase.isDropped(movie) }
 
       val state = FollowedState(
         isMyMovie = isMy.await() != null,
         isWatchlist = isWatchlist.await(),
-        isHidden = isHidden.await(),
+        isDropped = isDropped.await(),
         withAnimation = false,
       )
 
       val isMyHidden = spoilers.isMyMoviesRatingsHidden && state.isMyMovie
       val isWatchlistHidden = spoilers.isWatchlistMoviesRatingsHidden && state.isWatchlist
-      val isHiddenHidden = spoilers.isHiddenMoviesRatingsHidden && state.isHidden
+      val isDroppedHidden = spoilers.isDroppedMoviesRatingsHidden && state.isDropped
       val isNotCollectedHidden = spoilers.isNotCollectedMoviesRatingsHidden && !state.isInCollection()
 
       return@withContext ratings.copy(
-        isHidden = isMyHidden || isWatchlistHidden || isHiddenHidden || isNotCollectedHidden,
+        isHidden = isMyHidden || isWatchlistHidden || isDroppedHidden || isNotCollectedHidden,
       )
     }
 }

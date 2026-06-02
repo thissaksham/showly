@@ -201,7 +201,7 @@
         app:drawableStartCompat="@drawable/ic_lists"
         app:drawableTint="?android:attr/textColorPrimary"
         app:layout_constraintBottom_toTopOf="@+id/separator2"
-        app:layout_constraintEnd_toStartOf="@id/showDetailsHideLabel"
+        app:layout_constraintEnd_toStartOf="@id/showDetailsDropLabel"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
@@ -209,7 +209,7 @@
         />
 
       <TextView
-        android:id="@+id/showDetailsHideLabel"
+        android:id="@+id/showDetailsDropLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"

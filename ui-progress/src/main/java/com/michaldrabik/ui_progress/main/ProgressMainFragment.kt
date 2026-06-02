@@ -138,9 +138,11 @@ class ProgressMainFragment :
       with(progressMainSearchView) {
         hint = getString(R.string.textSearchFor)
         settingsIconVisible = true
+        statsIconVisible = true
         isClickable = false
         onClick { openMainSearch() }
         onSettingsClickListener = { openSettings() }
+        onStatsClickListener = { openStatistics() }
       }
 
       with(progressMainPagerModeTabs) {
@@ -269,6 +271,12 @@ class ProgressMainFragment :
     hideNavigation()
     exitSearch()
     navigateToSafe(R.id.actionProgressFragmentToSettingsFragment)
+  }
+
+  private fun openStatistics() {
+    hideNavigation()
+    exitSearch()
+    navigateToSafe(R.id.actionProgressFragmentToStatistics)
   }
 
   private fun enterSearch() {

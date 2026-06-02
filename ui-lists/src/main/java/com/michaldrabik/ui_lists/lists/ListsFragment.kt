@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy
 import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.michaldrabik.common.Mode.MOVIES
+import com.michaldrabik.common.Mode.SHOWS
 import com.michaldrabik.repository.settings.SettingsViewModeRepository
 import com.michaldrabik.ui_base.BaseFragment
 import com.michaldrabik.ui_base.common.OnTabReselectedListener
@@ -139,7 +141,9 @@ class ListsFragment :
     with(binding) {
       fragmentListsSearchView.run {
         hint = getString(R.string.textSearchFor)
+        statsIconVisible = true
         onSettingsClickListener = { openSettings() }
+        onStatsClickListener = { openStatistics() }
       }
       with(fragmentListsSearchLocalView) {
         onCloseClickListener = { exitSearch() }
@@ -179,7 +183,6 @@ class ListsFragment :
             top = statusBarSize + dimenToPx(R.dimen.listsRecyclerPaddingTop),
             bottom = inset.bottom + dimenToPx(R.dimen.listsBottomPadding),
           )
-        fragmentListsSearchView.applyWindowInsetBehaviour(dimenToPx(R.dimen.spaceNormal) + statusBarSize)
         fragmentListsSearchView.updateTopMargin(dimenToPx(R.dimen.spaceMedium) + statusBarSize)
         fragmentListsModeTabs.updateTopMargin(dimenToPx(R.dimen.collectionTabsMargin) + statusBarSize)
         fragmentListsIcons.updateTopMargin(dimenToPx(R.dimen.listsIconsPadding) + statusBarSize)
@@ -354,6 +357,16 @@ class ListsFragment :
     hideNavigation()
     exitSearch()
     navigateToSafe(R.id.actionListsFragmentToSettingsFragment)
+  }
+
+  private fun openStatistics() {
+    hideNavigation()
+    exitSearch()
+    val action = when ((requireActivity() as ModeHost).getMode()) {
+      SHOWS -> R.id.actionListsFragmentToStatisticsFragment
+      MOVIES -> R.id.actionListsFragmentToStatisticsMoviesFragment
+    }
+    navigateToSafe(action)
   }
 
   private fun openCreateList() {

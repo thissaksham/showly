@@ -59,9 +59,9 @@
   <string name="textSettingsSpoilersShowsOverviewsWatchlistTitle">Watchlist</string>
   <string name="textSettingsSpoilersShowsOverviewsWatchlistDescription">Hide <b>description</b> of shows added to Watchlist</string>
   <string name="textSettingsSpoilersShowsRatingsWatchlistDescription">Hide <b>rating</b> of shows added to Watchlist</string>
-  <string name="textSettingsSpoilersShowsOverviewsHiddenTitle">Hidden</string>
-  <string name="textSettingsSpoilersShowsOverviewsHiddenDescription">Hide <b>description</b> of shows added to Hidden</string>
-  <string name="textSettingsSpoilersShowsRatingsHiddenDescription">Hide <b>rating</b> of shows added to Hidden</string>
+  <string name="textSettingsSpoilersShowsOverviewsDroppedTitle">Dropped</string>
+  <string name="textSettingsSpoilersShowsOverviewsDroppedDescription">Hide <b>description</b> of shows added to Dropped</string>
+  <string name="textSettingsSpoilersShowsRatingsDroppedDescription">Hide <b>rating</b> of shows added to Dropped</string>
   <string name="textSettingsSpoilersShowsOverviewsNotCollectedTitle">Not Collected</string>
   <string name="textSettingsSpoilersShowsOverviewsNotCollectedDescription">Hide <b>description</b> of shows that are not in your Collection</string>
   <string name="textSettingsSpoilersShowsRatingsNotCollectedDescription">Hide <b>rating</b> of shows that are not in your Collection</string>
@@ -74,9 +74,9 @@
   <string name="textSettingsSpoilersMoviesOverviewsWatchlistTitle">Watchlist</string>
   <string name="textSettingsSpoilersMoviesOverviewsWatchlistDescription">Hide <b>description</b> of movies added to Watchlist</string>
   <string name="textSettingsSpoilersMoviesRatingsWatchlistDescription">Hide <b>rating</b> of movies added to Watchlist</string>
-  <string name="textSettingsSpoilersMoviesOverviewsHiddenTitle">Hidden</string>
-  <string name="textSettingsSpoilersMoviesOverviewsHiddenDescription">Hide <b>description</b> of movies added to Hidden</string>
-  <string name="textSettingsSpoilersMoviesRatingsHiddenDescription">Hide <b>rating</b> of movies added to Hidden</string>
+  <string name="textSettingsSpoilersMoviesOverviewsDroppedTitle">Dropped</string>
+  <string name="textSettingsSpoilersMoviesOverviewsDroppedDescription">Hide <b>description</b> of movies added to Dropped</string>
+  <string name="textSettingsSpoilersMoviesRatingsDroppedDescription">Hide <b>rating</b> of movies added to Dropped</string>
   <string name="textSettingsSpoilersMoviesOverviewsNotCollectedTitle">Not Collected</string>
   <string name="textSettingsSpoilersMoviesOverviewsNotCollectedDescription">Hide <b>description</b> of movies that are not in your Collection</string>
   <string name="textSettingsSpoilersMoviesRatingsNotCollectedDescription">Hide <b>rating</b> of movies that are not in your Collection</string>

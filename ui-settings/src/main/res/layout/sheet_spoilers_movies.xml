@@ -238,70 +238,70 @@
       </androidx.constraintlayout.widget.ConstraintLayout>
 
       <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/hiddenMoviesLayout"
+        android:id="@+id/droppedMoviesLayout"
         style="@style/Settings.ItemLayout"
         android:layout_width="match_parent"
         android:paddingTop="0dp"
         >
 
         <TextView
-          android:id="@+id/hiddenMoviesTitle"
+          android:id="@+id/droppedMoviesTitle"
           style="@style/Settings.Title"
-          android:text="@string/textSettingsSpoilersMoviesOverviewsHiddenTitle"
+          android:text="@string/textSettingsSpoilersMoviesOverviewsDroppedTitle"
           android:textStyle="bold"
-          app:layout_constraintBottom_toTopOf="@id/hiddenMoviesDescription"
+          app:layout_constraintBottom_toTopOf="@id/droppedMoviesDescription"
           app:layout_constraintStart_toStartOf="parent"
           app:layout_constraintTop_toTopOf="parent"
           app:layout_constraintVertical_chainStyle="spread"
           />
 
         <TextView
-          android:id="@+id/hiddenMoviesDescription"
+          android:id="@+id/droppedMoviesDescription"
           style="@style/Settings.Summary"
           android:layout_marginEnd="@dimen/spaceNormal"
-          android:text="@string/textSettingsSpoilersMoviesOverviewsHiddenDescription"
+          android:text="@string/textSettingsSpoilersMoviesOverviewsDroppedDescription"
           app:layout_constrainedWidth="true"
-          app:layout_constraintBottom_toTopOf="@id/hiddenMoviesRatingDescription"
-          app:layout_constraintEnd_toStartOf="@id/hiddenMoviesSwitch"
+          app:layout_constraintBottom_toTopOf="@id/droppedMoviesRatingDescription"
+          app:layout_constraintEnd_toStartOf="@id/droppedMoviesSwitch"
           app:layout_constraintHorizontal_bias="0"
           app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintTop_toBottomOf="@id/hiddenMoviesTitle"
+          app:layout_constraintTop_toBottomOf="@id/droppedMoviesTitle"
           />
 
         <com.google.android.material.checkbox.MaterialCheckBox
-          android:id="@+id/hiddenMoviesSwitch"
+          android:id="@+id/droppedMoviesSwitch"
           style="@style/ShowlyCheckbox"
           android:layout_width="30dp"
           android:layout_height="30dp"
           android:checked="false"
-          app:layout_constraintBottom_toBottomOf="@id/hiddenMoviesDescription"
+          app:layout_constraintBottom_toBottomOf="@id/droppedMoviesDescription"
           app:layout_constraintEnd_toEndOf="parent"
-          app:layout_constraintTop_toTopOf="@id/hiddenMoviesDescription"
+          app:layout_constraintTop_toTopOf="@id/droppedMoviesDescription"
           />
 
         <TextView
-          android:id="@+id/hiddenMoviesRatingDescription"
+          android:id="@+id/droppedMoviesRatingDescription"
           style="@style/Settings.Summary"
           android:layout_marginTop="@dimen/spaceNormal"
           android:layout_marginEnd="@dimen/spaceNormal"
-          android:text="@string/textSettingsSpoilersMoviesRatingsHiddenDescription"
+          android:text="@string/textSettingsSpoilersMoviesRatingsDroppedDescription"
           app:layout_constrainedWidth="true"
           app:layout_constraintBottom_toBottomOf="parent"
-          app:layout_constraintEnd_toStartOf="@id/hiddenMoviesRatingsSwitch"
+          app:layout_constraintEnd_toStartOf="@id/droppedMoviesRatingsSwitch"
           app:layout_constraintHorizontal_bias="0"
           app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintTop_toBottomOf="@id/hiddenMoviesDescription"
+          app:layout_constraintTop_toBottomOf="@id/droppedMoviesDescription"
           />
 
         <com.google.android.material.checkbox.MaterialCheckBox
-          android:id="@+id/hiddenMoviesRatingsSwitch"
+          android:id="@+id/droppedMoviesRatingsSwitch"
           style="@style/ShowlyCheckbox"
           android:layout_width="30dp"
           android:layout_height="30dp"
           android:checked="false"
-          app:layout_constraintBottom_toBottomOf="@id/hiddenMoviesRatingDescription"
+          app:layout_constraintBottom_toBottomOf="@id/droppedMoviesRatingDescription"
           app:layout_constraintEnd_toEndOf="parent"
-          app:layout_constraintTop_toTopOf="@id/hiddenMoviesRatingDescription"
+          app:layout_constraintTop_toTopOf="@id/droppedMoviesRatingDescription"
           />
       </androidx.constraintlayout.widget.ConstraintLayout>
 

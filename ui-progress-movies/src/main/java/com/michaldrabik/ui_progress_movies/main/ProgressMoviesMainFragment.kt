@@ -126,9 +126,11 @@ class ProgressMoviesMainFragment :
       with(progressMoviesSearchView) {
         hint = getString(R.string.textSearchFor)
         settingsIconVisible = true
+        statsIconVisible = true
         isClickable = false
         onClick { openMainSearch() }
         onSettingsClickListener = { openSettings() }
+        onStatsClickListener = { openStatistics() }
       }
 
       with(progressMoviesModeTabs) {
@@ -235,6 +237,12 @@ class ProgressMoviesMainFragment :
     hideNavigation()
     exitSearch()
     navigateToSafe(R.id.actionProgressMoviesFragmentToSettingsFragment)
+  }
+
+  private fun openStatistics() {
+    hideNavigation()
+    exitSearch()
+    navigateToSafe(R.id.actionProgressMoviesFragmentToStatistics)
   }
 
   private fun openMainSearch() {

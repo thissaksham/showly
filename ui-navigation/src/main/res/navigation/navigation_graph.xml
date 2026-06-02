@@ -116,6 +116,13 @@
       app:destination="@id/discoverFiltersFeedDialog"
       app:launchSingleTop="true"
       />
+    <action
+      android:id="@+id/actionDiscoverFragmentToStatisticsFragment"
+      app:destination="@id/statisticsFragment"
+      app:enterAnim="@anim/anim_fade_in"
+      app:launchSingleTop="true"
+      app:popExitAnim="@anim/anim_fade_out"
+      />
   </fragment>
 
   <fragment
@@ -154,6 +161,13 @@
       android:id="@+id/actionDiscoverMoviesFragmentToFiltersGenres"
       app:destination="@id/discoverMoviesFiltersGenresDialog"
       app:launchSingleTop="true"
+      />
+    <action
+      android:id="@+id/actionDiscoverMoviesFragmentToStatisticsFragment"
+      app:destination="@id/statisticsMoviesFragment"
+      app:enterAnim="@anim/anim_fade_in"
+      app:launchSingleTop="true"
+      app:popExitAnim="@anim/anim_fade_out"
       />
   </fragment>
 
@@ -219,6 +233,13 @@
       app:destination="@id/dateSelectionDialog"
       app:launchSingleTop="true"
       />
+    <action
+      android:id="@+id/actionProgressFragmentToStatistics"
+      app:destination="@id/statisticsFragment"
+      app:enterAnim="@anim/anim_fade_in"
+      app:launchSingleTop="true"
+      app:popExitAnim="@anim/anim_fade_out"
+      />
   </fragment>
 
   <fragment
@@ -272,6 +293,13 @@
       android:id="@+id/actionProgressMoviesFragmentToDateSelection"
       app:destination="@id/dateSelectionDialog"
       app:launchSingleTop="true"
+      />
+    <action
+      android:id="@+id/actionProgressMoviesFragmentToStatistics"
+      app:destination="@id/statisticsMoviesFragment"
+      app:enterAnim="@anim/anim_fade_in"
+      app:launchSingleTop="true"
+      app:popExitAnim="@anim/anim_fade_out"
       />
   </fragment>
 
@@ -607,6 +635,20 @@
       android:id="@+id/actionListsFragmentToSearch"
       app:destination="@id/searchFragment"
       app:launchSingleTop="true"
+      />
+    <action
+      android:id="@+id/actionListsFragmentToStatisticsFragment"
+      app:destination="@id/statisticsFragment"
+      app:enterAnim="@anim/anim_fade_in"
+      app:launchSingleTop="true"
+      app:popExitAnim="@anim/anim_fade_out"
+      />
+    <action
+      android:id="@+id/actionListsFragmentToStatisticsMoviesFragment"
+      app:destination="@id/statisticsMoviesFragment"
+      app:enterAnim="@anim/anim_fade_in"
+      app:launchSingleTop="true"
+      app:popExitAnim="@anim/anim_fade_out"
       />
   </fragment>
 

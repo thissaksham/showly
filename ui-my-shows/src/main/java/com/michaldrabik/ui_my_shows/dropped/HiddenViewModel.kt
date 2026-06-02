@@ -1,4 +1,4 @@
-package com.michaldrabik.ui_my_shows.hidden
+package com.michaldrabik.ui_my_shows.dropped
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,9 +17,9 @@ import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
 import com.michaldrabik.ui_my_shows.common.recycler.CollectionListItem
 import com.michaldrabik.ui_my_shows.common.recycler.CollectionListItem.ShowItem
-import com.michaldrabik.ui_my_shows.hidden.cases.HiddenLoadShowsCase
-import com.michaldrabik.ui_my_shows.hidden.cases.HiddenSortOrderCase
-import com.michaldrabik.ui_my_shows.hidden.cases.HiddenTranslationsCase
+import com.michaldrabik.ui_my_shows.dropped.cases.DroppedLoadShowsCase
+import com.michaldrabik.ui_my_shows.dropped.cases.DroppedSortOrderCase
+import com.michaldrabik.ui_my_shows.dropped.cases.DroppedTranslationsCase
 import com.michaldrabik.ui_my_shows.main.FollowedShowsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -33,10 +33,10 @@ import javax.inject.Inject
 import com.michaldrabik.ui_base.events.Event as EventSync
 
 @HiltViewModel
-class HiddenViewModel @Inject constructor(
-  private val sortOrderCase: HiddenSortOrderCase,
-  private val loadShowsCase: HiddenLoadShowsCase,
-  private val translationsCase: HiddenTranslationsCase,
+class DroppedViewModel @Inject constructor(
+  private val sortOrderCase: DroppedSortOrderCase,
+  private val loadShowsCase: DroppedLoadShowsCase,
+  private val translationsCase: DroppedTranslationsCase,
   private val imagesProvider: ShowImagesProvider,
   private val eventsManager: EventsManager,
 ) : ViewModel(),
@@ -129,7 +129,7 @@ class HiddenViewModel @Inject constructor(
     scrollState,
     viewModeState,
   ) { s1, s2, s3, s4 ->
-    HiddenUiState(
+    DroppedUiState(
       items = s1,
       sortOrder = s2,
       resetScroll = s3,
@@ -138,6 +138,6 @@ class HiddenViewModel @Inject constructor(
   }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.WhileSubscribed(SUBSCRIBE_STOP_TIMEOUT),
-    initialValue = HiddenUiState(),
+    initialValue = DroppedUiState(),
   )
 }

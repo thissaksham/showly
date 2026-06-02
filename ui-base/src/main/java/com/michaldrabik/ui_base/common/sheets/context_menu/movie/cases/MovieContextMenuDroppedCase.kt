@@ -1,33 +1,31 @@
-package com.michaldrabik.ui_movie.cases
+package com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases
 
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
 import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.repository.movies.MoviesRepository
+import com.michaldrabik.ui_model.IdTrakt
+import com.michaldrabik.ui_model.Ids
 import com.michaldrabik.ui_model.Movie
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
-class MovieDetailsHiddenCase @Inject constructor(
+@Singleton
+class MovieContextMenuDroppedCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val moviesRepository: MoviesRepository,
   private val pinnedItemsRepository: PinnedItemsRepository,
 ) {
 
-  suspend fun isHidden(movie: Movie) =
+  suspend fun moveToDropped(traktId: IdTrakt) =
     withContext(dispatchers.IO) {
-      moviesRepository.hiddenMovies.exists(movie.ids.trakt)
-    }
-
-  suspend fun addToHidden(movie: Movie) =
-    withContext(dispatchers.IO) {
-      moviesRepository.hiddenMovies.insert(movie.ids.trakt)
+      val movie = Movie.EMPTY.copy(ids = Ids.EMPTY.copy(traktId))
+      moviesRepository.droppedMovies.insert(traktId)
       pinnedItemsRepository.removePinnedItem(movie)
     }
 
-  suspend fun removeFromHidden(movie: Movie) =
+  suspend fun removeFromDropped(traktId: IdTrakt) =
     withContext(dispatchers.IO) {
-      moviesRepository.hiddenMovies.delete(movie.ids.trakt)
+      moviesRepository.droppedMovies.delete(traktId)
     }
 }

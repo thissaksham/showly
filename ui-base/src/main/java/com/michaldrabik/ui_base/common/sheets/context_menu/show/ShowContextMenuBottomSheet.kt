@@ -53,8 +53,8 @@ class ShowContextMenuBottomSheet : ContextMenuBottomSheet() {
       contextMenuItemRemoveFromMyButton.onClick { viewModel.removeFromMyShows() }
       contextMenuItemMoveToWatchlistButton.onClick { viewModel.moveToWatchlist() }
       contextMenuItemRemoveFromWatchlistButton.onClick { viewModel.removeFromWatchlist() }
-      contextMenuItemMoveToHiddenButton.onClick { viewModel.moveToHidden() }
-      contextMenuItemRemoveFromHiddenButton.onClick { viewModel.removeFromHidden() }
+      contextMenuItemMoveToDroppedButton.onClick { viewModel.moveToDropped() }
+      contextMenuItemRemoveFromDroppedButton.onClick { viewModel.removeFromDropped() }
       contextMenuItemPinButton.onClick { viewModel.addToTopPinned() }
       contextMenuItemUnpinButton.onClick { viewModel.removeFromTopPinned() }
       contextMenuItemAddOnHoldButton.onClick { viewModel.addToOnHoldPinned() }
@@ -112,11 +112,11 @@ class ShowContextMenuBottomSheet : ContextMenuBottomSheet() {
 
       contextMenuItemMoveToMyButton.visibleIf(!item.isMyShow)
       contextMenuItemMoveToWatchlistButton.visibleIf(!item.isWatchlist)
-      contextMenuItemMoveToHiddenButton.visibleIf(!item.isHidden)
+      contextMenuItemMoveToDroppedButton.visibleIf(!item.isDropped)
 
       contextMenuItemRemoveFromMyButton.visibleIf(item.isMyShow)
       contextMenuItemRemoveFromWatchlistButton.visibleIf(item.isWatchlist)
-      contextMenuItemRemoveFromHiddenButton.visibleIf(item.isHidden)
+      contextMenuItemRemoveFromDroppedButton.visibleIf(item.isDropped)
 
       contextMenuItemBadge.visibleIf(item.isMyShow || item.isWatchlist)
       val color = if (item.isMyShow) colorAccent else colorGray
@@ -125,7 +125,7 @@ class ShowContextMenuBottomSheet : ContextMenuBottomSheet() {
       if (!item.isInCollection()) {
         contextMenuItemMoveToMyButton.text = getString(R.string.textAddToMyShows)
         contextMenuItemMoveToWatchlistButton.text = getString(R.string.textAddedToWatchlist)
-        contextMenuItemMoveToHiddenButton.text = getString(R.string.textHide)
+        contextMenuItemMoveToDroppedButton.text = getString(R.string.textHide)
       }
     }
   }
@@ -141,10 +141,10 @@ class ShowContextMenuBottomSheet : ContextMenuBottomSheet() {
 
       val isMyShowHidden = item.spoilers.isMyShowsHidden && item.isMyShow
       val isWatchlistHidden = item.spoilers.isWatchlistShowsHidden && item.isWatchlist
-      val isHiddenShowHidden = item.spoilers.isHiddenShowsHidden && item.isHidden
+      val isDroppedShowHidden = item.spoilers.isDroppedShowsHidden && item.isDropped
       val isNotCollectedHidden = item.spoilers.isNotCollectedShowsHidden && (!item.isInCollection())
 
-      if (isMyShowHidden || isWatchlistHidden || isHiddenShowHidden || isNotCollectedHidden) {
+      if (isMyShowHidden || isWatchlistHidden || isDroppedShowHidden || isNotCollectedHidden) {
         val spoilerDescription = contextMenuItemDescription.text.toString()
         val hiddenDescription = SPOILERS_REGEX.replace(contextMenuItemDescription.text.toString(), SPOILERS_HIDE_SYMBOL)
         contextMenuItemDescription.tag = spoilerDescription
@@ -168,10 +168,10 @@ class ShowContextMenuBottomSheet : ContextMenuBottomSheet() {
 
       val isMyShowHidden = item.spoilers.isMyShowsRatingsHidden && item.isMyShow
       val isWatchlistHidden = item.spoilers.isWatchlistShowsRatingsHidden && item.isWatchlist
-      val isHiddenShowHidden = item.spoilers.isHiddenShowsRatingsHidden && item.isHidden
+      val isDroppedShowHidden = item.spoilers.isDroppedShowsRatingsHidden && item.isDropped
       val isNotCollectedHidden = item.spoilers.isNotCollectedShowsRatingsHidden && (!item.isInCollection())
 
-      if (isMyShowHidden || isWatchlistHidden || isHiddenShowHidden || isNotCollectedHidden) {
+      if (isMyShowHidden || isWatchlistHidden || isDroppedShowHidden || isNotCollectedHidden) {
         contextMenuRating.tag = rating
         rating = SPOILERS_RATINGS_HIDE_SYMBOL
       }

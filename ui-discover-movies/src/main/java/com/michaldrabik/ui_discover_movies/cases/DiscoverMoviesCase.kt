@@ -33,13 +33,13 @@ internal class DiscoverMoviesCase @Inject constructor(
       val movies = moviesRepository.discoverMovies.loadAllCached()
       val myMoviesIds = moviesRepository.myMovies.loadAllIds()
       val watchlistMoviesIds = moviesRepository.watchlistMovies.loadAllIds()
-      val hiddenMoviesIds = moviesRepository.hiddenMovies.loadAllIds()
+      val droppedMoviesIds = moviesRepository.droppedMovies.loadAllIds()
 
       prepareItems(
         movies = movies,
         myMoviesIds = myMoviesIds,
         watchlistMoviesIds = watchlistMoviesIds,
-        hiddenMoviesIds = hiddenMoviesIds,
+        droppedMoviesIds = droppedMoviesIds,
         filters = filters,
         language = translationsRepository.getLanguage(),
       )
@@ -56,13 +56,13 @@ internal class DiscoverMoviesCase @Inject constructor(
 
       val myMoviesIds = moviesRepository.myMovies.loadAllIds()
       val watchlistMoviesIds = moviesRepository.watchlistMovies.loadAllIds()
-      val hiddenMoviesIds = moviesRepository.hiddenMovies.loadAllIds()
+      val droppedMoviesIds = moviesRepository.droppedMovies.loadAllIds()
 
       prepareItems(
         movies = movies,
         myMoviesIds = myMoviesIds,
         watchlistMoviesIds = watchlistMoviesIds,
-        hiddenMoviesIds = hiddenMoviesIds,
+        droppedMoviesIds = droppedMoviesIds,
         filters = filters,
         language = translationsRepository.getLanguage(),
       )
@@ -72,13 +72,13 @@ internal class DiscoverMoviesCase @Inject constructor(
     movies: List<Movie>,
     myMoviesIds: List<Long>,
     watchlistMoviesIds: List<Long>,
-    hiddenMoviesIds: List<Long>,
+    droppedMoviesIds: List<Long>,
     filters: DiscoverFilters,
     language: String,
   ) = coroutineScope {
     val collectionIds = myMoviesIds + watchlistMoviesIds
     movies
-      .filter { !hiddenMoviesIds.contains(it.traktId) }
+      .filter { !droppedMoviesIds.contains(it.traktId) }
       .filter {
         if (!filters.hideCollection) {
           true

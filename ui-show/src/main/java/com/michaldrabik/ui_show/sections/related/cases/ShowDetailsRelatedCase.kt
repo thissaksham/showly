@@ -15,7 +15,7 @@ class ShowDetailsRelatedCase @Inject constructor(
 
   suspend fun loadRelatedShows(show: Show): List<Show> =
     withContext(dispatchers.IO) {
-      val archivedShowsIds = showsRepository.hiddenShows.loadAllIds()
+      val archivedShowsIds = showsRepository.droppedShows.loadAllIds()
       showsRepository.relatedShows
         .loadAll(show, archivedShowsIds.size)
         .filter { it.traktId !in archivedShowsIds }

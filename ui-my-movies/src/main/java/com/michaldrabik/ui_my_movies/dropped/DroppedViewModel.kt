@@ -1,4 +1,4 @@
-package com.michaldrabik.ui_my_movies.hidden
+package com.michaldrabik.ui_my_movies.dropped
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,8 +17,8 @@ import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
 import com.michaldrabik.ui_my_movies.common.recycler.CollectionListItem
-import com.michaldrabik.ui_my_movies.hidden.cases.HiddenLoadMoviesCase
-import com.michaldrabik.ui_my_movies.hidden.cases.HiddenSortOrderCase
+import com.michaldrabik.ui_my_movies.dropped.cases.DroppedLoadMoviesCase
+import com.michaldrabik.ui_my_movies.dropped.cases.DroppedSortOrderCase
 import com.michaldrabik.ui_my_movies.main.FollowedMoviesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -32,9 +32,9 @@ import javax.inject.Inject
 import com.michaldrabik.ui_base.events.Event as EventSync
 
 @HiltViewModel
-class HiddenViewModel @Inject constructor(
-  private val sortOrderCase: HiddenSortOrderCase,
-  private val loadMoviesCase: HiddenLoadMoviesCase,
+class DroppedViewModel @Inject constructor(
+  private val sortOrderCase: DroppedSortOrderCase,
+  private val loadMoviesCase: DroppedLoadMoviesCase,
   private val settingsRepository: SettingsRepository,
   private val imagesProvider: MovieImagesProvider,
   private val eventsManager: EventsManager,
@@ -130,7 +130,7 @@ class HiddenViewModel @Inject constructor(
     scrollState,
     viewModeState,
   ) { s1, s2, s3, s4 ->
-    HiddenUiState(
+    DroppedUiState(
       items = s1,
       sortOrder = s2,
       resetScroll = s3,
@@ -139,6 +139,6 @@ class HiddenViewModel @Inject constructor(
   }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.WhileSubscribed(SUBSCRIBE_STOP_TIMEOUT),
-    initialValue = HiddenUiState(),
+    initialValue = DroppedUiState(),
   )
 }

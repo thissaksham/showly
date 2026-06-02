@@ -100,7 +100,7 @@ class SettingsFiltersRepository @Inject constructor(
       preferences.edit { putStringSet(WATCHLIST_SHOWS_GENRES, value.map { it.name }.toSet()) }
     }
 
-  var hiddenShowsNetworks: List<Network>
+  var droppedShowsNetworks: List<Network>
     get() {
       val filters = preferences.getStringSet(HIDDEN_SHOWS_NETWORKS, emptySet()) ?: emptySet()
       return filters.map { Network.valueOf(it) }
@@ -109,7 +109,7 @@ class SettingsFiltersRepository @Inject constructor(
       preferences.edit { putStringSet(HIDDEN_SHOWS_NETWORKS, value.map { it.name }.toSet()) }
     }
 
-  var hiddenShowsGenres: List<Genre>
+  var droppedShowsGenres: List<Genre>
     get() {
       val filters = preferences.getStringSet(HIDDEN_SHOWS_GENRES, emptySet()) ?: emptySet()
       return filters.map { Genre.valueOf(it) }
@@ -151,7 +151,7 @@ class SettingsFiltersRepository @Inject constructor(
       preferences.edit { putStringSet(WATCHLIST_MOVIES_GENRES, value.map { it.name }.toSet()) }
     }
 
-  var hiddenMoviesGenres: List<Genre>
+  var droppedMoviesGenres: List<Genre>
     get() {
       val filters = preferences.getStringSet(HIDDEN_MOVIES_GENRES, emptySet()) ?: emptySet()
       return filters.map { Genre.valueOf(it) }

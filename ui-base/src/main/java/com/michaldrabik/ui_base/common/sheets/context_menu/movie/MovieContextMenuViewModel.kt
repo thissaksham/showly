@@ -2,7 +2,7 @@ package com.michaldrabik.ui_base.common.sheets.context_menu.movie
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases.MovieContextMenuHiddenCase
+import com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases.MovieContextMenuDroppedCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases.MovieContextMenuLoadItemCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases.MovieContextMenuMyMoviesCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases.MovieContextMenuPinnedCase
@@ -31,7 +31,7 @@ class MovieContextMenuViewModel @Inject constructor(
   private val loadItemCase: MovieContextMenuLoadItemCase,
   private val myMoviesCase: MovieContextMenuMyMoviesCase,
   private val watchlistCase: MovieContextMenuWatchlistCase,
-  private val hiddenCase: MovieContextMenuHiddenCase,
+  private val droppedCase: MovieContextMenuDroppedCase,
   private val pinnedCase: MovieContextMenuPinnedCase,
 ) : ViewModel() {
 
@@ -117,11 +117,11 @@ class MovieContextMenuViewModel @Inject constructor(
     }
   }
 
-  fun moveToHidden() {
+  fun moveToDropped() {
     viewModelScope.launch {
       loadingState.value = true
       try {
-        hiddenCase.moveToHidden(IdTrakt(movieIdValue))
+        droppedCase.moveToDropped(IdTrakt(movieIdValue))
         loadMovie(IdTrakt(movieIdValue))
       } catch (e: Throwable) {
         onError(e)
@@ -131,11 +131,11 @@ class MovieContextMenuViewModel @Inject constructor(
     }
   }
 
-  fun removeFromHidden() {
+  fun removeFromDropped() {
     viewModelScope.launch {
       loadingState.value = true
       try {
-        hiddenCase.removeFromHidden(IdTrakt(movieIdValue))
+        droppedCase.removeFromDropped(IdTrakt(movieIdValue))
         loadMovie(IdTrakt(movieIdValue))
       } catch (e: Throwable) {
         onError(e)

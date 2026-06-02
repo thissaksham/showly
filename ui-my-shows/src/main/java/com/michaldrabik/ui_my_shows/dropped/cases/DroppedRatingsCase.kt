@@ -1,4 +1,4 @@
-package com.michaldrabik.ui_my_movies.hidden.cases
+package com.michaldrabik.ui_my_shows.dropped.cases
 
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
 import com.michaldrabik.repository.RatingsRepository
@@ -9,13 +9,13 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @ViewModelScoped
-class HiddenRatingsCase @Inject constructor(
+class DroppedRatingsCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val ratingsRepository: RatingsRepository,
 ) {
 
   suspend fun loadRatings(): Map<IdTrakt, TraktRating?> =
     withContext(dispatchers.IO) {
-      ratingsRepository.movies.loadMoviesRatings().associateBy { it.idTrakt }
+      ratingsRepository.shows.loadShowsRatings().associateBy { it.idTrakt }
     }
 }

@@ -1,4 +1,4 @@
-package com.michaldrabik.ui_my_shows.hidden
+package com.michaldrabik.ui_my_shows.dropped
 
 import android.os.Bundle
 import android.view.View
@@ -35,7 +35,7 @@ import com.michaldrabik.ui_model.SortOrder.RATING
 import com.michaldrabik.ui_model.SortOrder.USER_RATING
 import com.michaldrabik.ui_model.SortType
 import com.michaldrabik.ui_my_shows.R
-import com.michaldrabik.ui_my_shows.common.filters.CollectionFiltersOrigin.HIDDEN_SHOWS
+import com.michaldrabik.ui_my_shows.common.filters.CollectionFiltersOrigin.DROPPED_SHOWS
 import com.michaldrabik.ui_my_shows.common.filters.genre.CollectionFiltersGenreBottomSheet
 import com.michaldrabik.ui_my_shows.common.filters.genre.CollectionFiltersGenreBottomSheet.Companion.REQUEST_COLLECTION_FILTERS_GENRE
 import com.michaldrabik.ui_my_shows.common.filters.network.CollectionFiltersNetworkBottomSheet
@@ -45,7 +45,7 @@ import com.michaldrabik.ui_my_shows.common.layout.CollectionShowListItemDecorati
 import com.michaldrabik.ui_my_shows.common.recycler.CollectionAdapter
 import com.michaldrabik.ui_my_shows.common.recycler.CollectionListItem.FiltersItem
 import com.michaldrabik.ui_my_shows.common.recycler.CollectionListItem.ShowItem
-import com.michaldrabik.ui_my_shows.databinding.FragmentHiddenBinding
+import com.michaldrabik.ui_my_shows.databinding.FragmentDroppedBinding
 import com.michaldrabik.ui_my_shows.main.FollowedShowsFragment
 import com.michaldrabik.ui_my_shows.main.FollowedShowsViewModel
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_SELECTED_SORT_ORDER
@@ -55,18 +55,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class HiddenFragment :
-  BaseFragment<HiddenViewModel>(R.layout.fragment_hidden),
+class DroppedFragment :
+  BaseFragment<DroppedViewModel>(R.layout.fragment_dropped),
   OnScrollResetListener,
   OnSearchClickListener {
 
   @Inject lateinit var settings: SettingsViewModeRepository
 
   override val navigationId = R.id.followedShowsFragment
-  private val binding by viewBinding(FragmentHiddenBinding::bind)
+  private val binding by viewBinding(FragmentDroppedBinding::bind)
 
   private val parentViewModel by viewModels<FollowedShowsViewModel>({ requireParentFragment() })
-  override val viewModel by viewModels<HiddenViewModel>()
+  override val viewModel by viewModels<DroppedViewModel>()
 
   private var adapter: CollectionAdapter? = null
   private var layoutManager: LayoutManager? = null
@@ -102,17 +102,17 @@ class HiddenFragment :
       upcomingChipClickListener = {},
       listViewChipClickListener = { },
       listChangeListener = {
-        binding.hiddenRecycler.scrollToPosition(0)
+        binding.droppedRecycler.scrollToPosition(0)
         (requireParentFragment() as FollowedShowsFragment).resetTranslations()
       },
       upcomingChipVisible = false,
     ).apply {
       stateRestorationPolicy = StateRestorationPolicy.PREVENT_WHEN_EMPTY
     }
-    binding.hiddenRecycler.apply {
+    binding.droppedRecycler.apply {
       setHasFixedSize(true)
-      adapter = this@HiddenFragment.adapter
-      layoutManager = this@HiddenFragment.layoutManager
+      adapter = this@DroppedFragment.adapter
+      layoutManager = this@DroppedFragment.layoutManager
       (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
       addItemDecoration(CollectionShowListItemDecoration(requireContext(), R.dimen.spaceSmall))
     }
@@ -123,8 +123,8 @@ class HiddenFragment :
       root.doOnApplyWindowInsets { _, insets, padding, _ ->
         val tabletOffset = if (isTablet) dimenToPx(R.dimen.spaceMedium) else 0
         val systemInset = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-        hiddenContent.updatePadding(top = padding.top + systemInset.top + tabletOffset)
-        hiddenRecycler.updatePadding(
+        droppedContent.updatePadding(top = padding.top + systemInset.top + tabletOffset)
+        droppedRecycler.updatePadding(
           top = dimenToPx(R.dimen.archiveTabsViewPadding),
           bottom = dimenToPx(R.dimen.myShowsBottomPadding) + systemInset.bottom,
         )
@@ -132,7 +132,7 @@ class HiddenFragment :
     }
   }
 
-  private fun render(uiState: HiddenUiState) {
+  private fun render(uiState: DroppedUiState) {
     uiState.run {
       with(binding) {
         viewMode.let {
@@ -140,7 +140,7 @@ class HiddenFragment :
             layoutManager = CollectionShowLayoutManagerProvider
               .provideLayoutManger(requireContext(), it, tabletGridSpanSize)
             adapter?.listViewMode = it
-            hiddenRecycler.let { recycler ->
+            droppedRecycler.let { recycler ->
               recycler.layoutManager = layoutManager
               recycler.adapter = adapter
             }
@@ -165,7 +165,7 @@ class HiddenFragment :
               }
             }
           }
-          hiddenEmptyView.root.fadeIf(it.isEmpty() && !isSearching)
+          droppedEmptyView.root.fadeIf(it.isEmpty() && !isSearching)
         }
       }
       sortOrder?.let { event ->
@@ -205,7 +205,7 @@ class HiddenFragment :
       viewModel.loadShows(resetScroll = true)
     }
 
-    val bundle = CollectionFiltersNetworkBottomSheet.createBundle(HIDDEN_SHOWS)
+    val bundle = CollectionFiltersNetworkBottomSheet.createBundle(DROPPED_SHOWS)
     navigateToSafe(R.id.actionFollowedShowsFragmentToNetworks, bundle)
   }
 
@@ -214,27 +214,27 @@ class HiddenFragment :
       viewModel.loadShows(resetScroll = true)
     }
 
-    val bundle = CollectionFiltersGenreBottomSheet.createBundle(HIDDEN_SHOWS)
+    val bundle = CollectionFiltersGenreBottomSheet.createBundle(DROPPED_SHOWS)
     navigateToSafe(R.id.actionFollowedShowsFragmentToGenres, bundle)
   }
 
   override fun onEnterSearch() {
     isSearching = true
     with(binding) {
-      hiddenRecycler.translationY = dimenToPx(R.dimen.myShowsSearchLocalOffset).toFloat()
-      hiddenRecycler.smoothScrollToPosition(0)
+      droppedRecycler.translationY = dimenToPx(R.dimen.myShowsSearchLocalOffset).toFloat()
+      droppedRecycler.smoothScrollToPosition(0)
     }
   }
 
   override fun onExitSearch() {
     isSearching = false
-    with(binding.hiddenRecycler) {
+    with(binding.droppedRecycler) {
       translationY = 0F
       postDelayed(200) { layoutManager?.scrollToPosition(0) }
     }
   }
 
-  override fun onScrollReset() = binding.hiddenRecycler.scrollToPosition(0)
+  override fun onScrollReset() = binding.droppedRecycler.scrollToPosition(0)
 
   override fun setupBackPressed() = Unit
 

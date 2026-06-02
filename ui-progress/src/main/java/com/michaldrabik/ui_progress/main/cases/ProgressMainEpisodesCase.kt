@@ -37,12 +37,12 @@ class ProgressMainEpisodesCase @Inject constructor(
     )
     val isFollowed = showsRepository.myShows.exists(show.ids.trakt)
     val isWatchlist = showsRepository.watchlistShows.exists(show.ids.trakt)
-    val isHidden = showsRepository.hiddenShows.exists(show.ids.trakt)
+    val isDropped = showsRepository.droppedShows.exists(show.ids.trakt)
 
     val areSpoilersHidden = when {
       isFollowed -> spoilersSettings.isMyShowsHidden
       isWatchlist -> spoilersSettings.isWatchlistShowsHidden
-      isHidden -> spoilersSettings.isHiddenShowsHidden
+      isDropped -> spoilersSettings.isDroppedShowsHidden
       else -> spoilersSettings.isUncollectedShowsHidden
     }
     localEpisode?.isWatched == true || !areSpoilersHidden

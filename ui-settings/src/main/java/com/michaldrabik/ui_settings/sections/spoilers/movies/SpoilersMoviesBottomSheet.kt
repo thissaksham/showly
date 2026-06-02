@@ -51,11 +51,11 @@ class SpoilersMoviesBottomSheet : BaseBottomSheetFragment(R.layout.sheet_spoiler
       watchlistMoviesRatingDescription.onClick {
         watchlistMoviesRatingsListener.invoke(it, !watchlistMoviesRatingsSwitch.isChecked)
       }
-      hiddenMoviesDescription.onClick {
-        hiddenMoviesListener.invoke(it, !hiddenMoviesSwitch.isChecked)
+      droppedMoviesDescription.onClick {
+        droppedMoviesListener.invoke(it, !droppedMoviesSwitch.isChecked)
       }
-      hiddenMoviesRatingDescription.onClick {
-        hiddenMoviesRatingsListener.invoke(it, !hiddenMoviesRatingsSwitch.isChecked)
+      droppedMoviesRatingDescription.onClick {
+        droppedMoviesRatingsListener.invoke(it, !droppedMoviesRatingsSwitch.isChecked)
       }
       notCollectedMoviesDescription.onClick {
         notCollectedMoviesListener.invoke(it, !notCollectedMoviesSwitch.isChecked)
@@ -80,8 +80,8 @@ class SpoilersMoviesBottomSheet : BaseBottomSheetFragment(R.layout.sheet_spoiler
         myMoviesRatingsSwitch.setCheckedSilent(isMyMoviesRatingsHidden, myMoviesRatingsListener)
         watchlistMoviesSwitch.setCheckedSilent(isWatchlistMoviesHidden, watchlistMoviesListener)
         watchlistMoviesRatingsSwitch.setCheckedSilent(isWatchlistMoviesRatingsHidden, watchlistMoviesRatingsListener)
-        hiddenMoviesSwitch.setCheckedSilent(isHiddenMoviesHidden, hiddenMoviesListener)
-        hiddenMoviesRatingsSwitch.setCheckedSilent(isHiddenMoviesRatingsHidden, hiddenMoviesRatingsListener)
+        droppedMoviesSwitch.setCheckedSilent(isDroppedMoviesHidden, droppedMoviesListener)
+        droppedMoviesRatingsSwitch.setCheckedSilent(isDroppedMoviesRatingsHidden, droppedMoviesRatingsListener)
       }
     }
   }
@@ -109,10 +109,10 @@ class SpoilersMoviesBottomSheet : BaseBottomSheetFragment(R.layout.sheet_spoiler
   private val watchlistMoviesRatingsListener: (View, Boolean) -> Unit = { _, isChecked ->
     viewModel.setHideWatchlistRatingsMovies(isChecked)
   }
-  private val hiddenMoviesListener: (View, Boolean) -> Unit = { _, isChecked ->
-    viewModel.setHideHiddenMovies(isChecked)
+  private val droppedMoviesListener: (View, Boolean) -> Unit = { _, isChecked ->
+    viewModel.setHideDroppedMovies(isChecked)
   }
-  private val hiddenMoviesRatingsListener: (View, Boolean) -> Unit = { _, isChecked ->
-    viewModel.setHideHiddenRatingsMovies(isChecked)
+  private val droppedMoviesRatingsListener: (View, Boolean) -> Unit = { _, isChecked ->
+    viewModel.setHideDroppedRatingsMovies(isChecked)
   }
 }

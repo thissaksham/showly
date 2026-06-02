@@ -12,11 +12,11 @@ data class ShowContextItem(
   val userRating: Int?,
   val isMyShow: Boolean,
   val isWatchlist: Boolean,
-  val isHidden: Boolean,
+  val isDropped: Boolean,
   val isPinnedTop: Boolean,
   val isOnHold: Boolean,
   val spoilers: SpoilersSettings,
 ) {
 
-  fun isInCollection() = isHidden || isWatchlist || isMyShow
+  fun isInCollection() = isDropped || isWatchlist || isMyShow
 }

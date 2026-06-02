@@ -48,7 +48,7 @@ class MovieContextMenuLoadItemCase @Inject constructor(
         userRating = rating?.rating,
         isMyMovie = moviesRepository.myMovies.exists(idTrakt),
         isWatchlist = moviesRepository.watchlistMovies.exists(idTrakt),
-        isHidden = moviesRepository.hiddenMovies.exists(idTrakt),
+        isDropped = moviesRepository.droppedMovies.exists(idTrakt),
         isPinnedTop = pinnedItemsRepository.isItemPinned(movie),
         spoilers = settingsSpoilersRepository.getAll(),
       )

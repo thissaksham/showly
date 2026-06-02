@@ -1,4 +1,4 @@
-package com.michaldrabik.ui_my_movies.hidden
+package com.michaldrabik.ui_my_movies.dropped
 
 import android.os.Bundle
 import android.view.View
@@ -40,8 +40,8 @@ import com.michaldrabik.ui_my_movies.common.layout.CollectionMovieListItemDecora
 import com.michaldrabik.ui_my_movies.common.recycler.CollectionAdapter
 import com.michaldrabik.ui_my_movies.common.recycler.CollectionListItem.FiltersItem
 import com.michaldrabik.ui_my_movies.common.recycler.CollectionListItem.MovieItem
-import com.michaldrabik.ui_my_movies.databinding.FragmentHiddenMoviesBinding
-import com.michaldrabik.ui_my_movies.filters.CollectionFiltersOrigin.HIDDEN_MOVIES
+import com.michaldrabik.ui_my_movies.databinding.FragmentDroppedMoviesBinding
+import com.michaldrabik.ui_my_movies.filters.CollectionFiltersOrigin.DROPPED_MOVIES
 import com.michaldrabik.ui_my_movies.filters.genre.CollectionFiltersGenreBottomSheet
 import com.michaldrabik.ui_my_movies.filters.genre.CollectionFiltersGenreBottomSheet.Companion.REQUEST_COLLECTION_FILTERS_GENRE
 import com.michaldrabik.ui_my_movies.main.FollowedMoviesFragment
@@ -51,18 +51,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class HiddenFragment :
-  BaseFragment<HiddenViewModel>(R.layout.fragment_hidden_movies),
+class DroppedFragment :
+  BaseFragment<DroppedViewModel>(R.layout.fragment_dropped_movies),
   OnScrollResetListener,
   OnSearchClickListener {
 
   @Inject lateinit var settings: SettingsViewModeRepository
 
   override val navigationId = R.id.followedMoviesFragment
-  private val binding by viewBinding(FragmentHiddenMoviesBinding::bind)
+  private val binding by viewBinding(FragmentDroppedMoviesBinding::bind)
 
   private val parentViewModel by viewModels<FollowedMoviesViewModel>({ requireParentFragment() })
-  override val viewModel by viewModels<HiddenViewModel>()
+  override val viewModel by viewModels<DroppedViewModel>()
 
   private var adapter: CollectionAdapter? = null
   private var layoutManager: LayoutManager? = null
@@ -98,14 +98,14 @@ class HiddenFragment :
       upcomingChipVisible = false,
       upcomingChipClickListener = {},
       listChangeListener = {
-        binding.hiddenMoviesRecycler.scrollToPosition(0)
+        binding.droppedMoviesRecycler.scrollToPosition(0)
         (requireParentFragment() as FollowedMoviesFragment).resetTranslations()
       },
     )
-    binding.hiddenMoviesRecycler.apply {
+    binding.droppedMoviesRecycler.apply {
       setHasFixedSize(true)
-      adapter = this@HiddenFragment.adapter
-      layoutManager = this@HiddenFragment.layoutManager
+      adapter = this@DroppedFragment.adapter
+      layoutManager = this@DroppedFragment.layoutManager
       (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
       addItemDecoration(CollectionMovieListItemDecoration(requireContext(), R.dimen.spaceSmall))
     }
@@ -116,8 +116,8 @@ class HiddenFragment :
       root.doOnApplyWindowInsets { _, insets, padding, _ ->
         val tabletOffset = if (isTablet) dimenToPx(R.dimen.spaceMedium) else 0
         val systemInset = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-        hiddenMoviesContent.updatePadding(top = padding.top + systemInset.top + tabletOffset)
-        hiddenMoviesRecycler.updatePadding(
+        droppedMoviesContent.updatePadding(top = padding.top + systemInset.top + tabletOffset)
+        droppedMoviesRecycler.updatePadding(
           top = dimenToPx(R.dimen.collectionTabsViewPadding),
           bottom = dimenToPx(R.dimen.myMoviesBottomPadding) + systemInset.bottom,
         )
@@ -125,7 +125,7 @@ class HiddenFragment :
     }
   }
 
-  private fun render(uiState: HiddenUiState) {
+  private fun render(uiState: DroppedUiState) {
     uiState.run {
       viewMode.let {
         if (adapter?.listViewMode != it) {
@@ -135,7 +135,7 @@ class HiddenFragment :
             gridSpanSize = tabletGridSpanSize,
           )
           adapter?.listViewMode = it
-          binding.hiddenMoviesRecycler?.let { recycler ->
+          binding.droppedMoviesRecycler?.let { recycler ->
             recycler.layoutManager = layoutManager
             recycler.adapter = adapter
           }
@@ -161,7 +161,7 @@ class HiddenFragment :
           }
         }
 
-        binding.hiddenMoviesEmptyView.root.fadeIf(it.isEmpty() && !isSearching)
+        binding.droppedMoviesEmptyView.root.fadeIf(it.isEmpty() && !isSearching)
       }
       sortOrder?.let { event ->
         event.consume()?.let { openSortOrderDialog(it.first, it.second) }
@@ -192,7 +192,7 @@ class HiddenFragment :
       viewModel.loadMovies(resetScroll = true)
     }
 
-    val bundle = CollectionFiltersGenreBottomSheet.createBundle(HIDDEN_MOVIES)
+    val bundle = CollectionFiltersGenreBottomSheet.createBundle(DROPPED_MOVIES)
     navigateToSafe(R.id.actionFollowedMoviesFragmentToGenres, bundle)
   }
 
@@ -206,7 +206,7 @@ class HiddenFragment :
 
   override fun onEnterSearch() {
     isSearching = true
-    with(binding.hiddenMoviesRecycler) {
+    with(binding.droppedMoviesRecycler) {
       translationY = dimenToPx(R.dimen.myMoviesSearchLocalOffset).toFloat()
       smoothScrollToPosition(0)
     }
@@ -214,13 +214,13 @@ class HiddenFragment :
 
   override fun onExitSearch() {
     isSearching = false
-    with(binding.hiddenMoviesRecycler) {
+    with(binding.droppedMoviesRecycler) {
       translationY = 0F
       postDelayed(200) { layoutManager?.scrollToPosition(0) }
     }
   }
 
-  override fun onScrollReset() = binding.hiddenMoviesRecycler.scrollToPosition(0)
+  override fun onScrollReset() = binding.droppedMoviesRecycler.scrollToPosition(0)
 
   override fun setupBackPressed() = Unit
 

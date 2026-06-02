@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @ViewModelScoped
-class ShowDetailsHiddenCase @Inject constructor(
+class ShowDetailsDroppedCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val localSource: LocalDataSource,
   private val transactions: TransactionsProvider,
@@ -22,17 +22,17 @@ class ShowDetailsHiddenCase @Inject constructor(
   private val announcementManager: AnnouncementManager,
 ) {
 
-  suspend fun isHidden(show: Show) =
+  suspend fun isDropped(show: Show) =
     withContext(dispatchers.IO) {
-      showsRepository.hiddenShows.exists(show.ids.trakt)
+      showsRepository.droppedShows.exists(show.ids.trakt)
     }
 
-  suspend fun addToHidden(
+  suspend fun addToDropped(
     show: Show,
     removeLocalData: Boolean,
   ) = withContext(dispatchers.IO) {
     transactions.withTransaction {
-      showsRepository.hiddenShows.insert(show.ids.trakt)
+      showsRepository.droppedShows.insert(show.ids.trakt)
 
       if (removeLocalData) {
         localSource.episodes.deleteAllUnwatchedForShow(show.traktId)
@@ -51,9 +51,9 @@ class ShowDetailsHiddenCase @Inject constructor(
     announcementManager.refreshShowsAnnouncements()
   }
 
-  suspend fun removeFromHidden(show: Show) =
+  suspend fun removeFromDropped(show: Show) =
     withContext(dispatchers.IO) {
-      showsRepository.hiddenShows.delete(show.ids.trakt)
+      showsRepository.droppedShows.delete(show.ids.trakt)
       pinnedItemsRepository.removePinnedItem(show)
       announcementManager.refreshShowsAnnouncements()
     }

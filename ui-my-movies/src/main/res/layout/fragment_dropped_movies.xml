@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:id="@+id/hiddenMoviesContent"
+  android:id="@+id/droppedMoviesContent"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:clipChildren="false"
@@ -9,7 +9,7 @@
   >
 
   <androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/hiddenMoviesRecycler"
+    android:id="@+id/droppedMoviesRecycler"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
@@ -23,8 +23,8 @@
     />
 
   <include
-    android:id="@+id/hiddenMoviesEmptyView"
-    layout="@layout/layout_hidden_empty"
+    android:id="@+id/droppedMoviesEmptyView"
+    layout="@layout/layout_dropped_empty"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"

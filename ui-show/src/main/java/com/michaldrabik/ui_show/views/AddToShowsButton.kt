@@ -92,7 +92,7 @@ class AddToShowsButton : FrameLayout {
             fadeIn(duration, startDelay = startDelay, withHardware = true) { isAnimating = false }
           }
         }
-        State.IN_HIDDEN -> {
+        State.IN_DROPPED -> {
           val delay = if (addToMyShowsButton.isVisible) startDelay else 0
           addToMyShowsButton.fadeOut(duration, withHardware = true)
           watchlistButton.fadeOut(duration, withHardware = true)
@@ -101,7 +101,7 @@ class AddToShowsButton : FrameLayout {
               val color = context.colorFromAttr(android.R.attr.textColorSecondary)
               val colorState = context.colorStateListFromAttr(android.R.attr.textColorSecondary)
               setIconResource(R.drawable.ic_eye_no)
-              setText(R.string.textInHidden)
+              setText(R.string.textInDropped)
               setTextColor(color)
               iconTint = colorState
               strokeColor = colorState
@@ -129,6 +129,6 @@ class AddToShowsButton : FrameLayout {
     ADD,
     IN_MY_SHOWS,
     IN_WATCHLIST,
-    IN_HIDDEN,
+    IN_DROPPED,
   }
 }

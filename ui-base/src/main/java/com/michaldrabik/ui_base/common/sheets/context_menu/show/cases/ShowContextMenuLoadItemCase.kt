@@ -47,7 +47,7 @@ class ShowContextMenuLoadItemCase @Inject constructor(
         userRating = rating?.rating,
         isMyShow = showsRepository.myShows.exists(idTrakt),
         isWatchlist = showsRepository.watchlistShows.exists(idTrakt),
-        isHidden = showsRepository.hiddenShows.exists(idTrakt),
+        isDropped = showsRepository.droppedShows.exists(idTrakt),
         isPinnedTop = pinnedItemsRepository.isItemPinned(show),
         isOnHold = onHoldItemsRepository.isOnHold(show),
         spoilers = settingsRepository.spoilers.getAll(),

@@ -15,7 +15,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ShowContextMenuHiddenCase @Inject constructor(
+class ShowContextMenuDroppedCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val localSource: LocalDataSource,
   private val transactions: TransactionsProvider,
@@ -24,13 +24,13 @@ class ShowContextMenuHiddenCase @Inject constructor(
   private val announcementManager: AnnouncementManager,
 ) {
 
-  suspend fun moveToHidden(
+  suspend fun moveToDropped(
     traktId: IdTrakt,
     removeLocalData: Boolean,
   ) = withContext(dispatchers.IO) {
     val show = Show.EMPTY.copy(ids = Ids.EMPTY.copy(traktId))
     transactions.withTransaction {
-      showsRepository.hiddenShows.insert(show.ids.trakt)
+      showsRepository.droppedShows.insert(show.ids.trakt)
 
       if (removeLocalData) {
         localSource.episodes.deleteAllUnwatchedForShow(show.traktId)
@@ -49,9 +49,9 @@ class ShowContextMenuHiddenCase @Inject constructor(
     announcementManager.refreshShowsAnnouncements()
   }
 
-  suspend fun removeFromHidden(traktId: IdTrakt) =
+  suspend fun removeFromDropped(traktId: IdTrakt) =
     withContext(dispatchers.IO) {
-      showsRepository.hiddenShows.delete(traktId)
+      showsRepository.droppedShows.delete(traktId)
       announcementManager.refreshShowsAnnouncements()
     }
 }

@@ -1,4 +1,4 @@
-package com.michaldrabik.ui_my_shows.hidden.cases
+package com.michaldrabik.ui_my_shows.dropped.cases
 
 import com.michaldrabik.common.Config
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @ViewModelScoped
-class HiddenTranslationsCase @Inject constructor(
+class DroppedTranslationsCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val translationsRepository: TranslationsRepository,
 ) {

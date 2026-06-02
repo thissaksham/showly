@@ -1,4 +1,4 @@
-package com.michaldrabik.ui_my_shows.hidden.cases
+package com.michaldrabik.ui_my_shows.dropped.cases
 
 import com.michaldrabik.common.Config
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
@@ -17,7 +17,7 @@ import com.michaldrabik.ui_model.TraktRating
 import com.michaldrabik.ui_model.Translation
 import com.michaldrabik.ui_model.UpcomingFilter
 import com.michaldrabik.ui_my_shows.common.recycler.CollectionListItem
-import com.michaldrabik.ui_my_shows.hidden.helpers.HiddenItemSorter
+import com.michaldrabik.ui_my_shows.dropped.helpers.DroppedItemSorter
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -27,10 +27,10 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @ViewModelScoped
-class HiddenLoadShowsCase @Inject constructor(
+class DroppedLoadShowsCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
-  private val ratingsCase: HiddenRatingsCase,
-  private val sorter: HiddenItemSorter,
+  private val ratingsCase: DroppedRatingsCase,
+  private val sorter: DroppedItemSorter,
   private val showsRepository: ShowsRepository,
   private val translationsRepository: TranslationsRepository,
   private val settingsRepository: SettingsRepository,
@@ -51,15 +51,15 @@ class HiddenLoadShowsCase @Inject constructor(
         }
       val spoilers = settingsRepository.spoilers.getAll()
 
-      val sortOrder = settingsRepository.sorting.hiddenShowsSortOrder
-      val sortType = settingsRepository.sorting.hiddenShowsSortType
+      val sortOrder = settingsRepository.sorting.droppedShowsSortOrder
+      val sortType = settingsRepository.sorting.droppedShowsSortType
 
       var filtersItem = loadFiltersItem(sortOrder, sortType)
       val filtersNetworks = filtersItem.networks
         .flatMap { network -> network.channels.map { it } }
       val filtersGenres = filtersItem.genres.map { it.slug.lowercase() }
 
-      val hiddenItems = showsRepository.hiddenShows
+      val droppedItems = showsRepository.droppedShows
         .loadAll()
         .map {
           toListItemAsync(
@@ -76,12 +76,12 @@ class HiddenLoadShowsCase @Inject constructor(
         .filterByGenre(filtersGenres)
         .sortedWith(sorter.sort(sortOrder, sortType))
 
-      filtersItem = filtersItem.copy(count = hiddenItems.size)
+      filtersItem = filtersItem.copy(count = droppedItems.size)
 
-      if (hiddenItems.isNotEmpty() || filtersItem.hasActiveFilters()) {
-        listOf(filtersItem) + hiddenItems
+      if (droppedItems.isNotEmpty() || filtersItem.hasActiveFilters()) {
+        listOf(filtersItem) + droppedItems
       } else {
-        hiddenItems
+        droppedItems
       }
     }
 
@@ -109,8 +109,8 @@ class HiddenLoadShowsCase @Inject constructor(
     CollectionListItem.FiltersItem(
       sortOrder = sortOrder,
       sortType = sortType,
-      networks = settingsRepository.filters.hiddenShowsNetworks,
-      genres = settingsRepository.filters.hiddenShowsGenres,
+      networks = settingsRepository.filters.droppedShowsNetworks,
+      genres = settingsRepository.filters.droppedShowsGenres,
       upcoming = UpcomingFilter.OFF,
       count = 0,
     )
@@ -133,8 +133,8 @@ class HiddenLoadShowsCase @Inject constructor(
       dateFormat = dateFormat,
       sortOrder = sortOrder,
       spoilers = CollectionListItem.ShowItem.Spoilers(
-        isSpoilerHidden = spoilers.isHiddenShowsHidden,
-        isSpoilerRatingsHidden = spoilers.isHiddenShowsRatingsHidden,
+        isSpoilerHidden = spoilers.isDroppedShowsHidden,
+        isSpoilerRatingsHidden = spoilers.isDroppedShowsRatingsHidden,
         isSpoilerTapToReveal = spoilers.isTapToReveal,
       ),
     )

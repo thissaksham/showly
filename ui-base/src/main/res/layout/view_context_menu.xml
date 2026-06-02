@@ -301,9 +301,9 @@
       />
 
     <com.google.android.material.button.MaterialButton
-      android:id="@+id/contextMenuItemMoveToHiddenButton"
+      android:id="@+id/contextMenuItemMoveToDroppedButton"
       style="@style/ContextMenuItemButton.Move"
-      android:text="@string/textMoveToHidden"
+      android:text="@string/textMoveToDropped"
       android:visibility="gone"
       app:icon="@drawable/ic_eye_no"
       tools:visibility="visible"
@@ -326,9 +326,9 @@
       />
 
     <com.google.android.material.button.MaterialButton
-      android:id="@+id/contextMenuItemRemoveFromHiddenButton"
+      android:id="@+id/contextMenuItemRemoveFromDroppedButton"
       style="@style/ContextMenuItemButton.Remove"
-      android:text="@string/textRemoveFromHidden"
+      android:text="@string/textRemoveFromDropped"
       android:visibility="gone"
       tools:visibility="visible"
       />

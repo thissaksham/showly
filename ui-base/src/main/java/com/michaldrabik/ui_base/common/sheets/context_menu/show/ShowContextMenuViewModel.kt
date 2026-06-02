@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.OnHoldItemsRepository
-import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuHiddenCase
+import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuDroppedCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuLoadItemCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuMyShowsCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuPinnedCase
@@ -35,7 +35,7 @@ class ShowContextMenuViewModel @Inject constructor(
   private val loadItemCase: ShowContextMenuLoadItemCase,
   private val myShowsCase: ShowContextMenuMyShowsCase,
   private val watchlistCase: ShowContextMenuWatchlistCase,
-  private val hiddenCase: ShowContextMenuHiddenCase,
+  private val droppedCase: ShowContextMenuDroppedCase,
   private val pinnedCase: ShowContextMenuPinnedCase,
   private val onHoldCase: OnHoldItemsRepository,
   private val imagesProvider: ShowImagesProvider,
@@ -125,11 +125,11 @@ class ShowContextMenuViewModel @Inject constructor(
     }
   }
 
-  fun moveToHidden() {
+  fun moveToDropped() {
     viewModelScope.launch {
       loadingSecondaryState.value = true
       try {
-        hiddenCase.moveToHidden(IdTrakt(showIdValue), false)
+        droppedCase.moveToDropped(IdTrakt(showIdValue), false)
         loadShow(IdTrakt(showIdValue))
       } catch (e: Throwable) {
         onError(e)
@@ -139,11 +139,11 @@ class ShowContextMenuViewModel @Inject constructor(
     }
   }
 
-  fun removeFromHidden() {
+  fun removeFromDropped() {
     viewModelScope.launch {
       loadingSecondaryState.value = true
       try {
-        hiddenCase.removeFromHidden(IdTrakt(showIdValue))
+        droppedCase.removeFromDropped(IdTrakt(showIdValue))
         loadShow(IdTrakt(showIdValue))
       } catch (e: Throwable) {
         onError(e)

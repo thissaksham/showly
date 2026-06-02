@@ -14,10 +14,10 @@ data class MovieContextItem(
   val userRating: Int?,
   val isMyMovie: Boolean,
   val isWatchlist: Boolean,
-  val isHidden: Boolean,
+  val isDropped: Boolean,
   val isPinnedTop: Boolean,
   val spoilers: SpoilersSettings,
 ) {
 
-  fun isInCollection() = isHidden || isWatchlist || isMyMovie
+  fun isInCollection() = isDropped || isWatchlist || isMyMovie
 }

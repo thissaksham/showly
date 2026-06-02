@@ -43,8 +43,8 @@ class SettingsSpoilersRepository @Inject constructor(
   var isMyShowsRatingsHidden by BooleanPreference(preferences, SHOWS_MY_SHOWS_RATINGS_HIDDEN, false)
   var isWatchlistShowsHidden by BooleanPreference(preferences, SHOWS_WATCHLIST_SHOWS_HIDDEN, false)
   var isWatchlistShowsRatingsHidden by BooleanPreference(preferences, SHOWS_WATCHLIST_SHOWS_RATINGS_HIDDEN, false)
-  var isHiddenShowsHidden by BooleanPreference(preferences, SHOWS_HIDDEN_SHOWS_HIDDEN, false)
-  var isHiddenShowsRatingsHidden by BooleanPreference(preferences, SHOWS_HIDDEN_SHOWS_RATINGS_HIDDEN, false)
+  var isDroppedShowsHidden by BooleanPreference(preferences, SHOWS_HIDDEN_SHOWS_HIDDEN, false)
+  var isDroppedShowsRatingsHidden by BooleanPreference(preferences, SHOWS_HIDDEN_SHOWS_RATINGS_HIDDEN, false)
   var isUncollectedShowsHidden by BooleanPreference(preferences, SHOWS_UNCOLLECTED_SHOWS_HIDDEN, false)
   var isUncollectedShowsRatingsHidden by BooleanPreference(preferences, SHOWS_UNCOLLECTED_SHOWS_RATINGS_HIDDEN, false)
 
@@ -52,8 +52,8 @@ class SettingsSpoilersRepository @Inject constructor(
   var isMyMoviesRatingsHidden by BooleanPreference(preferences, MOVIES_MY_MOVIES_RATINGS_HIDDEN, false)
   var isWatchlistMoviesHidden by BooleanPreference(preferences, MOVIES_WATCHLIST_MOVIES_HIDDEN, false)
   var isWatchlistMoviesRatingsHidden by BooleanPreference(preferences, MOVIES_WATCHLIST_MOVIES_RATINGS_HIDDEN, false)
-  var isHiddenMoviesHidden by BooleanPreference(preferences, MOVIES_HIDDEN_MOVIES_HIDDEN, false)
-  var isHiddenMoviesRatingsHidden by BooleanPreference(preferences, MOVIES_HIDDEN_MOVIES_RATINGS_HIDDEN, false)
+  var isDroppedMoviesHidden by BooleanPreference(preferences, MOVIES_HIDDEN_MOVIES_HIDDEN, false)
+  var isDroppedMoviesRatingsHidden by BooleanPreference(preferences, MOVIES_HIDDEN_MOVIES_RATINGS_HIDDEN, false)
   var isUncollectedMoviesHidden by BooleanPreference(preferences, MOVIES_UNCOLLECTED_MOVIES_HIDDEN, false)
   var isUncollectedMoviesRatingsHidden by BooleanPreference(
     preferences,
@@ -78,10 +78,10 @@ class SettingsSpoilersRepository @Inject constructor(
       isWatchlistShowsRatingsHidden = isWatchlistShowsRatingsHidden,
       isWatchlistMoviesHidden = isWatchlistMoviesHidden,
       isWatchlistMoviesRatingsHidden = isWatchlistMoviesRatingsHidden,
-      isHiddenShowsHidden = isHiddenShowsHidden,
-      isHiddenShowsRatingsHidden = isHiddenShowsRatingsHidden,
-      isHiddenMoviesHidden = isHiddenMoviesHidden,
-      isHiddenMoviesRatingsHidden = isHiddenMoviesRatingsHidden,
+      isDroppedShowsHidden = isDroppedShowsHidden,
+      isDroppedShowsRatingsHidden = isDroppedShowsRatingsHidden,
+      isDroppedMoviesHidden = isDroppedMoviesHidden,
+      isDroppedMoviesRatingsHidden = isDroppedMoviesRatingsHidden,
       isNotCollectedShowsHidden = isUncollectedShowsHidden,
       isNotCollectedShowsRatingsHidden = isUncollectedShowsRatingsHidden,
       isNotCollectedMoviesHidden = isUncollectedMoviesHidden,

@@ -8,7 +8,7 @@ import com.michaldrabik.ui_base.viewmodel.ChannelsDelegate
 import com.michaldrabik.ui_base.viewmodel.DefaultChannelsDelegate
 import com.michaldrabik.ui_model.Network
 import com.michaldrabik.ui_my_shows.common.filters.CollectionFiltersOrigin
-import com.michaldrabik.ui_my_shows.common.filters.CollectionFiltersOrigin.HIDDEN_SHOWS
+import com.michaldrabik.ui_my_shows.common.filters.CollectionFiltersOrigin.DROPPED_SHOWS
 import com.michaldrabik.ui_my_shows.common.filters.CollectionFiltersOrigin.MY_SHOWS
 import com.michaldrabik.ui_my_shows.common.filters.CollectionFiltersOrigin.WATCHLIST_SHOWS
 import com.michaldrabik.ui_my_shows.common.filters.CollectionFiltersUiEvent.ApplyFilters
@@ -37,7 +37,7 @@ internal class CollectionFiltersNetworkViewModel @Inject constructor(
     networksState.value = when (origin) {
       MY_SHOWS -> settingsRepository.filters.myShowsNetworks
       WATCHLIST_SHOWS -> settingsRepository.filters.watchlistShowsNetworks
-      HIDDEN_SHOWS -> settingsRepository.filters.hiddenShowsNetworks
+      DROPPED_SHOWS -> settingsRepository.filters.droppedShowsNetworks
     }.toList()
   }
 
@@ -50,7 +50,7 @@ internal class CollectionFiltersNetworkViewModel @Inject constructor(
       when (origin) {
         MY_SHOWS -> settingsRepository.filters.myShowsNetworks = networks
         WATCHLIST_SHOWS -> settingsRepository.filters.watchlistShowsNetworks = networks
-        HIDDEN_SHOWS -> settingsRepository.filters.hiddenShowsNetworks = networks
+        DROPPED_SHOWS -> settingsRepository.filters.droppedShowsNetworks = networks
       }
       eventChannel.send(ApplyFilters)
     }

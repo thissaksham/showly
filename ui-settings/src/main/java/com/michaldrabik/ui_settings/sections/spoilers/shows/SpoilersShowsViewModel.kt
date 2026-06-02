@@ -44,13 +44,13 @@ class SpoilersShowsViewModel @Inject constructor(
     refreshSettings()
   }
 
-  fun setHideHiddenShows(hide: Boolean) {
-    settingsRepository.isHiddenShowsHidden = hide
+  fun setHideDroppedShows(hide: Boolean) {
+    settingsRepository.isDroppedShowsHidden = hide
     refreshSettings()
   }
 
-  fun setHideHiddenRatingsShows(hide: Boolean) {
-    settingsRepository.isHiddenShowsRatingsHidden = hide
+  fun setHideDroppedRatingsShows(hide: Boolean) {
+    settingsRepository.isDroppedShowsRatingsHidden = hide
     refreshSettings()
   }
 

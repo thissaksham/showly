@@ -22,20 +22,20 @@ data class ShowDetailsUiState(
   data class FollowedState(
     val isMyShows: Boolean,
     val isWatchlist: Boolean,
-    val isHidden: Boolean,
+    val isDropped: Boolean,
     val withAnimation: Boolean,
   ) {
 
-    fun isInCollection() = isMyShows || isWatchlist || isHidden
+    fun isInCollection() = isMyShows || isWatchlist || isDropped
 
     companion object {
-      fun idle() = FollowedState(isMyShows = false, isWatchlist = false, isHidden = false, withAnimation = true)
+      fun idle() = FollowedState(isMyShows = false, isWatchlist = false, isDropped = false, withAnimation = true)
 
-      fun inMyShows() = FollowedState(isMyShows = true, isWatchlist = false, isHidden = false, withAnimation = true)
+      fun inMyShows() = FollowedState(isMyShows = true, isWatchlist = false, isDropped = false, withAnimation = true)
 
-      fun inWatchlist() = FollowedState(isMyShows = false, isWatchlist = true, isHidden = false, withAnimation = true)
+      fun inWatchlist() = FollowedState(isMyShows = false, isWatchlist = true, isDropped = false, withAnimation = true)
 
-      fun inHidden() = FollowedState(isMyShows = false, isWatchlist = false, isHidden = true, withAnimation = true)
+      fun inDropped() = FollowedState(isMyShows = false, isWatchlist = false, isDropped = true, withAnimation = true)
     }
   }
 }

@@ -13,7 +13,7 @@ import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
 import com.michaldrabik.ui_base.utilities.extensions.combine
 import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
-import com.michaldrabik.ui_movie.cases.MovieDetailsHiddenCase
+import com.michaldrabik.ui_movie.cases.MovieDetailsDroppedCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsListsCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsMainCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsMyMoviesCase
@@ -46,7 +46,7 @@ class MovieDetailsViewModel @Inject constructor(
   private val myMoviesCase: MovieDetailsMyMoviesCase,
   private val ratingsCase: MovieDetailsRatingCase,
   private val watchlistCase: MovieDetailsWatchlistCase,
-  private val hiddenCase: MovieDetailsHiddenCase,
+  private val droppedCase: MovieDetailsDroppedCase,
   private val listsCase: MovieDetailsListsCase,
   private val settingsRepository: SettingsRepository,
   private val imagesProvider: MovieImagesProvider,
@@ -88,12 +88,12 @@ class MovieDetailsViewModel @Inject constructor(
 
         val isFollowed = myMoviesCase.getMyMovie(result) != null
         val isWatchlist = watchlistCase.isWatchlist(result)
-        val isHidden = hiddenCase.isHidden(result)
+        val isDropped = droppedCase.isDropped(result)
 
         followedState.value = MovieDetailsUiState.FollowedState(
           isMyMovie = isFollowed,
           isWatchlist = isWatchlist,
-          isHidden = isHidden,
+          isDropped = isDropped,
           withAnimation = false,
           watchedAt = null,
         )
@@ -142,7 +142,7 @@ class MovieDetailsViewModel @Inject constructor(
   fun addToMyMovies(isCustomDateSelected: Boolean, customDate: ZonedDateTime?) {
     viewModelScope.launch {
       myMoviesCase.addToMyMovies(movie, customDate)
-      followedState.value = followedState.value?.copy(isMyMovie = true, isWatchlist = false, isHidden = false)
+      followedState.value = followedState.value?.copy(isMyMovie = true, isWatchlist = false, isDropped = false)
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToMyMovies))
     }
   }
@@ -150,16 +150,16 @@ class MovieDetailsViewModel @Inject constructor(
   fun addToWatchlist() {
     viewModelScope.launch {
       watchlistCase.addToWatchlist(movie)
-      followedState.value = followedState.value?.copy(isWatchlist = true, isMyMovie = false, isHidden = false)
+      followedState.value = followedState.value?.copy(isWatchlist = true, isMyMovie = false, isDropped = false)
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToWatchlist))
     }
   }
 
-  fun addToHidden() {
+  fun addToDropped() {
     viewModelScope.launch {
-      hiddenCase.addToHidden(movie)
-      followedState.value = followedState.value?.copy(isHidden = true, isMyMovie = false, isWatchlist = false)
-      messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToHidden))
+      droppedCase.addToDropped(movie)
+      followedState.value = followedState.value?.copy(isDropped = true, isMyMovie = false, isWatchlist = false)
+      messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToDropped))
     }
   }
 

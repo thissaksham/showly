@@ -51,11 +51,11 @@ class SpoilersShowsBottomSheet : BaseBottomSheetFragment(R.layout.sheet_spoilers
       watchlistShowsRatingDescription.onClick {
         watchlistShowsRatingsListener.invoke(it, !watchlistShowsRatingsSwitch.isChecked)
       }
-      hiddenShowsDescription.onClick {
-        hiddenShowsListener.invoke(it, !hiddenShowsSwitch.isChecked)
+      droppedShowsDescription.onClick {
+        droppedShowsListener.invoke(it, !droppedShowsSwitch.isChecked)
       }
-      hiddenShowsRatingDescription.onClick {
-        hiddenShowsRatingsListener.invoke(it, !hiddenShowsRatingsSwitch.isChecked)
+      droppedShowsRatingDescription.onClick {
+        droppedShowsRatingsListener.invoke(it, !droppedShowsRatingsSwitch.isChecked)
       }
       notCollectedShowsDescription.onClick {
         notCollectedShowsListener.invoke(it, !notCollectedShowsSwitch.isChecked)
@@ -80,8 +80,8 @@ class SpoilersShowsBottomSheet : BaseBottomSheetFragment(R.layout.sheet_spoilers
         myShowsRatingsSwitch.setCheckedSilent(isMyShowsRatingsHidden, myShowsRatingsListener)
         watchlistShowsSwitch.setCheckedSilent(isWatchlistShowsHidden, watchlistShowsListener)
         watchlistShowsRatingsSwitch.setCheckedSilent(isWatchlistShowsRatingsHidden, watchlistShowsRatingsListener)
-        hiddenShowsSwitch.setCheckedSilent(isHiddenShowsHidden, hiddenShowsListener)
-        hiddenShowsRatingsSwitch.setCheckedSilent(isHiddenShowsRatingsHidden, hiddenShowsRatingsListener)
+        droppedShowsSwitch.setCheckedSilent(isDroppedShowsHidden, droppedShowsListener)
+        droppedShowsRatingsSwitch.setCheckedSilent(isDroppedShowsRatingsHidden, droppedShowsRatingsListener)
       }
     }
   }
@@ -109,10 +109,10 @@ class SpoilersShowsBottomSheet : BaseBottomSheetFragment(R.layout.sheet_spoilers
   private val watchlistShowsRatingsListener: (View, Boolean) -> Unit = { _, isChecked ->
     viewModel.setHideWatchlistRatingsShows(isChecked)
   }
-  private val hiddenShowsListener: (View, Boolean) -> Unit = { _, isChecked ->
-    viewModel.setHideHiddenShows(isChecked)
+  private val droppedShowsListener: (View, Boolean) -> Unit = { _, isChecked ->
+    viewModel.setHideDroppedShows(isChecked)
   }
-  private val hiddenShowsRatingsListener: (View, Boolean) -> Unit = { _, isChecked ->
-    viewModel.setHideHiddenRatingsShows(isChecked)
+  private val droppedShowsRatingsListener: (View, Boolean) -> Unit = { _, isChecked ->
+    viewModel.setHideDroppedRatingsShows(isChecked)
   }
 }

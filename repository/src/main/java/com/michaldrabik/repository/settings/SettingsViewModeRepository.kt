@@ -28,7 +28,7 @@ class SettingsViewModeRepository @Inject constructor(
 
   var myShowsViewMode by StringPreference(preferences, MY_SHOWS_VIEW_MODE, Config.DEFAULT_LIST_VIEW_MODE)
   var watchlistShowsViewMode by StringPreference(preferences, WATCHLIST_SHOWS_VIEW_MODE, Config.DEFAULT_LIST_VIEW_MODE)
-  var hiddenShowsViewMode by StringPreference(preferences, HIDDEN_SHOWS_VIEW_MODE, Config.DEFAULT_LIST_VIEW_MODE)
+  var droppedShowsViewMode by StringPreference(preferences, HIDDEN_SHOWS_VIEW_MODE, Config.DEFAULT_LIST_VIEW_MODE)
 
   var myMoviesViewMode by StringPreference(preferences, MY_MOVIES_VIEW_MODE, Config.DEFAULT_LIST_VIEW_MODE)
   var watchlistMoviesViewMode by StringPreference(
@@ -36,7 +36,7 @@ class SettingsViewModeRepository @Inject constructor(
     WATCHLIST_MOVIES_VIEW_MODE,
     Config.DEFAULT_LIST_VIEW_MODE,
   )
-  var hiddenMoviesViewMode by StringPreference(preferences, HIDDEN_MOVIES_VIEW_MODE, Config.DEFAULT_LIST_VIEW_MODE)
+  var droppedMoviesViewMode by StringPreference(preferences, HIDDEN_MOVIES_VIEW_MODE, Config.DEFAULT_LIST_VIEW_MODE)
 
   var customListsViewMode by StringPreference(preferences, CUSTOM_LIST_VIEW_MODE, Config.DEFAULT_LIST_VIEW_MODE)
   var tabletGridSpanSize by IntPreference(preferences, TABLET_GRID_SPAN_SIZE, Config.DEFAULT_LISTS_GRID_SPAN)

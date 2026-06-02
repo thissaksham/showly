@@ -120,11 +120,16 @@ internal class DiscoverMoviesFragment :
       discoverMoviesSearchView.run {
         translationY = searchViewPosition
         settingsIconVisible = true
+        statsIconVisible = true
         isEnabled = false
         onClick { openSearch() }
         onSettingsClickListener = {
           hideNavigation()
           navigateToSafe(R.id.actionDiscoverMoviesFragmentToSettingsFragment)
+        }
+        onStatsClickListener = {
+          hideNavigation()
+          navigateToSafe(R.id.actionDiscoverMoviesFragmentToStatisticsFragment)
         }
       }
       discoverMoviesTabsView.run {

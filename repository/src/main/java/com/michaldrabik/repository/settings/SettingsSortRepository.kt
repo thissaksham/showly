@@ -58,8 +58,8 @@ class SettingsSortRepository @Inject constructor(
     SortOrder::class.java,
   )
   var watchlistShowsSortType by EnumPreference(preferences, WATCHLIST_SHOWS_SORT_TYPE, DESCENDING, SortType::class.java)
-  var hiddenShowsSortOrder by EnumPreference(preferences, HIDDEN_SHOWS_SORT_ORDER, DATE_ADDED, SortOrder::class.java)
-  var hiddenShowsSortType by EnumPreference(preferences, HIDDEN_SHOWS_SORT_TYPE, DESCENDING, SortType::class.java)
+  var droppedShowsSortOrder by EnumPreference(preferences, HIDDEN_SHOWS_SORT_ORDER, DATE_ADDED, SortOrder::class.java)
+  var droppedShowsSortType by EnumPreference(preferences, HIDDEN_SHOWS_SORT_TYPE, DESCENDING, SortType::class.java)
   var myShowsAllSortOrder by EnumPreference(preferences, MY_SHOWS_ALL_SORT_ORDER, DATE_ADDED, SortOrder::class.java)
   var myShowsAllSortType by EnumPreference(preferences, MY_SHOWS_ALL_SORT_TYPE, DESCENDING, SortType::class.java)
 
@@ -82,8 +82,8 @@ class SettingsSortRepository @Inject constructor(
     DESCENDING,
     SortType::class.java,
   )
-  var hiddenMoviesSortOrder by EnumPreference(preferences, HIDDEN_MOVIES_SORT_ORDER, DATE_ADDED, SortOrder::class.java)
-  var hiddenMoviesSortType by EnumPreference(preferences, HIDDEN_MOVIES_SORT_TYPE, DESCENDING, SortType::class.java)
+  var droppedMoviesSortOrder by EnumPreference(preferences, HIDDEN_MOVIES_SORT_ORDER, DATE_ADDED, SortOrder::class.java)
+  var droppedMoviesSortType by EnumPreference(preferences, HIDDEN_MOVIES_SORT_TYPE, DESCENDING, SortType::class.java)
   var myMoviesAllSortOrder by EnumPreference(preferences, MY_MOVIES_ALL_SORT_ORDER, DATE_ADDED, SortOrder::class.java)
   var myMoviesAllSortType by EnumPreference(preferences, MY_MOVIES_ALL_SORT_TYPE, DESCENDING, SortType::class.java)
 

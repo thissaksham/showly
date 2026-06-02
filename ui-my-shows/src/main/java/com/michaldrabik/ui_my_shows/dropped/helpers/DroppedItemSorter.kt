@@ -1,4 +1,4 @@
-package com.michaldrabik.ui_my_shows.hidden.helpers
+package com.michaldrabik.ui_my_shows.dropped.helpers
 
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortOrder.DATE_ADDED
@@ -15,7 +15,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class HiddenItemSorter @Inject constructor() {
+class DroppedItemSorter @Inject constructor() {
 
   fun sort(
     sortOrder: SortOrder,

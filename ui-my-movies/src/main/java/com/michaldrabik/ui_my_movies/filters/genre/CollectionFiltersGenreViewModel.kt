@@ -8,7 +8,7 @@ import com.michaldrabik.ui_base.viewmodel.ChannelsDelegate
 import com.michaldrabik.ui_base.viewmodel.DefaultChannelsDelegate
 import com.michaldrabik.ui_model.Genre
 import com.michaldrabik.ui_my_movies.filters.CollectionFiltersOrigin
-import com.michaldrabik.ui_my_movies.filters.CollectionFiltersOrigin.HIDDEN_MOVIES
+import com.michaldrabik.ui_my_movies.filters.CollectionFiltersOrigin.DROPPED_MOVIES
 import com.michaldrabik.ui_my_movies.filters.CollectionFiltersOrigin.MY_MOVIES
 import com.michaldrabik.ui_my_movies.filters.CollectionFiltersOrigin.WATCHLIST_MOVIES
 import com.michaldrabik.ui_my_movies.filters.CollectionFiltersUiEvent.ApplyFilters
@@ -37,7 +37,7 @@ internal class CollectionFiltersGenreViewModel @Inject constructor(
     genresState.value = when (origin) {
       MY_MOVIES -> settingsRepository.filters.myMoviesGenres
       WATCHLIST_MOVIES -> settingsRepository.filters.watchlistMoviesGenres
-      HIDDEN_MOVIES -> settingsRepository.filters.hiddenMoviesGenres
+      DROPPED_MOVIES -> settingsRepository.filters.droppedMoviesGenres
     }.toList()
   }
 
@@ -50,7 +50,7 @@ internal class CollectionFiltersGenreViewModel @Inject constructor(
       when (origin) {
         MY_MOVIES -> settingsRepository.filters.myMoviesGenres = genres
         WATCHLIST_MOVIES -> settingsRepository.filters.watchlistMoviesGenres = genres
-        HIDDEN_MOVIES -> settingsRepository.filters.hiddenMoviesGenres = genres
+        DROPPED_MOVIES -> settingsRepository.filters.droppedMoviesGenres = genres
       }
       eventChannel.send(ApplyFilters)
     }
