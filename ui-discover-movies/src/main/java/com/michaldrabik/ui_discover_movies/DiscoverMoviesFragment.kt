@@ -107,7 +107,12 @@ internal class DiscoverMoviesFragment :
     launchAndRepeatStarted(
       { viewModel.uiState.collect { render(it) } },
       { viewModel.messageFlow.collect { showSnack(it) } },
-      doAfterLaunch = { viewModel.loadMovies() },
+      doAfterLaunch = {
+        if (!isInitialized) {
+          viewModel.loadMovies()
+          isInitialized = true
+        }
+      },
     )
 
     setFragmentResultListener(REQUEST_DISCOVER_FILTERS) { _, _ ->

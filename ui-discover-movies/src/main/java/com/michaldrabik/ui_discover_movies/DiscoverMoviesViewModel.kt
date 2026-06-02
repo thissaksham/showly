@@ -87,8 +87,6 @@ internal class DiscoverMoviesViewModel @Inject constructor(
 
         if (pullToRefresh || skipCache || !moviesCase.isCacheValid()) {
           val movies = moviesCase.loadRemoteMovies(filters)
-          itemsState.value = emptyList()
-          delay(50) // Added to avoid long scrolling to top
           itemsState.value = movies
           scrollState.value = Event(resetScroll)
           initialFilters = filters

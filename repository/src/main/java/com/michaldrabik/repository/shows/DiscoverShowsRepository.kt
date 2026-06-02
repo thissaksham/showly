@@ -48,12 +48,15 @@ class DiscoverShowsRepository @Inject constructor(
     collectionSize: Int,
     genres: List<Genre>,
     networks: List<Network>,
-  ): List<Show> =
-    when (order) {
+  ): List<Show> {
+    val shows = when (order) {
       TRENDING, RECENT -> loadRemoteTrending(genres, networks, showCollection, collectionSize)
       POPULAR -> loadRemotePopular(genres, networks)
       ANTICIPATED -> loadRemoteAnticipated(genres, networks)
     }
+    cacheDiscoverShows(shows)
+    return shows
+  }
 
   private suspend fun loadRemoteTrending(
     genres: List<Genre>,

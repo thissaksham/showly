@@ -87,8 +87,6 @@ internal class DiscoverViewModel @Inject constructor(
 
         if (pullToRefresh || skipCache || !showsCase.isCacheValid()) {
           val shows = showsCase.loadRemoteShows(filters)
-          itemsState.value = emptyList()
-          delay(50) // Added to avoid long scrolling to top
           itemsState.value = shows
           scrollState.value = Event(resetScroll)
           initialFilters = filters
