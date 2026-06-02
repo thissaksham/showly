@@ -15,6 +15,7 @@ import com.michaldrabik.common.Config.LISTS_GRID_SPAN
 import com.michaldrabik.repository.settings.SettingsViewModeRepository
 import com.michaldrabik.ui_base.BaseFragment
 import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
+import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_base.common.OnScrollResetListener
 import com.michaldrabik.ui_base.common.OnSearchClickListener
 import com.michaldrabik.ui_base.common.sheets.sort_order.SortOrderBottomSheet
@@ -153,6 +154,7 @@ class HiddenFragment :
               is FiltersItem -> {
                 when (viewMode) {
                   LIST_NORMAL -> if (isTablet) tabletGridSpanSize else LISTS_GRID_SPAN
+                  POSTER -> if (isTablet) tabletGridSpanSize else LISTS_GRID_SPAN
                 }
               }
               is ShowItem -> {

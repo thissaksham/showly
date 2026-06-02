@@ -1,16 +1,9 @@
 package com.michaldrabik.ui_lists.details.cases
 
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
-import com.michaldrabik.common.errors.ErrorHelper
-import com.michaldrabik.common.errors.ShowlyError
-import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.data_local.LocalDataSource
-import com.michaldrabik.data_local.database.model.CustomListItem
 import com.michaldrabik.data_local.utilities.TransactionsProvider
-import com.michaldrabik.data_remote.trakt.AuthorizedTraktRemoteDataSource
 import com.michaldrabik.repository.ListsRepository
-import com.michaldrabik.repository.UserTraktManager
-import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.ui_lists.details.recycler.ListDetailsItem
 import com.michaldrabik.ui_model.CustomList
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -21,14 +14,11 @@ import javax.inject.Inject
 class ListDetailsMainCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val localSource: LocalDataSource,
-  private val remoteSource: AuthorizedTraktRemoteDataSource,
   private val transactions: TransactionsProvider,
   private val listsRepository: ListsRepository,
-  private val settingsRepository: SettingsRepository,
-  private val userTraktManager: UserTraktManager,
 ) {
 
-  suspend fun loadDetails(id: Long) =
+  suspend fun loadDetails(id: Long): CustomList =
     withContext(dispatchers.IO) {
       listsRepository.loadById(id)
     }
@@ -38,49 +28,28 @@ class ListDetailsMainCase @Inject constructor(
     items: List<ListDetailsItem>,
   ): List<ListDetailsItem> =
     withContext(dispatchers.IO) {
-      val now = nowUtcMillis()
-      val listItems = listsRepository.loadItemsById(listId)
-      val updateItems = mutableListOf<ListDetailsItem>()
-      val updateItemsDb = mutableListOf<CustomListItem>()
-      items.forEachIndexed { index, item ->
-        val dbItem = listItems.first { it.id == item.id }.copy(rank = index + 1L, updatedAt = now)
-        val updatedItem = item.copy(rank = index + 1L)
-        updateItems.add(updatedItem)
-        updateItemsDb.add(dbItem)
-      }
       transactions.withTransaction {
-        localSource.customListsItems.update(updateItemsDb)
-        localSource.customLists.updateTimestamp(listId, now)
+        val listItems = localSource.customListsItems.getItemsById(listId)
+        val updatedItems = listItems.map { listItem ->
+          val item = items.find { it.id == listItem.id }
+          if (item != null) {
+            listItem.copy(rank = (items.indexOf(item) + 1).toLong())
+          } else {
+            listItem
+          }
+        }
+        localSource.customListsItems.update(updatedItems)
       }
-      updateItems
+      items
     }
 
   suspend fun deleteList(
-    listId: Long,
-    removeFromTrakt: Boolean,
+    id: Long,
   ) = withContext(dispatchers.IO) {
-    val isAuthorized = userTraktManager.isAuthorized()
-    val isQuickRemove = settingsRepository.load().traktQuickRemoveEnabled
-    val list = listsRepository.loadById(listId)
-    val listIdTrakt = list.idTrakt
-
-    if (isQuickRemove && isAuthorized && removeFromTrakt && listIdTrakt != null) {
-      userTraktManager.checkAuthorization()
-      try {
-        remoteSource.deleteList(listIdTrakt)
-      } catch (error: Throwable) {
-        when (ErrorHelper.parse(error)) {
-          is ShowlyError.ResourceNotFoundError -> Unit // NOOP List does not exist in Trakt.
-          else -> throw error
-        }
-      }
+    transactions.withTransaction {
+      listsRepository.deleteList(id)
     }
-
-    listsRepository.deleteList(listId)
   }
 
-  suspend fun isQuickRemoveEnabled(list: CustomList) =
-    withContext(dispatchers.IO) {
-      list.idTrakt != null && settingsRepository.load().traktQuickRemoveEnabled
-    }
+  fun isQuickRemoveEnabled(list: CustomList): Boolean = false
 }

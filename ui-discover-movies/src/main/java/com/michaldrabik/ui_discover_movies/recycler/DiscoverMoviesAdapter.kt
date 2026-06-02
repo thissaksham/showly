@@ -10,7 +10,7 @@ import com.michaldrabik.ui_model.ImageType.FANART
 import com.michaldrabik.ui_model.ImageType.FANART_WIDE
 import com.michaldrabik.ui_model.ImageType.POSTER
 
-class DiscoverMoviesAdapter(
+internal class DiscoverMoviesAdapter(
   private val itemClickListener: (DiscoverMovieListItem) -> Unit,
   private val itemLongClickListener: (DiscoverMovieListItem) -> Unit,
   private val missingImageListener: (DiscoverMovieListItem, Boolean) -> Unit,

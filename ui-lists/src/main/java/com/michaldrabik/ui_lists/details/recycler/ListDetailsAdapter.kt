@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
+import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_lists.details.helpers.ListItemDragListener
 import com.michaldrabik.ui_lists.details.helpers.ListItemSwipeListener
 import com.michaldrabik.ui_lists.details.helpers.ReorderListCallbackAdapter
@@ -68,6 +69,7 @@ class ListDetailsAdapter(
     VIEW_TYPE_SHOW -> {
       val view = when (listViewMode) {
         LIST_NORMAL -> ListDetailsShowItemView(parent.context)
+        POSTER -> ListDetailsShowItemView(parent.context) // Use same view for now or fix if needed
       }.apply {
         itemClickListener = { item -> this@ListDetailsAdapter.itemClickListener(item) }
         missingImageListener = { item, force -> this@ListDetailsAdapter.missingImageListener(item, force) }
@@ -82,6 +84,7 @@ class ListDetailsAdapter(
     VIEW_TYPE_MOVIE -> {
       val view = when (listViewMode) {
         LIST_NORMAL -> ListDetailsMovieItemView(parent.context)
+        POSTER -> ListDetailsMovieItemView(parent.context) // Use same view for now
       }.apply {
         itemClickListener = { item -> this@ListDetailsAdapter.itemClickListener(item) }
         missingImageListener = { item, force -> this@ListDetailsAdapter.missingImageListener(item, force) }
@@ -106,9 +109,11 @@ class ListDetailsAdapter(
     when (holder.itemViewType) {
       VIEW_TYPE_SHOW -> when (listViewMode) {
         LIST_NORMAL -> (holder.itemView as ListDetailsShowItemView).bind(item)
+        POSTER -> (holder.itemView as ListDetailsShowItemView).bind(item)
       }
       VIEW_TYPE_MOVIE -> when (listViewMode) {
         LIST_NORMAL -> (holder.itemView as ListDetailsMovieItemView).bind(item)
+        POSTER -> (holder.itemView as ListDetailsMovieItemView).bind(item)
       }
       else -> throw IllegalStateException()
     }

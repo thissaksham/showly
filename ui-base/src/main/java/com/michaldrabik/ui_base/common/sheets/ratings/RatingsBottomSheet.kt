@@ -25,6 +25,7 @@ import com.michaldrabik.ui_model.TraktRating
 import com.michaldrabik.ui_navigation.java.NavigationArgs
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 @AndroidEntryPoint
 class RatingsBottomSheet : BaseBottomSheetFragment(R.layout.view_rate_sheet) {

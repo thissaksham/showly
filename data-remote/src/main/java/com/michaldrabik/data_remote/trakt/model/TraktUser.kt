@@ -1,15 +1,16 @@
 package com.michaldrabik.data_remote.trakt.model
 
 data class TraktUser(
-  val username: String,
-  val images: Image?,
+  val username: String?,
+  val name: String?,
+  val ids: Ids?,
+  val images: Images?,
 ) {
-
-  data class Image(
-    val avatar: ImageDetails?,
-  )
-
-  data class ImageDetails(
-    val full: String?,
-  )
+  data class Images(
+    val avatar: Avatar?,
+  ) {
+    data class Avatar(
+      val full: String?,
+    )
+  }
 }

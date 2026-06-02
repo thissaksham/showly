@@ -2,39 +2,29 @@ package com.michaldrabik.ui_lists.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.michaldrabik.common.Config
 import com.michaldrabik.common.Mode
-import com.michaldrabik.common.Mode.MOVIES
-import com.michaldrabik.common.Mode.SHOWS
 import com.michaldrabik.repository.images.MovieImagesProvider
 import com.michaldrabik.repository.images.ShowImagesProvider
-import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.utilities.events.Event
-import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
 import com.michaldrabik.ui_base.utilities.extensions.combine
-import com.michaldrabik.ui_base.utilities.extensions.findReplace
-import com.michaldrabik.ui_base.viewmodel.ChannelsDelegate
-import com.michaldrabik.ui_base.viewmodel.DefaultChannelsDelegate
-import com.michaldrabik.ui_lists.R
+import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
 import com.michaldrabik.ui_lists.details.cases.ListDetailsItemsCase
 import com.michaldrabik.ui_lists.details.cases.ListDetailsMainCase
 import com.michaldrabik.ui_lists.details.cases.ListDetailsSortCase
 import com.michaldrabik.ui_lists.details.cases.ListDetailsTipsCase
 import com.michaldrabik.ui_lists.details.cases.ListDetailsTranslationsCase
 import com.michaldrabik.ui_lists.details.recycler.ListDetailsItem
+import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_model.CustomList
-import com.michaldrabik.ui_model.Image
+import com.michaldrabik.ui_model.ImageType
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
-import com.michaldrabik.ui_model.Tip
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,8 +36,7 @@ class ListDetailsViewModel @Inject constructor(
   private val tipsCase: ListDetailsTipsCase,
   private val showImagesProvider: ShowImagesProvider,
   private val movieImagesProvider: MovieImagesProvider,
-) : ViewModel(),
-  ChannelsDelegate by DefaultChannelsDelegate() {
+) : ViewModel() {
 
   private val listDetailsState = MutableStateFlow<CustomList?>(null)
   private val listItemsState = MutableStateFlow<List<ListDetailsItem>?>(null)
@@ -59,195 +48,120 @@ class ListDetailsViewModel @Inject constructor(
   private val filtersVisibleState = MutableStateFlow(false)
   private val viewModeState = MutableStateFlow(ListViewMode.LIST_NORMAL)
 
-  fun loadDetails(id: Long) {
+  fun loadDetails(listId: Long) {
     viewModelScope.launch {
-      val list = mainCase.loadDetails(id)
-      val (listItems, totalCount) = itemsCase.loadItems(list)
-
-      listDetailsState.value = list
-      listItemsState.value = listItems
-      manageModeState.value = false
-      filtersVisibleState.value = totalCount > 0
-      quickRemoveState.value = mainCase.isQuickRemoveEnabled(list)
-
-      val tip = Tip.LIST_ITEM_SWIPE_DELETE
-      if (listItems.isNotEmpty() && !tipsCase.isTipShown(tip)) {
-        messageChannel.send(MessageEvent.Info(tip.textResId, isIndefinite = true))
-        tipsCase.setTipShown(tip)
+      loadingState.value = true
+      try {
+        val details = mainCase.loadDetails(listId)
+        listDetailsState.value = details
+        val items = itemsCase.loadItems(details)
+        listItemsState.value = items.first
+        quickRemoveState.value = mainCase.isQuickRemoveEnabled(details)
+      } catch (e: Throwable) {
+        rethrowCancellation(e)
+      } finally {
+        loadingState.value = false
       }
     }
   }
 
-  fun loadMissingImage(
-    item: ListDetailsItem,
-    force: Boolean,
-  ) {
+  fun loadMissingImage(item: ListDetailsItem, force: Boolean = false) {
     viewModelScope.launch {
-      updateItem(item.copy(isLoading = true))
-      try {
-        val image =
-          when {
-            item.isShow() -> showImagesProvider.loadRemoteImage(item.requireShow(), item.image.type, force)
-            item.isMovie() -> movieImagesProvider.loadRemoteImage(item.requireMovie(), item.image.type, force)
-            else -> throw IllegalStateException()
-          }
-        updateItem(item.copy(isLoading = false, image = image))
-      } catch (t: Throwable) {
-        updateItem(item.copy(isLoading = false, image = Image.createUnavailable(item.image.type)))
+      val image = if (item.isShow()) {
+        showImagesProvider.findCachedImage(item.show!!, ImageType.POSTER)
+      } else {
+        movieImagesProvider.findCachedImage(item.movie!!, ImageType.POSTER)
+      }
+      if (image != null) {
+        updateItem(item.copy(image = image))
       }
     }
   }
 
   fun loadMissingTranslation(item: ListDetailsItem) {
-    if (item.translation != null || translationsCase.getLanguage() == Config.DEFAULT_LANGUAGE) return
     viewModelScope.launch {
-      try {
-        val translation = translationsCase.loadTranslation(item, false)
+      val translation = translationsCase.loadTranslation(item, false)
+      if (translation != null) {
         updateItem(item.copy(translation = translation))
-      } catch (error: Throwable) {
-        Timber.e(error)
       }
     }
   }
 
-  fun setReorderMode(
-    listId: Long,
-    isReorderMode: Boolean,
-  ) {
-    viewModelScope.launch {
-      if (isReorderMode) {
-        val list = mainCase.loadDetails(listId).copy(
-          sortByLocal = SortOrder.RANK,
-          sortHowLocal = SortType.ASCENDING,
-          filterTypeLocal = Mode.getAll(),
-        )
-        val listItems = itemsCase.loadItems(list).first.map { it.copy(isManageMode = true) }
-        listItemsState.value = listItems
-        manageModeState.value = true
-        filtersVisibleState.value = false
-        scrollState.value = Event(false)
-      } else {
-        val list = mainCase.loadDetails(listId)
-        val listItems = itemsCase.loadItems(list).first.map { it.copy(isManageMode = false) }
-        listItemsState.value = listItems
-        manageModeState.value = false
-        filtersVisibleState.value = true
-        scrollState.value = Event(true)
-      }
+  fun setReorderMode(listId: Long, enabled: Boolean) {
+    manageModeState.value = enabled
+    if (!enabled) {
+      updateRanks(listId, listItemsState.value ?: emptyList())
     }
   }
 
-  fun updateRanks(
-    listId: Long,
-    items: List<ListDetailsItem>,
-  ) {
+  fun updateRanks(listId: Long, items: List<ListDetailsItem>) {
     viewModelScope.launch {
       val updatedItems = mainCase.updateRanks(listId, items)
       listItemsState.value = updatedItems
     }
   }
 
-  fun setSortOrder(
-    id: Long,
-    sortOrder: SortOrder,
-    sortType: SortType,
-  ) {
+  fun setSortOrder(listId: Long, sort: SortOrder, type: SortType) {
     viewModelScope.launch {
-      val list = sortCase.setSortOrder(id, sortOrder, sortType)
-
-      val currentItems = uiState.value.listItems?.toList() ?: emptyList()
-      val sortedItems = itemsCase.sortItems(
-        currentItems,
-        list.sortByLocal,
-        list.sortHowLocal,
-        list.filterTypeLocal,
-      )
-
-      listDetailsState.value = list
-      listItemsState.value = sortedItems
-      scrollState.value = Event(true)
-    }
-  }
-
-  fun setFilterTypes(
-    listId: Long,
-    types: List<Mode>,
-  ) {
-    viewModelScope.launch {
-      val list = sortCase.setFilterTypes(listId, types)
-      val (sortedItems, _) = itemsCase.loadItems(list)
-
-      listDetailsState.value = list
-      listItemsState.value = sortedItems
-      filtersVisibleState.value = true
-      scrollState.value = Event(true)
-    }
-  }
-
-  fun deleteList(
-    listId: Long,
-    removeFromTrakt: Boolean,
-  ) {
-    viewModelScope.launch {
-      try {
-        if (removeFromTrakt) {
-          loadingState.value = true
-        }
-        mainCase.deleteList(listId, removeFromTrakt)
-        loadingState.value = false
-        listDeleteState.value = Event(true)
-      } catch (error: Throwable) {
-        loadingState.value = false
-        messageChannel.send(MessageEvent.Error(R.string.errorCouldNotDeleteList))
-      }
-    }
-  }
-
-  fun deleteListItem(
-    listId: Long,
-    item: ListDetailsItem,
-  ) {
-    viewModelScope.launch {
-      val type =
-        when {
-          item.isShow() -> SHOWS
-          item.isMovie() -> MOVIES
-          else -> throw IllegalStateException()
-        }
-      itemsCase.deleteListItem(listId, item.getTraktId(), type)
+      sortCase.setSortOrder(listId, sort, type)
       loadDetails(listId)
     }
   }
 
-  private fun updateItem(newItem: ListDetailsItem) {
-    listItemsState.update { state ->
-      state?.toMutableList()?.apply {
-        findReplace(newItem) { it.id == newItem.id }
-      }
+  fun setFilterTypes(listId: Long, types: List<Mode>) {
+    viewModelScope.launch {
+      sortCase.setFilterTypes(listId, types)
+      loadDetails(listId)
+    }
+  }
+
+  fun deleteList(listId: Long, removeFromTrakt: Boolean) {
+    viewModelScope.launch {
+      mainCase.deleteList(listId)
+      listDeleteState.value = Event(true)
+    }
+  }
+
+  fun deleteListItem(listId: Long, item: ListDetailsItem) {
+    viewModelScope.launch {
+      val type = if (item.isShow()) Mode.SHOWS else Mode.MOVIES
+      itemsCase.deleteListItem(listId, item.getTraktId(), type)
+      val currentItems = listItemsState.value?.toMutableList() ?: return@launch
+      currentItems.remove(item)
+      listItemsState.value = currentItems
+    }
+  }
+
+  private fun updateItem(item: ListDetailsItem) {
+    val currentItems = listItemsState.value?.toMutableList() ?: return
+    val index = currentItems.indexOfFirst { it.id == item.id }
+    if (index != -1) {
+      currentItems[index] = item
+      listItemsState.value = currentItems
     }
   }
 
   val uiState = combine(
     listDetailsState,
     listItemsState,
+    listDeleteState,
     manageModeState,
     quickRemoveState,
-    loadingState,
-    listDeleteState,
     scrollState,
+    loadingState,
     filtersVisibleState,
     viewModeState,
-  ) { s1, s2, s3, s4, s5, s6, s7, s8, s9 ->
+  ) { listDetails, listItems, listDelete, manageMode, quickRemove, scroll, loading, filtersVisible, viewMode ->
     ListDetailsUiState(
-      listDetails = s1,
-      listItems = s2,
-      isManageMode = s3,
-      isQuickRemoveEnabled = s4,
-      isLoading = s5,
-      deleteEvent = s6,
-      resetScroll = s7,
-      isFiltersVisible = s8,
-      viewMode = s9,
+      listDetails = listDetails,
+      listItems = listItems,
+      deleteEvent = listDelete,
+      isManageMode = manageMode,
+      isQuickRemoveEnabled = quickRemove,
+      resetScroll = scroll,
+      isLoading = loading,
+      isFiltersVisible = filtersVisible,
+      viewMode = viewMode,
     )
   }.stateIn(
     scope = viewModelScope,

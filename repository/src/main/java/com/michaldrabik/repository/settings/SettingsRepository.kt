@@ -33,7 +33,6 @@ class SettingsRepository @Inject constructor(
   val widgets: SettingsWidgetsRepository,
   val viewMode: SettingsViewModeRepository,
   val spoilers: SettingsSpoilersRepository,
-  val sync: SettingsSyncRepository,
   private val dispatchers: CoroutineDispatchers,
   private val localSource: LocalDataSource,
   private val transactions: TransactionsProvider,

@@ -125,8 +125,8 @@ class SearchFragment :
   override fun onStop() {
     viewModel.clearSuggestions()
     with(binding) {
-      searchViewLayout.binding.searchViewInput.removeTextChangedListener(this@SearchFragment)
-      searchViewLayout.binding.searchViewInput.setText("")
+      searchViewLayout.input.removeTextChangedListener(this@SearchFragment)
+      searchViewLayout.input.setText("")
     }
     super.onStop()
   }
@@ -139,20 +139,20 @@ class SearchFragment :
 
   private fun setupView() {
     with(binding) {
-      searchViewLayout.binding.searchViewInput.visible()
-      searchViewLayout.binding.searchViewText.gone()
-      (searchViewLayout.binding.searchViewIcon.drawable as Animatable).start()
+      searchViewLayout.input.visible()
+      searchViewLayout.textView.gone()
+      (searchViewLayout.iconView.drawable as Animatable).start()
       searchViewLayout.settingsIconVisible = false
 
       viewModel.preloadSuggestions()
 
       if (!isInitialized) {
-        searchViewLayout.binding.searchViewInput.showKeyboard()
-        searchViewLayout.binding.searchViewInput.requestFocus()
+        searchViewLayout.input.showKeyboard()
+        searchViewLayout.input.requestFocus()
         viewModel.loadRecentSearches()
       }
 
-      searchViewLayout.binding.searchViewInput.run {
+      searchViewLayout.input.run {
         addTextChangedListener(this@SearchFragment)
         setOnEditorActionListener { textView, id, _ ->
           if (id == EditorInfo.IME_ACTION_SEARCH) {
@@ -170,8 +170,8 @@ class SearchFragment :
         }
       }
 
-      searchViewLayout.binding.searchViewIcon.onClick {
-        searchViewLayout.binding.searchViewInput.hideKeyboard()
+      searchViewLayout.iconView.onClick {
+        searchViewLayout.input.hideKeyboard()
         requireActivity().onBackPressed()
       }
 
@@ -262,8 +262,8 @@ class SearchFragment :
         return true
       }
       viewModel.search(query)
-      searchViewLayout.binding.searchViewInput.hideKeyboard()
-      searchViewLayout.binding.searchViewInput.clearFocus()
+      searchViewLayout.input.hideKeyboard()
+      searchViewLayout.input.clearFocus()
       return true
     }
   }
@@ -383,7 +383,7 @@ class SearchFragment :
           bind(item)
           onClick {
             viewModel.search(item.text)
-            searchViewLayout.binding.searchViewInput.setText(item.text)
+            searchViewLayout.input.setText(item.text)
           }
         }
         searchRecentsLayout.addView(view)

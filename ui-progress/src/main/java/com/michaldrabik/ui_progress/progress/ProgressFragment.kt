@@ -92,10 +92,7 @@ class ProgressFragment :
 
   private var adapter: ProgressAdapter? = null
   private var layoutManager: LayoutManager? = null
-  private var overscroll: IOverScrollDecor? = null
-  private var overscrollJob: Job? = null
   private var statusBarHeight = 0
-  private var overscrollEnabled = true
   private var isSearching = false
 
   override fun onViewCreated(
@@ -123,7 +120,6 @@ class ProgressFragment :
 
   private fun setupView() {
     with(binding) {
-      progressEmptyView.progressEmptyTraktButton.onClick { requireMainFragment().openTraktSync() }
       progressEmptyView.progressEmptyDiscoverButton.onClick {
         (requireActivity() as NavigationHost).navigateToDiscover()
       }
@@ -159,7 +155,7 @@ class ProgressFragment :
         )
       },
       checkClickListener = viewModel::onEpisodeChecked,
-      sortChipClickListener = viewModel::loadSortOrder,
+      sortChipClickListener = viewModel::onSortOrderClicked,
       upcomingChipClickListener = viewModel::setUpcomingFilter,
       onHoldChipClickListener = viewModel::setOnHoldFilter,
       missingTranslationListener = viewModel::findMissingTranslation,
@@ -186,8 +182,7 @@ class ProgressFragment :
         if (moviesEnabled) R.dimen.progressOverscrollPadding else R.dimen.progressOverscrollPaddingNoModes
 
       if (statusBarHeight != 0) {
-        (progressOverscroll.layoutParams as ViewGroup.MarginLayoutParams)
-          .updateMargins(top = statusBarHeight + dimenToPx(overscrollPadding))
+        // Removed.
       }
 
       root.doOnApplyWindowInsets { _, insets, padding, _ ->
@@ -202,86 +197,8 @@ class ProgressFragment :
 
         (progressEmptyView.root.layoutParams as ViewGroup.MarginLayoutParams)
           .updateMargins(top = statusBarHeight + dimenToPx(R.dimen.spaceBig))
-
-        (progressOverscroll.layoutParams as ViewGroup.MarginLayoutParams)
-          .updateMargins(top = statusBarHeight + dimenToPx(overscrollPadding))
       }
     }
-  }
-
-  private fun setupOverscroll() {
-    if (overscroll != null || view == null) {
-      return
-    }
-    val adapt = TopOverscrollAdapter(binding.progressRecycler)
-    overscroll = VerticalOverScrollBounceEffectDecorator(
-      adapt,
-      1F,
-      OverScrollBounceEffectDecoratorBase.DEFAULT_TOUCH_DRAG_MOVE_RATIO_BCK,
-      OverScrollBounceEffectDecoratorBase.DEFAULT_DECELERATE_FACTOR,
-    ).apply {
-      setOverScrollUpdateListener { _, state, offset ->
-        binding.progressOverscroll.run {
-          if (offset > 0) {
-            val value = (offset / OVERSCROLL_OFFSET).coerceAtMost(1F)
-            val valueTranslation = offset / OVERSCROLL_OFFSET_TRANSLATION
-            if (value >= 1F) {
-              onOverscrollReach()
-            } else {
-              onOverscrollCancel()
-            }
-            when (state) {
-              STATE_DRAG_START_SIDE -> {
-                alpha = value
-                scaleX = value
-                scaleY = value
-                translationY = valueTranslation
-                overscrollEnabled = true
-              }
-              STATE_BOUNCE_BACK -> {
-                alpha = value
-                scaleX = value
-                scaleY = value
-                translationY = valueTranslation
-                if (offset >= OVERSCROLL_OFFSET &&
-                  overscrollEnabled &&
-                  binding.progressOverscrollProgress.progress >= 100
-                ) {
-                  overscrollEnabled = false
-                  viewModel.startTraktSync()
-                }
-              }
-            }
-          } else {
-            alpha = 0F
-            scaleX = 0F
-            scaleY = 0F
-            translationY = 0F
-            onOverscrollCancel()
-          }
-        }
-      }
-    }
-  }
-
-  private fun onOverscrollReach() {
-    if (overscrollJob != null) return
-    overscrollJob = viewLifecycleOwner.lifecycleScope.launch {
-      repeat(100) {
-        val progress = it + 1
-        binding.progressOverscrollProgress.progress = progress
-        if (progress >= 100) {
-          binding.progressOverscroll.bump(200)
-        }
-        delay(5)
-      }
-    }
-  }
-
-  private fun onOverscrollCancel() {
-    overscrollJob?.cancel()
-    overscrollJob = null
-    binding.progressOverscrollProgress.progress = 0
   }
 
   private fun openSortOrderDialog(
@@ -309,9 +226,6 @@ class ProgressFragment :
       progressRecycler.translationY = dimenToPx(R.dimen.progressSearchLocalOffset).toFloat()
       progressRecycler.smoothScrollToPosition(0)
     }
-
-    overscroll?.detach()
-    overscroll = null
   }
 
   override fun onExitSearch() {
@@ -321,8 +235,6 @@ class ProgressFragment :
       progressRecycler.translationY = 0F
       progressRecycler.smoothScrollToPosition(0)
     }
-
-    setupOverscroll()
   }
 
   private fun handleEvent(event: Event<*>) {
@@ -353,14 +265,6 @@ class ProgressFragment :
               duration = 200,
               withHardware = true,
             ).add(animations)
-        }
-      }
-      isOverScrollEnabled.let {
-        if (it) {
-          setupOverscroll()
-        } else {
-          overscroll?.detach()
-          overscroll = null
         }
       }
       sortOrder?.let { event ->
@@ -395,9 +299,6 @@ class ProgressFragment :
   override fun setupBackPressed() = Unit
 
   override fun onDestroyView() {
-    overscrollJob?.cancel()
-    overscrollJob = null
-    overscroll = null
     adapter = null
     layoutManager = null
     super.onDestroyView()

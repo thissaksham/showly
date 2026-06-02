@@ -2,25 +2,18 @@ package com.michaldrabik.ui_progress.progress
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkManager
-import com.michaldrabik.common.Config
 import com.michaldrabik.repository.TranslationsRepository
-import com.michaldrabik.repository.UserTraktManager
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
-import com.michaldrabik.ui_base.trakt.TraktSyncWorker
-import com.michaldrabik.ui_base.utilities.events.Event
-import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
-import com.michaldrabik.ui_base.utilities.extensions.findReplace
+import com.michaldrabik.ui_base.dates.DateFormatProvider
 import com.michaldrabik.ui_base.viewmodel.ChannelsDelegate
 import com.michaldrabik.ui_base.viewmodel.DefaultChannelsDelegate
-import com.michaldrabik.ui_model.EpisodeBundle
-import com.michaldrabik.ui_model.Image
+import com.michaldrabik.ui_base.utilities.events.Event
+import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
+import com.michaldrabik.ui_model.ImageType
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
-import com.michaldrabik.ui_progress.main.EpisodeCheckActionUiEvent
 import com.michaldrabik.ui_progress.main.ProgressMainUiState
-import com.michaldrabik.ui_progress.main.RequestWidgetsUpdate
 import com.michaldrabik.ui_progress.progress.cases.ProgressFiltersCase
 import com.michaldrabik.ui_progress.progress.cases.ProgressHeadersCase
 import com.michaldrabik.ui_progress.progress.cases.ProgressItemsCase
@@ -30,11 +23,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,8 +37,7 @@ class ProgressViewModel @Inject constructor(
   private val sortOrderCase: ProgressSortOrderCase,
   private val filtersCase: ProgressFiltersCase,
   private val imagesProvider: ShowImagesProvider,
-  private val userTraktManager: UserTraktManager,
-  private val workManager: WorkManager,
+  private val dateFormatProvider: DateFormatProvider,
   private val translationsRepository: TranslationsRepository,
   private val settingsRepository: SettingsRepository,
 ) : ViewModel(),
@@ -55,148 +47,113 @@ class ProgressViewModel @Inject constructor(
 
   private val itemsState = MutableStateFlow<List<ProgressListItem>?>(null)
   private val loadingState = MutableStateFlow(false)
-  private val overscrollState = MutableStateFlow(false)
   private val scrollState = MutableStateFlow(Event(false))
   private val sortOrderState = MutableStateFlow<Event<Triple<SortOrder, SortType, Boolean>>?>(null)
+  private val dateFormatState = MutableStateFlow<DateTimeFormatter?>(null)
 
   private var searchQuery: String? = null
-  private var timestamp = 0L
+  private var timestamp: Long = 0L
 
-  fun onParentState(state: ProgressMainUiState) {
-    when {
-      this.timestamp != state.timestamp && state.timestamp != 0L -> {
-        this.timestamp = state.timestamp ?: 0L
-        loadItems(resetScroll = state.resetScroll?.consume() == true)
-      }
-      this.searchQuery != state.searchQuery -> {
-        this.searchQuery = state.searchQuery
-        loadItems(resetScroll = state.searchQuery.isNullOrBlank())
-      }
+  init {
+    dateFormatState.value = dateFormatProvider.loadShortDayFormat()
+  }
+
+  fun onParentState(parentState: ProgressMainUiState) {
+    if (this.timestamp != parentState.timestamp) {
+      this.timestamp = parentState.timestamp ?: 0L
+      loadItems(withLoading = true)
+    }
+    if (this.searchQuery != parentState.searchQuery) {
+      this.searchQuery = parentState.searchQuery
+      loadItems(withLoading = false)
     }
   }
 
-  private fun loadItems(resetScroll: Boolean = false) {
+  fun loadItems(withLoading: Boolean = false) {
     loadItemsJob?.cancel()
     loadItemsJob = viewModelScope.launch {
-      loadingState.value = true
-
-      val items = itemsCase.loadItems(searchQuery ?: "")
+      if (withLoading) loadingState.value = true
+      val items = itemsCase.loadItems(searchQuery ?: "", true)
       itemsState.value = items
       loadingState.value = false
-      scrollState.value = Event(resetScroll)
-      overscrollState.value = userTraktManager.isAuthorized() && items.isNotEmpty()
-
-      eventChannel.send(RequestWidgetsUpdate)
     }
   }
 
-  fun loadSortOrder() {
-    if (itemsState.value?.isEmpty() == true) return
+  fun onSortOrderClicked() {
     viewModelScope.launch {
       val sortOrder = sortOrderCase.loadSortOrder()
       sortOrderState.value = Event(sortOrder)
     }
   }
 
-  fun onEpisodeChecked(episode: ProgressListItem.Episode) {
-    viewModelScope.launch {
-      val bundle = EpisodeBundle(episode.requireEpisode(), episode.requireSeason(), episode.show)
-      eventChannel.send(
-        EpisodeCheckActionUiEvent(
-          episode = bundle,
-          dateSelectionType = settingsRepository.progressDateSelectionType,
-        ),
-      )
-    }
+  fun onEpisodeChecked(item: ProgressListItem.Episode) {
+    updateItem(item.copy(isWatched = true))
   }
 
-  fun findMissingImage(
-    item: ProgressListItem,
-    force: Boolean,
-  ) {
-    check(item is ProgressListItem.Episode)
+  fun findMissingImage(item: ProgressListItem, withLoading: Boolean) {
+    if (item !is ProgressListItem.Episode) return
     viewModelScope.launch {
-      updateItem(item.copy(isLoading = true))
-      try {
-        val image = imagesProvider.loadRemoteImage(item.show, item.image.type, force)
-        updateItem(item.copy(image = image, isLoading = false))
-      } catch (t: Throwable) {
-        val unavailable = Image.createUnavailable(item.image.type)
-        updateItem(item.copy(image = unavailable, isLoading = false))
+      val image = imagesProvider.findCachedImage(item.show, ImageType.POSTER)
+      if (image.fileUrl.isNotBlank()) {
+        updateItem(item.copy(image = image))
       }
     }
   }
 
   fun findMissingTranslation(item: ProgressListItem) {
-    check(item is ProgressListItem.Episode)
-    val language = translationsRepository.getLanguage()
-    if (item.translations?.show != null || language == Config.DEFAULT_LANGUAGE) return
+    if (item !is ProgressListItem.Episode) return
     viewModelScope.launch {
-      try {
-        val translation = translationsRepository.loadTranslation(item.show, language)
-        val translations = item.translations?.copy(show = translation)
-        updateItem(item.copy(translations = translations))
-      } catch (error: Throwable) {
-        Timber.e(error)
+      val language = translationsRepository.getLanguage()
+      val translation = translationsRepository.loadTranslation(item.show, language)
+      if (translation != null) {
+        updateItem(item.copy(translations = item.translations?.copy(show = translation)))
       }
     }
   }
 
-  fun setSortOrder(
-    sortOrder: SortOrder,
-    sortType: SortType,
-    newAtTop: Boolean,
-  ) {
-    sortOrderCase.setSortOrder(sortOrder, sortType, newAtTop)
-    loadItems(resetScroll = true)
+  fun setSortOrder(order: SortOrder, type: SortType, isNewAlwaysAtTop: Boolean) {
+    viewModelScope.launch {
+      sortOrderCase.setSortOrder(order, type, isNewAlwaysAtTop)
+      loadItems(withLoading = true)
+    }
   }
 
-  fun setUpcomingFilter(isEnabled: Boolean) {
-    filtersCase.setUpcomingFilter(isEnabled)
-    loadItems(resetScroll = true)
+  fun setUpcomingFilter(enabled: Boolean) {
+    filtersCase.setUpcomingFilter(enabled)
+    loadItems(withLoading = true)
   }
 
-  fun setOnHoldFilter(isEnabled: Boolean) {
-    filtersCase.setOnHoldFilter(isEnabled)
-    loadItems(resetScroll = true)
+  fun setOnHoldFilter(enabled: Boolean) {
+    filtersCase.setOnHoldFilter(enabled)
+    loadItems(withLoading = true)
   }
 
-  fun toggleHeaderCollapsed(headerType: ProgressListItem.Header.Type) {
-    headersCase.toggleHeaderCollapsed(headerType)
+  fun toggleHeaderCollapsed(type: ProgressListItem.Header.Type) {
+    headersCase.toggleHeaderCollapsed(type)
     loadItems()
   }
 
-  fun startTraktSync() {
-    TraktSyncWorker.scheduleOneOff(
-      workManager,
-      isImport = true,
-      isExport = true,
-      isSilent = false,
-    )
-  }
-
   private fun updateItem(newItem: ProgressListItem) {
-    itemsState.update { value ->
-      value?.toMutableList()?.apply {
-        findReplace(newItem) { it.isSameAs(newItem) }
-      }
+    val currentItems = itemsState.value ?: return
+    val newItems = currentItems.toMutableList()
+    val index = newItems.indexOfFirst { it isSameAs newItem }
+    if (index != -1) {
+      newItems[index] = newItem
+      itemsState.value = newItems
     }
-    scrollState.update { Event(false) }
   }
 
-  val uiState = combine(
+  val uiState: StateFlow<ProgressUiState> = combine(
     itemsState,
+    loadingState,
     scrollState,
     sortOrderState,
-    loadingState,
-    overscrollState,
-  ) { s1, s2, s3, s4, s5 ->
+  ) { items, loading, scroll, sortOrder ->
     ProgressUiState(
-      items = s1,
-      scrollReset = s2,
-      sortOrder = s3,
-      isLoading = s4,
-      isOverScrollEnabled = s5,
+      items = items,
+      isLoading = loading,
+      scrollReset = scroll,
+      sortOrder = sortOrder,
     )
   }.stateIn(
     scope = viewModelScope,

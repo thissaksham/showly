@@ -14,6 +14,7 @@ import com.michaldrabik.common.Config.LISTS_GRID_SPAN
 import com.michaldrabik.repository.settings.SettingsViewModeRepository
 import com.michaldrabik.ui_base.BaseFragment
 import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
+import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_base.common.OnScrollResetListener
 import com.michaldrabik.ui_base.common.OnSearchClickListener
 import com.michaldrabik.ui_base.common.sheets.sort_order.SortOrderBottomSheet
@@ -151,6 +152,7 @@ class MyMoviesFragment :
               RECENT_MOVIES, HEADER -> {
                 when (viewMode) {
                   LIST_NORMAL -> if (isTablet) gridSpanSize else LISTS_GRID_SPAN
+                  POSTER -> if (isTablet) gridSpanSize else LISTS_GRID_SPAN
                 }
               }
               ALL_MOVIES_ITEM -> {

@@ -17,7 +17,7 @@ import com.michaldrabik.ui_discover_movies.recycler.DiscoverMovieListItem
 import com.michaldrabik.ui_model.ImageStatus.AVAILABLE
 import com.michaldrabik.ui_model.ImageStatus.UNAVAILABLE
 
-class MoviePosterView : MovieView<DiscoverMovieListItem> {
+internal class MoviePosterView : MovieView<DiscoverMovieListItem> {
 
   constructor(context: Context) : super(context)
   constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)

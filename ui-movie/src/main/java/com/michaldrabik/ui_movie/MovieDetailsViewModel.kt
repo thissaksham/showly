@@ -2,57 +2,42 @@ package com.michaldrabik.ui_movie
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.michaldrabik.common.errors.ErrorHelper
-import com.michaldrabik.common.errors.ShowlyError.CoroutineCancellation
-import com.michaldrabik.common.errors.ShowlyError.ResourceNotFoundError
-import com.michaldrabik.common.extensions.dateFromMillis
-import com.michaldrabik.common.extensions.nowUtc
-import com.michaldrabik.common.extensions.toUtcZone
-import com.michaldrabik.repository.UserTraktManager
+import com.michaldrabik.common.Mode
+import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.MovieImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
-import com.michaldrabik.ui_base.Logger
 import com.michaldrabik.ui_base.dates.DateFormatProvider
 import com.michaldrabik.ui_base.notifications.AnnouncementManager
+import com.michaldrabik.ui_base.utilities.events.Event
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
 import com.michaldrabik.ui_base.utilities.extensions.combine
-import com.michaldrabik.ui_base.utilities.extensions.launchDelayed
 import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
-import com.michaldrabik.ui_base.viewmodel.ChannelsDelegate
-import com.michaldrabik.ui_base.viewmodel.DefaultChannelsDelegate
-import com.michaldrabik.ui_model.IdTrakt
-import com.michaldrabik.ui_model.Image
-import com.michaldrabik.ui_model.ImageType
-import com.michaldrabik.ui_model.Movie
-import com.michaldrabik.ui_model.ProgressDateSelectionType.ALWAYS_ASK
-import com.michaldrabik.ui_model.RatingState
-import com.michaldrabik.ui_model.SpoilersSettings
-import com.michaldrabik.ui_model.TraktRating
-import com.michaldrabik.ui_model.Translation
-import com.michaldrabik.ui_movie.MovieDetailsEvent.Finish
-import com.michaldrabik.ui_movie.MovieDetailsEvent.RemoveFromTrakt
-import com.michaldrabik.ui_movie.MovieDetailsEvent.RequestWidgetsUpdate
-import com.michaldrabik.ui_movie.MovieDetailsUiState.FollowedState
 import com.michaldrabik.ui_movie.cases.MovieDetailsHiddenCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsListsCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsMainCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsMyMoviesCase
+import com.michaldrabik.ui_movie.sections.ratings.cases.MovieDetailsRatingCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsTranslationCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsWatchlistCase
 import com.michaldrabik.ui_movie.helpers.MovieDetailsMeta
-import com.michaldrabik.ui_movie.sections.ratings.cases.MovieDetailsRatingCase
+import com.michaldrabik.ui_model.IdTrakt
+import com.michaldrabik.ui_model.Image
+import com.michaldrabik.ui_model.ImageType
+import com.michaldrabik.ui_model.Movie
+import com.michaldrabik.ui_model.RatingState
+import com.michaldrabik.ui_model.SpoilersSettings
+import com.michaldrabik.ui_model.Translation
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.time.ZonedDateTime
 import javax.inject.Inject
-import kotlin.properties.Delegates.notNull
 
 @HiltViewModel
 class MovieDetailsViewModel @Inject constructor(
@@ -64,228 +49,130 @@ class MovieDetailsViewModel @Inject constructor(
   private val hiddenCase: MovieDetailsHiddenCase,
   private val listsCase: MovieDetailsListsCase,
   private val settingsRepository: SettingsRepository,
-  private val userManager: UserTraktManager,
   private val imagesProvider: MovieImagesProvider,
   private val dateFormatProvider: DateFormatProvider,
   private val announcementManager: AnnouncementManager,
-) : ViewModel(),
-  ChannelsDelegate by DefaultChannelsDelegate() {
+) : ViewModel() {
 
-  private var movie by notNull<Movie>()
+  lateinit var movie: Movie
 
   private val movieState = MutableStateFlow<Movie?>(null)
+  val parentMovieState: SharedFlow<Movie?> = movieState
   private val movieLoadingState = MutableStateFlow<Boolean?>(null)
   private val imageState = MutableStateFlow<Image?>(null)
-  private val followedState = MutableStateFlow<FollowedState?>(null)
+  private val followedState = MutableStateFlow<MovieDetailsUiState.FollowedState?>(null)
+  val parentFollowedState: SharedFlow<MovieDetailsUiState.FollowedState?> = followedState
   private val ratingState = MutableStateFlow<RatingState?>(null)
   private val translationState = MutableStateFlow<Translation?>(null)
   private val metaState = MutableStateFlow<MovieDetailsMeta?>(null)
   private val spoilersState = MutableStateFlow<SpoilersSettings?>(null)
   private val listsCountState = MutableStateFlow(0)
 
-  val parentMovieState = movieState.asStateFlow()
-  val parentFollowedState = followedState.asStateFlow()
+  private val messageChannel = MutableSharedFlow<MessageEvent>()
+  val messageFlow: SharedFlow<MessageEvent> = messageChannel
 
-  fun loadDetails(id: IdTrakt) {
+  private val eventChannel = MutableSharedFlow<Event<*>>()
+  val eventFlow: SharedFlow<Event<*>> = eventChannel
+
+  fun loadDetails(movieId: IdTrakt) {
     viewModelScope.launch {
-      val progressJob = launchDelayed(700) {
-        movieLoadingState.value = true
-      }
+      movieLoadingState.value = true
       try {
-        movie = mainCase.loadDetails(id)
+        val result = mainCase.loadDetails(movieId)
+        movie = result
+        movieState.value = result
+        loadBackgroundImage(result)
+        loadTranslation()
+        loadListsCount(result)
+        loadUserRating()
 
-        val isMyMovie = async { myMoviesCase.getMyMovie(movie) }
-        val isWatchlist = async { watchlistCase.isWatchlist(movie) }
-        val isHidden = async { hiddenCase.isHidden(movie) }
+        val isFollowed = myMoviesCase.getMyMovie(result) != null
+        val isWatchlist = watchlistCase.isWatchlist(result)
+        val isHidden = hiddenCase.isHidden(result)
 
-        val myMovie = isMyMovie.await()
-        val isFollowed = FollowedState(
-          isMyMovie = myMovie != null,
-          isWatchlist = isWatchlist.await(),
-          isHidden = isHidden.await(),
+        followedState.value = MovieDetailsUiState.FollowedState(
+          isMyMovie = isFollowed,
+          isWatchlist = isWatchlist,
+          isHidden = isHidden,
           withAnimation = false,
-          watchedAt = myMovie?.updatedAt?.let { dateFromMillis(it) },
+          watchedAt = null,
         )
-
-        progressJob.cancel()
-
-        movieState.value = movie
-        movieLoadingState.value = false
-        followedState.value = isFollowed
-        ratingState.value = RatingState(rateLoading = false)
-        spoilersState.value = settingsRepository.spoilers.getAll()
         metaState.value = MovieDetailsMeta(
           dateFormat = dateFormatProvider.loadShortDayFormat(),
           commentsDateFormat = dateFormatProvider.loadFullHourFormat(),
-          watchedAtDateFormat = dateFormatProvider.loadFullHourFormat(),
-          isSignedIn = userManager.isAuthorized(),
+          watchedAtDateFormat = dateFormatProvider.loadFullDayFormat(),
+          isSignedIn = false,
         )
-
-        loadBackgroundImage(movie)
-        loadListsCount(movie)
-        loadUserRating()
-        loadTranslation()
-
-        eventChannel.send(RequestWidgetsUpdate)
-      } catch (error: Throwable) {
-        Timber.e(error)
-        progressJob.cancel()
-        when (ErrorHelper.parse(error)) {
-          is CoroutineCancellation -> {
-            rethrowCancellation(error)
-          }
-          is ResourceNotFoundError -> {
-            // Malformed Trakt data or duplicate show.
-            messageChannel.send(MessageEvent.Info(R.string.errorMalformedMovie))
-            Logger.record(error, "MovieDetailsViewModel::loadDetails(${id.id})")
-          }
-          else -> {
-            messageChannel.send(MessageEvent.Error(R.string.errorCouldNotLoadMovie))
-            Logger.record(error, "MovieDetailsViewModel::loadDetails(${id.id})")
-          }
-        }
+        spoilersState.value = settingsRepository.spoilers.getAll()
+      } catch (e: Throwable) {
+        rethrowCancellation(e)
+      } finally {
+        movieLoadingState.value = false
       }
     }
   }
 
-  private fun loadBackgroundImage(movie: Movie? = null) {
+  private fun loadBackgroundImage(movie: Movie?) {
+    if (movie == null) return
     viewModelScope.launch {
-      try {
-        val backgroundImage = imagesProvider.loadRemoteImage(
-          movie ?: this@MovieDetailsViewModel.movie,
-          ImageType.FANART,
-        )
-        imageState.value = backgroundImage
-      } catch (error: Throwable) {
-        imageState.value = Image.createUnavailable(ImageType.FANART)
-        Timber.e(error)
-        rethrowCancellation(error)
-      }
+      imageState.value = imagesProvider.findCachedImage(movie, ImageType.FANART)
     }
   }
 
   private fun loadTranslation() {
     viewModelScope.launch {
-      try {
-        translationCase.loadTranslation(movie)?.let {
-          translationState.value = it
-        }
-      } catch (error: Throwable) {
-        rethrowCancellation(error)
-      }
+      translationState.value = translationCase.loadTranslation(movie)
     }
   }
 
   fun loadListsCount(movie: Movie? = null) {
+    val targetMovie = movie ?: this.movie
     viewModelScope.launch {
-      val count = listsCase.countLists(movie ?: this@MovieDetailsViewModel.movie)
-      listsCountState.value = count
+      listsCountState.value = listsCase.countLists(targetMovie)
     }
   }
 
   fun loadUserRating() {
     viewModelScope.launch {
-      try {
-        ratingState.value = RatingState(rateLoading = true)
-        val rating = ratingsCase.loadRating(movie)
-        ratingState.value =
-          RatingState(rateLoading = false, userRating = rating ?: TraktRating.EMPTY)
-      } catch (error: Throwable) {
-        ratingState.value = RatingState(rateLoading = false)
-        rethrowCancellation(error)
-      }
+      val rating = ratingsCase.loadRating(movie)
+      ratingState.value = RatingState(userRating = rating, rateLoading = false)
     }
   }
 
-  fun addToMyMovies(
-    isCustomDateSelected: Boolean = false,
-    customDate: ZonedDateTime? = null,
-  ) {
+  fun addToMyMovies(isCustomDateSelected: Boolean, customDate: ZonedDateTime?) {
     viewModelScope.launch {
-      if (!isCustomDateSelected && settingsRepository.progressDateSelectionType == ALWAYS_ASK) {
-        eventChannel.send(MovieDetailsEvent.OpenDateSelectionSheet(movie))
-        return@launch
-      }
-      val date = if (isCustomDateSelected) customDate else nowUtc()
-      myMoviesCase.addToMyMovies(movie, date)
-      followedState.value = FollowedState
-        .inMyMovies()
-        .copy(watchedAt = date?.toUtcZone())
-      eventChannel.send(RequestWidgetsUpdate)
+      myMoviesCase.addToMyMovies(movie, customDate)
+      followedState.value = followedState.value?.copy(isMyMovie = true, isWatchlist = false, isHidden = false)
+      messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToMyMovies))
     }
   }
 
   fun addToWatchlist() {
     viewModelScope.launch {
       watchlistCase.addToWatchlist(movie)
-      followedState.value = FollowedState.inWatchlist()
-      eventChannel.send(RequestWidgetsUpdate)
+      followedState.value = followedState.value?.copy(isWatchlist = true, isMyMovie = false, isHidden = false)
+      messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToWatchlist))
     }
   }
 
   fun addToHidden() {
     viewModelScope.launch {
       hiddenCase.addToHidden(movie)
-      followedState.value = FollowedState.inHidden()
-      eventChannel.send(RequestWidgetsUpdate)
+      followedState.value = followedState.value?.copy(isHidden = true, isMyMovie = false, isWatchlist = false)
+      messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToHidden))
     }
   }
 
   fun removeFromMyMovies() {
     viewModelScope.launch {
-      val isMyMovie = myMoviesCase.getMyMovie(movie) != null
-      val isWatchlist = watchlistCase.isWatchlist(movie)
-      val isHidden = hiddenCase.isHidden(movie)
-
-      when {
-        isMyMovie -> myMoviesCase.removeFromMyMovies(movie)
-        isWatchlist -> watchlistCase.removeFromWatchlist(movie)
-        isHidden -> hiddenCase.removeFromHidden(movie)
-      }
-
-      val traktQuickRemoveEnabled = settingsRepository.load().traktQuickRemoveEnabled
-      val showRemoveTrakt = userManager.isAuthorized() && traktQuickRemoveEnabled
-
-      val state = FollowedState.idle()
-      when {
-        isMyMovie -> {
-          followedState.value = state
-          if (showRemoveTrakt) {
-            eventChannel.send(RemoveFromTrakt(R.id.actionMovieDetailsFragmentToRemoveTraktProgress))
-          }
-        }
-        isWatchlist -> {
-          followedState.value = state
-          if (showRemoveTrakt) {
-            eventChannel.send(RemoveFromTrakt(R.id.actionMovieDetailsFragmentToRemoveTraktWatchlist))
-          }
-        }
-        isHidden -> {
-          followedState.value = state
-          if (showRemoveTrakt) {
-            eventChannel.send(RemoveFromTrakt(R.id.actionMovieDetailsFragmentToRemoveTraktHidden))
-          }
-        }
-        else -> {
-          error("Unexpected movie state.")
-        }
-      }
-      eventChannel.send(RequestWidgetsUpdate)
-      announcementManager.refreshMoviesAnnouncements()
+      myMoviesCase.removeFromMyMovies(movie)
+      followedState.value = followedState.value?.copy(isMyMovie = false)
+      messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromMyMovies))
     }
   }
 
-  fun removeMalformedMovie(id: IdTrakt) {
-    viewModelScope.launch {
-      try {
-        mainCase.removeMalformedMovie(id)
-      } catch (error: Throwable) {
-        Timber.e(error)
-        rethrowCancellation(error)
-      } finally {
-        eventChannel.send(Finish)
-      }
-    }
+  fun removeMalformedMovie(movieId: IdTrakt) {
+    // Removed.
   }
 
   val uiState = combine(
@@ -295,20 +182,20 @@ class MovieDetailsViewModel @Inject constructor(
     followedState,
     ratingState,
     translationState,
-    listsCountState,
     metaState,
     spoilersState,
-  ) { s1, s2, s3, s4, s5, s6, s7, s8, s9 ->
+    listsCountState,
+  ) { movie, movieLoading, image, followedState, ratingState, translation, meta, spoilers, listsCount ->
     MovieDetailsUiState(
-      movie = s1,
-      movieLoading = s2,
-      image = s3,
-      followedState = s4,
-      ratingState = s5,
-      translation = s6,
-      listsCount = s7,
-      meta = s8,
-      spoilers = s9,
+      movie = movie,
+      movieLoading = movieLoading ?: false,
+      image = image,
+      followedState = followedState,
+      ratingState = ratingState,
+      translation = translation,
+      meta = meta,
+      spoilers = spoilers,
+      listsCount = listsCount,
     )
   }.stateIn(
     scope = viewModelScope,

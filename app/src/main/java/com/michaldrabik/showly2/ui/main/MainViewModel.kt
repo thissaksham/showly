@@ -13,7 +13,6 @@ import com.michaldrabik.showly2.ui.main.cases.MainClearingCase
 import com.michaldrabik.showly2.ui.main.cases.MainInitialsCase
 import com.michaldrabik.showly2.ui.main.cases.MainModesCase
 import com.michaldrabik.showly2.ui.main.cases.MainTipsCase
-import com.michaldrabik.showly2.ui.main.cases.MainTraktCase
 import com.michaldrabik.showly2.ui.main.cases.deeplink.MainDeepLinksCase
 import com.michaldrabik.showly2.utilities.deeplink.DeepLinkBundle
 import com.michaldrabik.showly2.utilities.deeplink.DeepLinkSource
@@ -38,11 +37,10 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
   private val initCase: MainInitialsCase,
   private val tipsCase: MainTipsCase,
-  private val traktCase: MainTraktCase,
-  private val backupCase: MainBackupCase,
   private val clearingCase: MainClearingCase,
   private val announcementsCase: MainAnnouncementsCase,
   private val modesCase: MainModesCase,
+  private val backupCase: MainBackupCase,
   private val linksCase: MainDeepLinksCase,
   private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -101,15 +99,6 @@ class MainViewModel @Inject constructor(
   fun refreshAnnouncements() {
     viewModelScope.launch {
       announcementsCase.refreshAnnouncements()
-    }
-  }
-
-  fun refreshTraktSyncSchedule() {
-    viewModelScope.launch {
-      traktCase.run {
-        refreshTraktSyncSchedule()
-        refreshTraktQuickSync()
-      }
     }
   }
 

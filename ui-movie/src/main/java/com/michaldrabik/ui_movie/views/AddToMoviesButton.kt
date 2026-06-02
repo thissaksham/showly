@@ -54,7 +54,7 @@ class AddToMoviesButton : FrameLayout {
     with(binding) {
       when (state) {
         ADD -> {
-          addToMyMoviesButton.setText(R.string.textAddToMyMovies)
+          addToMyMoviesButton.setText(com.michaldrabik.ui_base.R.string.textAddToMyMovies)
           checkButton.fadeOut(duration, withHardware = true)
           addedToButton.fadeOut(duration, withHardware = true)
           addToMyMoviesButton.fadeIn(duration, startDelay = startDelay, withHardware = true)

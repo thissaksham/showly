@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @ViewModelScoped
-class DiscoverFiltersCase @Inject constructor(
+internal class DiscoverFiltersCase @Inject constructor(
   @ApplicationContext private val context: Context,
   private val dispatchers: CoroutineDispatchers,
   private val settingsRepository: SettingsRepository,

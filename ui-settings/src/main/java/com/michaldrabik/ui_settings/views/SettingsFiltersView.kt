@@ -10,13 +10,12 @@ import androidx.core.view.children
 import com.google.android.material.chip.Chip
 import com.michaldrabik.ui_base.utilities.extensions.onClick
 import com.michaldrabik.ui_settings.databinding.ViewSettingsFiltersBinding
-import com.michaldrabik.ui_settings.views.SettingsFiltersView.SettingsFilter.BACKUP
 import com.michaldrabik.ui_settings.views.SettingsFiltersView.SettingsFilter.GENERAL
 import com.michaldrabik.ui_settings.views.SettingsFiltersView.SettingsFilter.MISC
 import com.michaldrabik.ui_settings.views.SettingsFiltersView.SettingsFilter.NOTIFICATIONS
 import com.michaldrabik.ui_settings.views.SettingsFiltersView.SettingsFilter.SPOILERS
-import com.michaldrabik.ui_settings.views.SettingsFiltersView.SettingsFilter.TRAKT
 import com.michaldrabik.ui_settings.views.SettingsFiltersView.SettingsFilter.WIDGETS
+import com.michaldrabik.ui_settings.views.SettingsFiltersView.SettingsFilter.BACKUP
 
 class SettingsFiltersView : FrameLayout {
 
@@ -36,10 +35,6 @@ class SettingsFiltersView : FrameLayout {
 
   private fun initView() {
     with(binding) {
-      traktChip.onClick(safe = false) {
-        selectedFilter = if (selectedFilter == TRAKT) null else TRAKT
-        onFilterClick?.invoke(selectedFilter)
-      }
       generalChip.onClick(safe = false) {
         selectedFilter = if (selectedFilter == GENERAL) null else GENERAL
         onFilterClick?.invoke(selectedFilter)
@@ -79,7 +74,6 @@ class SettingsFiltersView : FrameLayout {
   }
 
   enum class SettingsFilter {
-    TRAKT,
     GENERAL,
     NOTIFICATIONS,
     SPOILERS,

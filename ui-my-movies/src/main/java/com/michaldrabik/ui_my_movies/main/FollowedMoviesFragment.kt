@@ -278,10 +278,7 @@ class FollowedMoviesFragment :
   }
 
   private fun render(uiState: FollowedMoviesUiState) {
-    uiState.isSyncing?.let {
-      binding.followedMoviesSearchView.setTraktProgress(it)
-      binding.followedMoviesSearchView.isEnabled = !it
-    }
+    // Removed.
   }
 
   private val pageChangeListener = object : ViewPager.OnPageChangeListener {

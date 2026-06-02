@@ -49,14 +49,12 @@ class CommentView : ConstraintLayout {
           }
         }
       }
-      commentReply.onClick { onReplyClickListener?.invoke(comment) }
-      commentDelete.onClick { onDeleteClickListener?.invoke(comment) }
+      commentReply.visibleIf(false)
+      commentDelete.visibleIf(false)
     }
   }
 
   var onRepliesClickListener: ((Comment) -> Unit)? = null
-  var onReplyClickListener: ((Comment) -> Unit)? = null
-  var onDeleteClickListener: ((Comment) -> Unit)? = null
 
   private lateinit var comment: Comment
 
@@ -83,10 +81,10 @@ class CommentView : ConstraintLayout {
       commentReplies.visibleIf(comment.replies > 0 && !comment.isLoading && !comment.hasRepliesLoaded)
       commentRepliesCount.visibleIf(comment.replies > 0 && !comment.isLoading && !comment.hasRepliesLoaded)
       commentRepliesCount.text = comment.replies.toString()
-      commentProgress.visibleIf(comment.isLoading || comment.isLoading)
+      commentProgress.visibleIf(comment.isLoading)
       commentSpacerLine.visibleIf(comment.isReply())
-      commentReply.visibleIf(comment.isSignedIn && !comment.isLoading)
-      commentDelete.visibleIf(comment.isSignedIn && comment.isMe && comment.replies == 0L && !comment.isLoading)
+      commentReply.visibleIf(false)
+      commentDelete.visibleIf(false)
 
       if (comment.hasSpoilers()) {
         with(commentText) {

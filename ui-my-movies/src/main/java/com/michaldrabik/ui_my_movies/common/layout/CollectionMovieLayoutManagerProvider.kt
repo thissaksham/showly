@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import androidx.recyclerview.widget.RecyclerView
 import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
+import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_base.utilities.extensions.isTablet
 
 internal object CollectionMovieLayoutManagerProvider {
@@ -28,6 +29,7 @@ internal object CollectionMovieLayoutManagerProvider {
   ): RecyclerView.LayoutManager =
     when (viewMode) {
       LIST_NORMAL -> LinearLayoutManager(context, VERTICAL, false)
+      POSTER -> LinearLayoutManager(context, VERTICAL, false)
     }
 
   private fun provideTabletLayout(
@@ -37,5 +39,6 @@ internal object CollectionMovieLayoutManagerProvider {
   ): RecyclerView.LayoutManager =
     when (viewMode) {
       LIST_NORMAL -> GridLayoutManager(context, gridSpanSize)
+      POSTER -> GridLayoutManager(context, gridSpanSize)
     }
 }

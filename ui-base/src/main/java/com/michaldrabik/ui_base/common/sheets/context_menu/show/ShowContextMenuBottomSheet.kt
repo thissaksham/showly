@@ -11,10 +11,8 @@ import com.michaldrabik.common.Config.SPOILERS_RATINGS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_REGEX
 import com.michaldrabik.ui_base.R
 import com.michaldrabik.ui_base.common.sheets.context_menu.ContextMenuBottomSheet
-import com.michaldrabik.ui_base.common.sheets.context_menu.events.FinishUiEvent
-import com.michaldrabik.ui_base.common.sheets.context_menu.events.RemoveTraktUiEvent
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.helpers.ShowContextItem
-import com.michaldrabik.ui_base.common.sheets.remove_trakt.RemoveTraktBottomSheet.Mode
+import com.michaldrabik.ui_base.utilities.events.FinishUiEvent
 import com.michaldrabik.ui_base.utilities.events.Event
 import com.michaldrabik.ui_base.utilities.extensions.gone
 import com.michaldrabik.ui_base.utilities.extensions.launchAndRepeatStarted
@@ -67,18 +65,12 @@ class ShowContextMenuBottomSheet : ContextMenuBottomSheet() {
   private fun render(uiState: ShowContextMenuUiState) {
     uiState.run {
       isLoading?.let {
-        when {
-          isLoading -> binding.contextMenuItemProgress.show()
-          else -> binding.contextMenuItemProgress.hide()
-        }
-        binding.contextMenuItemButtonsLayout.visibleIf(!isLoading, gone = false)
+        if (it) binding.contextMenuItemProgress.show() else binding.contextMenuItemProgress.hide()
+        binding.contextMenuItemButtonsLayout.visibleIf(!it, gone = false)
       }
       isLoadingSecondary?.let {
-        when {
-          isLoadingSecondary -> binding.contextMenuItemProgressSecondary.visible()
-          else -> binding.contextMenuItemProgressSecondary.gone()
-        }
-        binding.contextMenuItemButtonsLayout.visibleIf(!isLoadingSecondary, gone = false)
+        if (it) binding.contextMenuItemProgressSecondary.visible() else binding.contextMenuItemProgressSecondary.gone()
+        binding.contextMenuItemButtonsLayout.visibleIf(!it, gone = false)
       }
       item?.let {
         renderItem(it)
@@ -132,7 +124,7 @@ class ShowContextMenuBottomSheet : ContextMenuBottomSheet() {
 
       if (!item.isInCollection()) {
         contextMenuItemMoveToMyButton.text = getString(R.string.textAddToMyShows)
-        contextMenuItemMoveToWatchlistButton.text = getString(R.string.textAddToWatchlist)
+        contextMenuItemMoveToWatchlistButton.text = getString(R.string.textAddedToWatchlist)
         contextMenuItemMoveToHiddenButton.text = getString(R.string.textHide)
       }
     }
@@ -199,18 +191,8 @@ class ShowContextMenuBottomSheet : ContextMenuBottomSheet() {
   }
 
   private fun handleEvent(event: Event<*>) {
-    when (val result = event.peek()) {
-      is RemoveTraktUiEvent -> when {
-        result.removeProgress -> openRemoveTraktSheet(R.id.actionShowItemContextDialogToRemoveTraktProgress, Mode.SHOW)
-        result.removeWatchlist -> openRemoveTraktSheet(
-          R.id.actionShowItemContextDialogToRemoveTraktWatchlist,
-          Mode.SHOW,
-        )
-        result.removeHidden -> openRemoveTraktSheet(R.id.actionShowItemContextDialogToRemoveTraktHidden, Mode.SHOW)
-        else -> close()
-      }
-      is FinishUiEvent -> if (result.isSuccess) close()
-      else -> throw IllegalStateException()
+    when (event.peek()) {
+      is FinishUiEvent -> close()
     }
   }
 

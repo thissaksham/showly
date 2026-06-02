@@ -30,5 +30,5 @@ include ':ui-show'
 include ':ui-statistics'
 include ':ui-statistics-movies'
 include ':ui-streamings'
-include ':ui-trakt-sync'
+
 include ':ui-widgets'

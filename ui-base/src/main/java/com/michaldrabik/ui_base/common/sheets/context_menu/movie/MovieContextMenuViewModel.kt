@@ -1,14 +1,7 @@
 package com.michaldrabik.ui_base.common.sheets.context_menu.movie
 
-import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.michaldrabik.common.extensions.nowUtc
-import com.michaldrabik.repository.settings.SettingsRepository
-import com.michaldrabik.ui_base.R
-import com.michaldrabik.ui_base.common.sheets.context_menu.events.FinishUiEvent
-import com.michaldrabik.ui_base.common.sheets.context_menu.events.RemoveTraktUiEvent
-import com.michaldrabik.ui_base.common.sheets.context_menu.events.SelectDateUiEvent
 import com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases.MovieContextMenuHiddenCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases.MovieContextMenuLoadItemCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases.MovieContextMenuMyMoviesCase
@@ -16,24 +9,23 @@ import com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases.MovieCont
 import com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases.MovieContextMenuWatchlistCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.movie.helpers.MovieContextItem
 import com.michaldrabik.ui_base.utilities.events.Event
+import com.michaldrabik.ui_base.utilities.events.FinishUiEvent
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
 import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
-import com.michaldrabik.ui_base.viewmodel.ChannelsDelegate
-import com.michaldrabik.ui_base.viewmodel.DefaultChannelsDelegate
 import com.michaldrabik.ui_model.IdTrakt
-import com.michaldrabik.ui_model.ProgressDateSelectionType.ALWAYS_ASK
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.ZonedDateTime
 import javax.inject.Inject
-import kotlin.properties.Delegates.notNull
 
-@SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class MovieContextMenuViewModel @Inject constructor(
   private val loadItemCase: MovieContextMenuLoadItemCase,
@@ -41,145 +33,145 @@ class MovieContextMenuViewModel @Inject constructor(
   private val watchlistCase: MovieContextMenuWatchlistCase,
   private val hiddenCase: MovieContextMenuHiddenCase,
   private val pinnedCase: MovieContextMenuPinnedCase,
-  private val settingsRepository: SettingsRepository,
-) : ViewModel(),
-  ChannelsDelegate by DefaultChannelsDelegate() {
+) : ViewModel() {
 
-  private var movieId by notNull<IdTrakt>()
-  private var isQuickRemoveEnabled by notNull<Boolean>()
+  var movieIdValue: Long = -1L
 
   private val loadingState = MutableStateFlow(false)
   private val itemState = MutableStateFlow<MovieContextItem?>(null)
 
-  fun loadMovie(idTrakt: IdTrakt) {
-    viewModelScope.launch {
-      movieId = idTrakt
-      isQuickRemoveEnabled = settingsRepository.load().traktQuickRemoveEnabled
+  private val eventChannel = Channel<Event<*>>(Channel.BUFFERED)
+  val eventFlow = eventChannel.receiveAsFlow()
 
+  private val messageChannel = Channel<MessageEvent>(Channel.BUFFERED)
+  val messageFlow = messageChannel.receiveAsFlow()
+
+  fun loadMovie(idTrakt: IdTrakt) {
+    movieIdValue = idTrakt.id
+    viewModelScope.launch {
+      loadingState.value = true
       try {
-        loadingState.value = true
         val item = loadItemCase.loadItem(idTrakt)
         itemState.value = item
-      } catch (error: Throwable) {
-        messageChannel.send(MessageEvent.Error(R.string.errorGeneral))
+      } catch (e: Throwable) {
+        onError(e)
       } finally {
         loadingState.value = false
       }
     }
   }
 
-  fun moveToMyMovies(
-    isCustomDateSelected: Boolean = false,
-    customDate: ZonedDateTime? = null,
-  ) {
+  fun moveToMyMovies(isCustomDateSelected: Boolean, customDate: ZonedDateTime?) {
     viewModelScope.launch {
+      loadingState.value = true
       try {
-        val movie = itemState.value?.movie
-        val isCustomDateAlwaysAsk = { settingsRepository.progressDateSelectionType == ALWAYS_ASK }
-        if (movie != null && !isCustomDateSelected && isCustomDateAlwaysAsk()) {
-          eventChannel.send(Event(SelectDateUiEvent(movie)))
-          return@launch
-        }
-        val date = if (isCustomDateSelected) customDate else nowUtc()
-        val result = myMoviesCase.moveToMyMovies(movieId, date)
-        checkQuickRemove(result)
-      } catch (error: Throwable) {
-        onError(error)
+        myMoviesCase.moveToMyMovies(IdTrakt(movieIdValue), customDate)
+        loadMovie(IdTrakt(movieIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingState.value = false
       }
     }
   }
 
   fun removeFromMyMovies() {
     viewModelScope.launch {
+      loadingState.value = true
       try {
-        myMoviesCase.removeFromMyMovies(movieId)
-        checkQuickRemove(RemoveTraktUiEvent(removeProgress = true))
-      } catch (error: Throwable) {
-        onError(error)
+        myMoviesCase.removeFromMyMovies(IdTrakt(movieIdValue))
+        loadMovie(IdTrakt(movieIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingState.value = false
       }
     }
   }
 
   fun moveToWatchlist() {
     viewModelScope.launch {
+      loadingState.value = true
       try {
-        val result = watchlistCase.moveToWatchlist(movieId)
-        checkQuickRemove(result)
-      } catch (error: Throwable) {
-        onError(error)
+        watchlistCase.moveToWatchlist(IdTrakt(movieIdValue))
+        loadMovie(IdTrakt(movieIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingState.value = false
       }
     }
   }
 
   fun removeFromWatchlist() {
     viewModelScope.launch {
+      loadingState.value = true
       try {
-        watchlistCase.removeFromWatchlist(movieId)
-        checkQuickRemove(RemoveTraktUiEvent(removeWatchlist = true))
-      } catch (error: Throwable) {
-        onError(error)
+        watchlistCase.removeFromWatchlist(IdTrakt(movieIdValue))
+        loadMovie(IdTrakt(movieIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingState.value = false
       }
     }
   }
 
   fun moveToHidden() {
     viewModelScope.launch {
+      loadingState.value = true
       try {
-        val result = hiddenCase.moveToHidden(movieId)
-        checkQuickRemove(result)
-      } catch (error: Throwable) {
-        onError(error)
+        hiddenCase.moveToHidden(IdTrakt(movieIdValue))
+        loadMovie(IdTrakt(movieIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingState.value = false
       }
     }
   }
 
   fun removeFromHidden() {
     viewModelScope.launch {
+      loadingState.value = true
       try {
-        hiddenCase.removeFromHidden(movieId)
-        checkQuickRemove(RemoveTraktUiEvent(removeHidden = true))
-      } catch (error: Throwable) {
-        onError(error)
+        hiddenCase.removeFromHidden(IdTrakt(movieIdValue))
+        loadMovie(IdTrakt(movieIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingState.value = false
       }
     }
   }
 
   fun addToTopPinned() {
     viewModelScope.launch {
-      pinnedCase.addToTopPinned(movieId)
-      eventChannel.send(Event(FinishUiEvent(true)))
+      pinnedCase.addToTopPinned(IdTrakt(movieIdValue))
+      loadMovie(IdTrakt(movieIdValue))
     }
   }
 
   fun removeFromTopPinned() {
     viewModelScope.launch {
-      pinnedCase.removeFromTopPinned(movieId)
-      eventChannel.send(Event(FinishUiEvent(true)))
-    }
-  }
-
-  private suspend fun checkQuickRemove(event: RemoveTraktUiEvent) {
-    if (isQuickRemoveEnabled) {
-      loadingState.value = false
-      eventChannel.send(Event(event))
-    } else {
-      eventChannel.send(Event(FinishUiEvent(true)))
+      pinnedCase.removeFromTopPinned(IdTrakt(movieIdValue))
+      loadMovie(IdTrakt(movieIdValue))
     }
   }
 
   private suspend fun onError(error: Throwable) {
     loadingState.value = false
-    messageChannel.send(MessageEvent.Error(R.string.errorGeneral))
+    messageChannel.send(MessageEvent.Error(com.michaldrabik.ui_base.R.string.errorGeneral))
     rethrowCancellation(error)
   }
 
   val uiState = combine(
     loadingState,
     itemState,
-  ) { s1, s2 ->
+  ) { loading, item ->
     MovieContextMenuUiState(
-      isLoading = s1,
-      item = s2,
+      isLoading = loading,
+      item = item,
     )
   }.stateIn(
     scope = viewModelScope,

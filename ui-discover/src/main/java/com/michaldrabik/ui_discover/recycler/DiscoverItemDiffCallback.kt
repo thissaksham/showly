@@ -2,7 +2,7 @@ package com.michaldrabik.ui_discover.recycler
 
 import androidx.recyclerview.widget.DiffUtil
 
-class DiscoverItemDiffCallback : DiffUtil.ItemCallback<DiscoverListItem>() {
+internal class DiscoverItemDiffCallback : DiffUtil.ItemCallback<DiscoverListItem>() {
 
   override fun areItemsTheSame(
     oldItem: DiscoverListItem,

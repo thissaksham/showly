@@ -1,22 +1,16 @@
 package com.michaldrabik.ui_base.common.sheets.ratings.cases
 
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
-import com.michaldrabik.common.errors.ErrorHelper
-import com.michaldrabik.common.errors.ShowlyError
 import com.michaldrabik.repository.RatingsRepository
-import com.michaldrabik.repository.UserTraktManager
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Ids
 import com.michaldrabik.ui_model.Show
 import com.michaldrabik.ui_model.TraktRating
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-@ViewModelScoped
 class RatingsShowCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
-  private val userTraktManager: UserTraktManager,
   private val ratingsRepository: RatingsRepository,
 ) {
 
@@ -24,54 +18,32 @@ class RatingsShowCase @Inject constructor(
     private val RATING_VALID_RANGE = 1..10
   }
 
-  suspend fun loadRating(idTrakt: IdTrakt): TraktRating =
+  suspend fun loadRating(id: IdTrakt): TraktRating? =
     withContext(dispatchers.IO) {
-      val show = Show.EMPTY.copy(ids = Ids.EMPTY.copy(trakt = idTrakt))
-      try {
-        val rating = ratingsRepository.shows.loadRatings(listOf(show))
-        rating.firstOrNull() ?: TraktRating.EMPTY
-      } catch (error: Throwable) {
-        handleError(error)
-        TraktRating.EMPTY
-      }
+      val show = Show.EMPTY.copy(ids = Ids.EMPTY.copy(trakt = id))
+      val ratings = ratingsRepository.shows.loadRatings(listOf(show))
+      ratings.firstOrNull()
     }
 
   suspend fun saveRating(
-    idTrakt: IdTrakt,
+    id: IdTrakt,
     rating: Int,
   ) = withContext(dispatchers.IO) {
-    check(rating in RATING_VALID_RANGE)
-
-    try {
-      val show = Show.EMPTY.copy(ids = Ids.EMPTY.copy(trakt = idTrakt))
-      ratingsRepository.shows.addRating(
-        show = show,
-        rating = rating,
-        withSync = userTraktManager.isAuthorized(),
-      )
-    } catch (error: Throwable) {
-      handleError(error)
-    }
+    if (rating !in RATING_VALID_RANGE) throw IllegalArgumentException("Rating must be between 1 and 10.")
+    val show = Show.EMPTY.copy(ids = Ids.EMPTY.copy(trakt = id))
+    ratingsRepository.shows.addRating(
+      show = show,
+      rating = rating,
+      withSync = false,
+    )
   }
 
-  suspend fun deleteRating(idTrakt: IdTrakt) =
+  suspend fun deleteRating(id: IdTrakt) =
     withContext(dispatchers.IO) {
-      val show = Show.EMPTY.copy(ids = Ids.EMPTY.copy(trakt = idTrakt))
-      try {
-        ratingsRepository.shows.deleteRating(
-          show = show,
-          withSync = userTraktManager.isAuthorized(),
-        )
-      } catch (error: Throwable) {
-        handleError(error)
-      }
+      val show = Show.EMPTY.copy(ids = Ids.EMPTY.copy(trakt = id))
+      ratingsRepository.shows.deleteRating(
+        show = show,
+        withSync = false,
+      )
     }
-
-  private suspend fun handleError(error: Throwable) {
-    val showlyError = ErrorHelper.parse(error)
-    if (showlyError is ShowlyError.UnauthorizedError) {
-      userTraktManager.revokeToken()
-    }
-    throw error
-  }
 }

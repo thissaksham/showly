@@ -1,13 +1,10 @@
 package com.michaldrabik.ui_lists.manage.cases
 
-import com.michaldrabik.common.Mode
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
 import com.michaldrabik.repository.ListsRepository
-import com.michaldrabik.ui_base.trakt.quicksync.QuickSyncManager
 import com.michaldrabik.ui_lists.manage.recycler.ManageListsItem
 import com.michaldrabik.ui_model.IdTrakt
 import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -15,22 +12,21 @@ import javax.inject.Inject
 class ManageListsCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val listsRepository: ListsRepository,
-  private val quickSyncManager: QuickSyncManager,
 ) {
 
   suspend fun loadLists(
     itemId: IdTrakt,
     itemType: String,
   ) = withContext(dispatchers.IO) {
-    val listsAsync = async { listsRepository.loadAll() }
-    val listsWithItemAsync = async { listsRepository.loadListIdsForItem(itemId, itemType) }
-    val (lists, listsWithItem) = Pair(listsAsync.await(), listsWithItemAsync.await())
-    lists
-      .sortedBy { it.name }
-      .map {
-        val isChecked = listsWithItem.contains(it.id)
-        ManageListsItem(it, isChecked, true)
-      }
+    val lists = listsRepository.loadAll()
+    val listIds = listsRepository.loadListIdsForItem(itemId, itemType)
+    lists.map { list ->
+      ManageListsItem(
+        list = list,
+        isChecked = listIds.contains(list.id),
+        isEnabled = true,
+      )
+    }
   }
 
   suspend fun addToList(
@@ -39,7 +35,6 @@ class ManageListsCase @Inject constructor(
     listItem: ManageListsItem,
   ) = withContext(dispatchers.IO) {
     listsRepository.addToList(listItem.list.id, itemId, itemType)
-    quickSyncManager.scheduleAddToList(itemId.id, listItem.list.id, Mode.fromType(itemType))
   }
 
   suspend fun removeFromList(
@@ -48,6 +43,5 @@ class ManageListsCase @Inject constructor(
     listItem: ManageListsItem,
   ) = withContext(dispatchers.IO) {
     listsRepository.removeFromList(listItem.list.id, itemId, itemType)
-    quickSyncManager.scheduleRemoveFromList(itemId.id, listItem.list.id, Mode.fromType(itemType))
   }
 }

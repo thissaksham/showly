@@ -27,8 +27,6 @@ import com.michaldrabik.ui_base.common.OnTabReselectedListener
 import com.michaldrabik.ui_base.common.sheets.sort_order.SortOrderBottomSheet
 import com.michaldrabik.ui_base.events.Event
 import com.michaldrabik.ui_base.events.EventsManager
-import com.michaldrabik.ui_base.events.TraktListQuickSyncSuccess
-import com.michaldrabik.ui_base.events.TraktQuickSyncSuccess
 import com.michaldrabik.ui_base.utilities.ModeHost
 import com.michaldrabik.ui_base.utilities.extensions.add
 import com.michaldrabik.ui_base.utilities.extensions.dimenToPx
@@ -324,10 +322,6 @@ class ListsFragment :
         sortOrder?.let {
           fragmentListsFilters.setSorting(it.first, it.second)
         }
-        isSyncing?.let {
-          fragmentListsSearchView.setTraktProgress(it)
-          fragmentListsSearchView.isEnabled = !it
-        }
       }
     }
   }
@@ -387,21 +381,7 @@ class ListsFragment :
   }
 
   private fun handleEvent(event: Event) {
-    when (event) {
-      is TraktListQuickSyncSuccess -> {
-        val text = resources.getQuantityString(R.plurals.textTraktQuickSyncComplete, 1, 1)
-        binding.fragmentListsSnackHost.showInfoSnackbar(text)
-      }
-
-      is TraktQuickSyncSuccess -> {
-        val text = resources.getQuantityString(R.plurals.textTraktQuickSyncComplete, event.count, event.count)
-        binding.fragmentListsSnackHost.showInfoSnackbar(text)
-      }
-
-      else -> {
-        Unit
-      }
-    }
+    // No-op.
   }
 
   override fun onTabReselected() {

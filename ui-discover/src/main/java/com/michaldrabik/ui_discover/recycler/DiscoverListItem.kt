@@ -5,7 +5,7 @@ import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.Show
 import com.michaldrabik.ui_model.Translation
 
-data class DiscoverListItem(
+internal data class DiscoverListItem(
   override val show: Show,
   override val image: Image,
   override var isLoading: Boolean = false,

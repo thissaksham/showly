@@ -2,7 +2,7 @@ package com.michaldrabik.ui_discover.helpers.itemtype
 
 import com.michaldrabik.ui_model.ImageType
 
-internal interface ImageTypeProvider {
+interface ImageTypeProvider {
 
   val twitterAdPosition: Int
 

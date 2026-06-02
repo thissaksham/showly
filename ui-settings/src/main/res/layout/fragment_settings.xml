@@ -44,26 +44,14 @@
       android:clipToPadding="false"
       android:paddingStart="@dimen/spaceNormal"
       android:paddingEnd="@dimen/spaceNormal"
-      app:layout_constraintBottom_toTopOf="@id/settingsCategoryTrakt"
+      app:layout_constraintBottom_toTopOf="@id/settingsCategoryGeneral"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@id/settingsToolbar"
       app:layout_goneMarginTop="0dp"
       />
 
-    <androidx.fragment.app.FragmentContainerView
-      android:id="@+id/settingsCategoryTrakt"
-      android:name="com.michaldrabik.ui_settings.sections.trakt.SettingsTraktFragment"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="@dimen/spaceTiny"
-      app:layout_constraintBottom_toTopOf="@id/settingsCategoryGeneral"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/settingsFilters"
-      app:layout_goneMarginTop="0dp"
-      tools:layout="@layout/fragment_settings_trakt"
-      />
+
 
     <androidx.fragment.app.FragmentContainerView
       android:id="@+id/settingsCategoryGeneral"
@@ -73,7 +61,7 @@
       app:layout_constraintBottom_toTopOf="@+id/settingsCategoryNotifications"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/settingsCategoryTrakt"
+      app:layout_constraintTop_toBottomOf="@id/settingsFilters"
       tools:layout="@layout/fragment_settings_general"
       />
 

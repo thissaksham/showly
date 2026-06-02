@@ -21,8 +21,6 @@ import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottom
 import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet
 import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Operation
 import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Type
-import com.michaldrabik.ui_base.common.sheets.remove_trakt.RemoveTraktBottomSheet
-import com.michaldrabik.ui_base.utilities.SnackbarHost
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.doOnApplyWindowInsets
 import com.michaldrabik.ui_base.utilities.extensions.launchAndRepeatStarted
@@ -30,7 +28,6 @@ import com.michaldrabik.ui_base.utilities.extensions.navigateToSafe
 import com.michaldrabik.ui_base.utilities.extensions.onClick
 import com.michaldrabik.ui_base.utilities.extensions.optionalParcelable
 import com.michaldrabik.ui_base.utilities.extensions.requireParcelable
-import com.michaldrabik.ui_base.utilities.extensions.showInfoSnackbar
 import com.michaldrabik.ui_base.utilities.extensions.visibleIf
 import com.michaldrabik.ui_base.utilities.viewBinding
 import com.michaldrabik.ui_episodes.details.EpisodeDetailsBottomSheet
@@ -46,7 +43,6 @@ import com.michaldrabik.ui_show.episodes.ShowDetailsEpisodesEvent.OpenEpisodeDat
 import com.michaldrabik.ui_show.episodes.ShowDetailsEpisodesEvent.OpenEpisodeDetails
 import com.michaldrabik.ui_show.episodes.ShowDetailsEpisodesEvent.OpenRateSeason
 import com.michaldrabik.ui_show.episodes.ShowDetailsEpisodesEvent.OpenSeasonDateSelection
-import com.michaldrabik.ui_show.episodes.ShowDetailsEpisodesEvent.RemoveFromTrakt
 import com.michaldrabik.ui_show.episodes.ShowDetailsEpisodesEvent.RequestWidgetsUpdate
 import com.michaldrabik.ui_show.episodes.recycler.EpisodesAdapter
 import com.michaldrabik.ui_show.sections.seasons.recycler.SeasonListItem
@@ -214,7 +210,6 @@ class ShowDetailsEpisodesFragment :
 
   private fun handleEvent(event: ShowDetailsEpisodesEvent<*>) {
     when (event) {
-      is RemoveFromTrakt -> openRemoveTraktSheet(event)
       is OpenEpisodeDetails -> openEpisodeDetails(event.bundle, event.isWatched)
       is OpenRateSeason -> openRateSeasonDialog(event.season)
       is OpenEpisodeDateSelection -> openDateSelectionDialog(event.episode)
@@ -259,17 +254,6 @@ class ShowDetailsEpisodesFragment :
       showTabs = true,
     )
     navigateToSafe(R.id.actionEpisodesFragmentToEpisodesDetails, bundle)
-  }
-
-  private fun openRemoveTraktSheet(event: RemoveFromTrakt) {
-    setFragmentResultListener(NavigationArgs.REQUEST_REMOVE_TRAKT) { _, bundle ->
-      if (bundle.getBoolean(NavigationArgs.RESULT, false)) {
-        val text = resources.getString(R.string.textTraktSyncRemovedFromTrakt)
-        (requireActivity() as SnackbarHost).provideSnackbarLayout().showInfoSnackbar(text)
-      }
-    }
-    val args = RemoveTraktBottomSheet.createBundle(event.traktIds, event.mode)
-    navigateToSafe(event.actionId, args)
   }
 
   private fun openRateSeasonDialog(season: Season) {

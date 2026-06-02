@@ -1,41 +1,35 @@
 package com.michaldrabik.ui_base.common.sheets.context_menu.show
 
-import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.michaldrabik.repository.images.ShowImagesProvider
-import com.michaldrabik.repository.settings.SettingsRepository
-import com.michaldrabik.ui_base.R
-import com.michaldrabik.ui_base.common.sheets.context_menu.events.FinishUiEvent
-import com.michaldrabik.ui_base.common.sheets.context_menu.events.RemoveTraktUiEvent
+import com.michaldrabik.repository.OnHoldItemsRepository
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuHiddenCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuLoadItemCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuMyShowsCase
-import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuOnHoldCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuPinnedCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuWatchlistCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.helpers.ShowContextItem
-import com.michaldrabik.ui_base.network.NetworkStatusProvider
 import com.michaldrabik.ui_base.utilities.events.Event
+import com.michaldrabik.ui_base.utilities.events.FinishUiEvent
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
-import com.michaldrabik.ui_base.utilities.extensions.launchDelayed
 import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
-import com.michaldrabik.ui_base.viewmodel.ChannelsDelegate
-import com.michaldrabik.ui_base.viewmodel.DefaultChannelsDelegate
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.ImageType
+import com.michaldrabik.ui_model.Show
+import com.michaldrabik.ui_model.Ids
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
-import kotlin.properties.Delegates.notNull
 
-@SuppressLint("StaticFieldLeak")
 @HiltViewModel
 class ShowContextMenuViewModel @Inject constructor(
   private val loadItemCase: ShowContextMenuLoadItemCase,
@@ -43,31 +37,32 @@ class ShowContextMenuViewModel @Inject constructor(
   private val watchlistCase: ShowContextMenuWatchlistCase,
   private val hiddenCase: ShowContextMenuHiddenCase,
   private val pinnedCase: ShowContextMenuPinnedCase,
-  private val onHoldCase: ShowContextMenuOnHoldCase,
+  private val onHoldCase: OnHoldItemsRepository,
   private val imagesProvider: ShowImagesProvider,
-  private val networkProvider: NetworkStatusProvider,
-  private val settingsRepository: SettingsRepository,
-) : ViewModel(),
-  ChannelsDelegate by DefaultChannelsDelegate() {
+) : ViewModel() {
 
-  private var showId by notNull<IdTrakt>()
-  private var isQuickRemoveEnabled by notNull<Boolean>()
+  var showIdValue: Long = -1L
 
   private val loadingState = MutableStateFlow(false)
   private val loadingSecondaryState = MutableStateFlow(false)
   private val itemState = MutableStateFlow<ShowContextItem?>(null)
 
-  fun loadShow(idTrakt: IdTrakt) {
-    viewModelScope.launch {
-      showId = idTrakt
-      isQuickRemoveEnabled = settingsRepository.load().traktQuickRemoveEnabled
+  private val eventChannel = Channel<Event<*>>(Channel.BUFFERED)
+  val eventFlow = eventChannel.receiveAsFlow()
 
+  private val messageChannel = Channel<MessageEvent>(Channel.BUFFERED)
+  val messageFlow = messageChannel.receiveAsFlow()
+
+  fun loadShow(idTrakt: IdTrakt) {
+    showIdValue = idTrakt.id
+    viewModelScope.launch {
+      loadingState.value = true
       try {
-        loadingState.value = true
         val item = loadItemCase.loadItem(idTrakt)
         itemState.value = item
-      } catch (error: Throwable) {
-        messageChannel.send(MessageEvent.Error(R.string.errorGeneral))
+        preloadImage()
+      } catch (e: Throwable) {
+        onError(e)
       } finally {
         loadingState.value = false
       }
@@ -76,143 +71,127 @@ class ShowContextMenuViewModel @Inject constructor(
 
   fun moveToMyShows() {
     viewModelScope.launch {
-      if (!networkProvider.isOnline()) {
-        messageChannel.send(MessageEvent.Error(R.string.errorNoInternetConnection))
-        return@launch
-      }
-      val progressJob = launchDelayed(250) {
-        loadingSecondaryState.value = true
-      }
+      loadingSecondaryState.value = true
       try {
-        val result = myShowsCase.moveToMyShows(showId)
-        preloadImage()
-        checkQuickRemove(result)
-      } catch (error: Throwable) {
-        onError(error)
+        myShowsCase.moveToMyShows(IdTrakt(showIdValue))
+        loadShow(IdTrakt(showIdValue))
+      } catch (e: Throwable) {
+        onError(e)
       } finally {
-        progressJob.cancel()
+        loadingSecondaryState.value = false
       }
     }
   }
 
   fun removeFromMyShows() {
     viewModelScope.launch {
+      loadingSecondaryState.value = true
       try {
-        myShowsCase.removeFromMyShows(
-          traktId = showId,
-          removeLocalData = networkProvider.isOnline(),
-        )
-        checkQuickRemove(RemoveTraktUiEvent(removeProgress = true))
-      } catch (error: Throwable) {
-        onError(error)
+        myShowsCase.removeFromMyShows(IdTrakt(showIdValue), false)
+        loadShow(IdTrakt(showIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingSecondaryState.value = false
       }
     }
   }
 
   fun moveToWatchlist() {
     viewModelScope.launch {
+      loadingSecondaryState.value = true
       try {
-        val result = watchlistCase.moveToWatchlist(
-          traktId = showId,
-          removeLocalData = networkProvider.isOnline(),
-        )
-        checkQuickRemove(result)
-      } catch (error: Throwable) {
-        onError(error)
+        watchlistCase.moveToWatchlist(IdTrakt(showIdValue), false)
+        loadShow(IdTrakt(showIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingSecondaryState.value = false
       }
     }
   }
 
   fun removeFromWatchlist() {
     viewModelScope.launch {
+      loadingSecondaryState.value = true
       try {
-        watchlistCase.removeFromWatchlist(showId)
-        checkQuickRemove(RemoveTraktUiEvent(removeWatchlist = true))
-      } catch (error: Throwable) {
-        onError(error)
+        watchlistCase.removeFromWatchlist(IdTrakt(showIdValue))
+        loadShow(IdTrakt(showIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingSecondaryState.value = false
       }
     }
   }
 
   fun moveToHidden() {
     viewModelScope.launch {
+      loadingSecondaryState.value = true
       try {
-        val result = hiddenCase.moveToHidden(
-          traktId = showId,
-          removeLocalData = networkProvider.isOnline(),
-        )
-        checkQuickRemove(result)
-      } catch (error: Throwable) {
-        onError(error)
+        hiddenCase.moveToHidden(IdTrakt(showIdValue), false)
+        loadShow(IdTrakt(showIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingSecondaryState.value = false
       }
     }
   }
 
   fun removeFromHidden() {
     viewModelScope.launch {
+      loadingSecondaryState.value = true
       try {
-        hiddenCase.removeFromHidden(showId)
-        checkQuickRemove(RemoveTraktUiEvent(removeHidden = true))
-      } catch (error: Throwable) {
-        onError(error)
+        hiddenCase.removeFromHidden(IdTrakt(showIdValue))
+        loadShow(IdTrakt(showIdValue))
+      } catch (e: Throwable) {
+        onError(e)
+      } finally {
+        loadingSecondaryState.value = false
       }
     }
   }
 
   fun addToTopPinned() {
     viewModelScope.launch {
-      pinnedCase.addToTopPinned(showId)
-      eventChannel.send(Event(FinishUiEvent(true)))
+      pinnedCase.addToTopPinned(IdTrakt(showIdValue))
+      loadShow(IdTrakt(showIdValue))
     }
   }
 
   fun removeFromTopPinned() {
     viewModelScope.launch {
-      pinnedCase.removeFromTopPinned(showId)
-      eventChannel.send(Event(FinishUiEvent(true)))
+      pinnedCase.removeFromTopPinned(IdTrakt(showIdValue))
+      loadShow(IdTrakt(showIdValue))
     }
   }
 
   fun addToOnHoldPinned() {
     viewModelScope.launch {
-      onHoldCase.addToOnHold(showId)
-      eventChannel.send(Event(FinishUiEvent(true)))
+      onHoldCase.addItem(IdTrakt(showIdValue))
+      loadShow(IdTrakt(showIdValue))
     }
   }
 
   fun removeFromOnHoldPinned() {
     viewModelScope.launch {
-      onHoldCase.removeFromOnHold(showId)
-      eventChannel.send(Event(FinishUiEvent(true)))
+      onHoldCase.removeItem(Show.EMPTY.copy(ids = Ids.EMPTY.copy(trakt = IdTrakt(showIdValue))))
+      loadShow(IdTrakt(showIdValue))
     }
   }
 
-  private suspend fun preloadImage() {
-    try {
-      val show = itemState.value?.show
-      show?.let {
-        imagesProvider.loadRemoteImage(it, ImageType.FANART)
-      }
-    } catch (error: Throwable) {
-      Timber.e(error)
-      rethrowCancellation(error)
-    }
-  }
-
-  private suspend fun checkQuickRemove(event: RemoveTraktUiEvent) {
-    if (isQuickRemoveEnabled) {
-      loadingState.value = false
-      loadingSecondaryState.value = false
-      eventChannel.send(Event(event))
-    } else {
-      eventChannel.send(Event(FinishUiEvent(true)))
+  private fun preloadImage() {
+    val item = itemState.value ?: return
+    viewModelScope.launch {
+      imagesProvider.findCachedImage(item.show, ImageType.POSTER)
     }
   }
 
   private suspend fun onError(error: Throwable) {
     loadingState.value = false
     loadingSecondaryState.value = false
-    messageChannel.send(MessageEvent.Error(R.string.errorGeneral))
+    messageChannel.send(MessageEvent.Error(com.michaldrabik.ui_base.R.string.errorGeneral))
     rethrowCancellation(error)
   }
 
@@ -220,11 +199,11 @@ class ShowContextMenuViewModel @Inject constructor(
     loadingState,
     loadingSecondaryState,
     itemState,
-  ) { s1, s2, s3 ->
+  ) { loading, loadingSecondary, item ->
     ShowContextMenuUiState(
-      isLoading = s1,
-      isLoadingSecondary = s2,
-      item = s3,
+      isLoading = loading,
+      isLoadingSecondary = loadingSecondary,
+      item = item,
     )
   }.stateIn(
     scope = viewModelScope,

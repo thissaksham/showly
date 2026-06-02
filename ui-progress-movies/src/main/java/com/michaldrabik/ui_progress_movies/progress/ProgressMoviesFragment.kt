@@ -120,7 +120,6 @@ class ProgressMoviesFragment :
 
   private fun setupView() {
     with(binding) {
-      progressMoviesEmptyView.progressMoviesEmptyTraktButton.onClick { requireMainFragment().openTraktSync() }
       progressMoviesEmptyView.progressMoviesEmptyDiscoverButton.onClick {
         (requireActivity() as NavigationHost).navigateToDiscover()
       }
@@ -193,13 +192,6 @@ class ProgressMoviesFragment :
                 scaleX = value
                 scaleY = value
                 translationY = valueTranslation
-                if (offset >= OVERSCROLL_OFFSET &&
-                  overscrollEnabled &&
-                  binding.progressMoviesOverscrollProgress.progress >= 100
-                ) {
-                  overscrollEnabled = false
-                  viewModel.startTraktSync()
-                }
               }
             }
           } else {

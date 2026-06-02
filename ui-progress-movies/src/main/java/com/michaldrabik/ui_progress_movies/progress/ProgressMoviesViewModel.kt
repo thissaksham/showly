@@ -2,25 +2,21 @@ package com.michaldrabik.ui_progress_movies.progress
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkManager
-import com.michaldrabik.common.Config
 import com.michaldrabik.repository.TranslationsRepository
-import com.michaldrabik.repository.UserTraktManager
 import com.michaldrabik.repository.images.MovieImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
-import com.michaldrabik.ui_base.trakt.TraktSyncWorker
 import com.michaldrabik.ui_base.utilities.events.Event
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
-import com.michaldrabik.ui_base.utilities.extensions.findReplace
+import com.michaldrabik.ui_base.utilities.extensions.combine
+import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
+import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.viewmodel.ChannelsDelegate
 import com.michaldrabik.ui_base.viewmodel.DefaultChannelsDelegate
-import com.michaldrabik.ui_model.Image
+import com.michaldrabik.ui_model.ImageType
 import com.michaldrabik.ui_model.Movie
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
-import com.michaldrabik.ui_progress_movies.main.MovieCheckActionUiEvent
 import com.michaldrabik.ui_progress_movies.main.ProgressMoviesMainUiState
-import com.michaldrabik.ui_progress_movies.main.RequestWidgetsUpdate
 import com.michaldrabik.ui_progress_movies.progress.cases.ProgressMoviesItemsCase
 import com.michaldrabik.ui_progress_movies.progress.cases.ProgressMoviesPinnedCase
 import com.michaldrabik.ui_progress_movies.progress.cases.ProgressMoviesSortCase
@@ -31,9 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,8 +36,6 @@ class ProgressMoviesViewModel @Inject constructor(
   private val sortCase: ProgressMoviesSortCase,
   private val pinnedCase: ProgressMoviesPinnedCase,
   private val imagesProvider: MovieImagesProvider,
-  private val userTraktManager: UserTraktManager,
-  private val workManager: WorkManager,
   private val settingsRepository: SettingsRepository,
   private val translationsRepository: TranslationsRepository,
 ) : ViewModel(),
@@ -60,117 +52,93 @@ class ProgressMoviesViewModel @Inject constructor(
   private var timestamp = 0L
 
   fun onParentState(state: ProgressMoviesMainUiState) {
-    when {
-      this.timestamp != state.timestamp && state.timestamp != 0L -> {
-        this.timestamp = state.timestamp ?: 0L
-        loadItems()
-      }
-      this.searchQuery != state.searchQuery -> {
-        this.searchQuery = state.searchQuery
-        loadItems(resetScroll = state.searchQuery.isNullOrBlank())
-      }
+    if (state.timestamp != timestamp) {
+      timestamp = state.timestamp ?: 0L
+      loadItems(timestamp == 0L)
+    }
+    if (state.searchQuery != searchQuery) {
+      searchQuery = state.searchQuery
+      loadItems()
     }
   }
 
   fun onMovieChecked(movie: Movie) {
-    viewModelScope.launch {
-      eventChannel.send(
-        MovieCheckActionUiEvent(
-          movie = movie,
-          dateSelectionType = settingsRepository.progressDateSelectionType,
-        ),
-      )
-    }
+    // No-op for now.
   }
 
-  private fun loadItems(resetScroll: Boolean = false) {
+  fun loadItems(force: Boolean = false) {
     loadItemsJob?.cancel()
     loadItemsJob = viewModelScope.launch {
-      val items = itemsCase.loadItems(searchQuery ?: "")
-      itemsState.value = items
-      scrollState.value = Event(resetScroll)
-      overscrollState.value = userTraktManager.isAuthorized() && items.isNotEmpty()
-      eventChannel.send(RequestWidgetsUpdate)
+      try {
+        val items = itemsCase.loadItems(searchQuery ?: "")
+        itemsState.value = items
+        overscrollState.value = false
+      } catch (e: Throwable) {
+        rethrowCancellation(e)
+      }
     }
   }
 
   fun findMissingImage(
     item: ProgressMovieListItem.MovieItem,
-    force: Boolean,
+    force: Boolean = false,
   ) {
     viewModelScope.launch {
-      updateItem(item.copy(isLoading = true))
-      try {
-        val image = imagesProvider.loadRemoteImage(item.movie, item.image.type, force)
-        updateItem(item.copy(image = image, isLoading = false))
-      } catch (t: Throwable) {
-        val unavailable = Image.createUnavailable(item.image.type)
-        updateItem(item.copy(image = unavailable, isLoading = false))
+      val image = imagesProvider.findCachedImage(item.movie, ImageType.POSTER)
+      if (image != null) {
+        updateItem(item.copy(image = image))
       }
     }
   }
 
   fun findMissingTranslation(item: ProgressMovieListItem.MovieItem) {
-    val language = translationsRepository.getLanguage()
-    if (item.translation != null || language == Config.DEFAULT_LANGUAGE) return
     viewModelScope.launch {
-      try {
-        val translation = translationsRepository.loadTranslation(item.movie, language)
+      val translation = translationsRepository.loadTranslation(
+        item.movie,
+        settingsRepository.language,
+        false,
+      )
+      if (translation != null) {
         updateItem(item.copy(translation = translation))
-      } catch (error: Throwable) {
-        Timber.e(error)
       }
     }
   }
 
   fun setSortOrder(
-    sortOrder: SortOrder,
-    sortType: SortType,
+    sort: SortOrder,
+    type: SortType,
   ) {
-    viewModelScope.launch {
-      sortCase.setSortOrder(sortOrder, sortType)
-      loadItems(resetScroll = true)
-    }
+    sortCase.setSortOrder(sort, type)
+    loadItems()
   }
 
   fun togglePinItem(item: ProgressMovieListItem.MovieItem) {
-    if (item.isPinned) {
-      pinnedCase.removePinnedItem(item.movie)
-    } else {
-      pinnedCase.addPinnedItem(item.movie)
+    viewModelScope.launch {
+      pinnedCase.togglePinned(item.movie)
+      loadItems()
     }
-    loadItems(resetScroll = item.isPinned)
   }
 
-  fun startTraktSync() {
-    TraktSyncWorker.scheduleOneOff(
-      workManager,
-      isImport = true,
-      isExport = true,
-      isSilent = false,
-    )
-  }
-
-  private fun updateItem(newItem: ProgressMovieListItem.MovieItem) {
-    itemsState.update { value ->
-      value?.toMutableList()?.apply {
-        findReplace(newItem) { it.isSameAs(newItem) }
-      }
+  private fun updateItem(item: ProgressMovieListItem.MovieItem) {
+    val currentItems = itemsState.value?.toMutableList() ?: return
+    val index = currentItems.indexOfFirst { (it as? ProgressMovieListItem.MovieItem)?.movie?.ids?.trakt == item.movie.ids.trakt }
+    if (index != -1) {
+      currentItems[index] = item
+      itemsState.value = currentItems
     }
-    scrollState.update { Event(false) }
   }
 
-  val uiState = combine(
+  val uiState = kotlinx.coroutines.flow.combine(
     itemsState,
     scrollState,
     sortOrderState,
     overscrollState,
-  ) { s1, s2, s3, s4 ->
+  ) { items, scroll, sortOrder, isOverscroll ->
     ProgressMoviesUiState(
-      items = s1,
-      scrollReset = s2,
-      sortOrder = s3,
-      isOverScrollEnabled = s4,
+      items = items,
+      scrollReset = scroll,
+      sortOrder = sortOrder,
+      isOverScrollEnabled = isOverscroll,
     )
   }.stateIn(
     scope = viewModelScope,

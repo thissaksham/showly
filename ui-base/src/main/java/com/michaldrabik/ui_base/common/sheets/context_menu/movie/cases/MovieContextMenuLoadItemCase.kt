@@ -1,5 +1,6 @@
 package com.michaldrabik.ui_base.common.sheets.context_menu.movie.cases
 
+import com.michaldrabik.common.Config
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
 import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.repository.RatingsRepository
@@ -11,12 +12,11 @@ import com.michaldrabik.ui_base.common.sheets.context_menu.movie.helpers.MovieCo
 import com.michaldrabik.ui_base.dates.DateFormatProvider
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.ImageType
-import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 class MovieContextMenuLoadItemCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val moviesRepository: MoviesRepository,
@@ -28,35 +28,29 @@ class MovieContextMenuLoadItemCase @Inject constructor(
   private val dateFormatProvider: DateFormatProvider,
 ) {
 
-  suspend fun loadItem(traktId: IdTrakt) =
+  suspend fun loadItem(idTrakt: IdTrakt): MovieContextItem =
     withContext(dispatchers.IO) {
-      val movie = moviesRepository.movieDetails.load(traktId)
-      val dateFormat = dateFormatProvider.loadShortDayFormat()
+      val movie = moviesRepository.movieDetails.load(idTrakt)
+      val image = imagesProvider.findCachedImage(movie, ImageType.POSTER)
       val language = translationsRepository.getLanguage()
-      val spoilers = settingsSpoilersRepository.getAll()
-
-      val imageAsync = async { imagesProvider.loadRemoteImage(movie, ImageType.POSTER) }
-      val translationAsync =
-        async { translationsRepository.loadTranslation(movie, language = language, onlyLocal = true) }
-      val ratingAsync = async { ratingsRepository.movies.loadRatings(listOf(movie)) }
-
-      val isMyMovieAsync = async { moviesRepository.myMovies.exists(traktId) }
-      val isWatchlistAsync = async { moviesRepository.watchlistMovies.exists(traktId) }
-      val isHiddenAsync = async { moviesRepository.hiddenMovies.exists(traktId) }
-
-      val isPinnedAsync = async { pinnedItemsRepository.isItemPinned(movie) }
+      val translation = if (language != Config.DEFAULT_LANGUAGE) {
+        translationsRepository.loadTranslation(movie, language, onlyLocal = true)
+      } else {
+        null
+      }
+      val rating = ratingsRepository.movies.loadRatings(listOf(movie)).firstOrNull()
 
       MovieContextItem(
         movie = movie,
-        image = imageAsync.await(),
-        translation = translationAsync.await(),
-        userRating = ratingAsync.await().firstOrNull()?.rating,
-        isMyMovie = isMyMovieAsync.await(),
-        isWatchlist = isWatchlistAsync.await(),
-        isHidden = isHiddenAsync.await(),
-        isPinnedTop = isPinnedAsync.await(),
-        dateFormat = dateFormat,
-        spoilers = spoilers,
+        image = image,
+        translation = translation,
+        dateFormat = dateFormatProvider.loadFullDayFormat(),
+        userRating = rating?.rating,
+        isMyMovie = moviesRepository.myMovies.exists(idTrakt),
+        isWatchlist = moviesRepository.watchlistMovies.exists(idTrakt),
+        isHidden = moviesRepository.hiddenMovies.exists(idTrakt),
+        isPinnedTop = pinnedItemsRepository.isItemPinned(movie),
+        spoilers = settingsSpoilersRepository.getAll(),
       )
     }
 }

@@ -1,7 +1,6 @@
 package com.michaldrabik.ui_show
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.os.Bundle
@@ -27,8 +26,6 @@ import com.michaldrabik.common.Config.SPOILERS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_REGEX
 import com.michaldrabik.common.Mode
 import com.michaldrabik.ui_base.BaseFragment
-import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Type
-import com.michaldrabik.ui_base.common.sheets.remove_trakt.RemoveTraktBottomSheet
 import com.michaldrabik.ui_base.utilities.SnackbarHost
 import com.michaldrabik.ui_base.utilities.events.Event
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
@@ -57,24 +54,19 @@ import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.ImageFamily.SHOW
 import com.michaldrabik.ui_model.ImageStatus.UNAVAILABLE
 import com.michaldrabik.ui_model.ImageType.FANART
-import com.michaldrabik.ui_model.RatingState
 import com.michaldrabik.ui_model.Show
 import com.michaldrabik.ui_model.SpoilersSettings
 import com.michaldrabik.ui_model.Tip.SHOW_DETAILS_GALLERY
 import com.michaldrabik.ui_model.Translation
-import com.michaldrabik.ui_navigation.java.NavigationArgs
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_FAMILY
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_ID
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_SHOW_ID
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_TYPE
 import com.michaldrabik.ui_navigation.java.NavigationArgs.REQUEST_MANAGE_LISTS
-import com.michaldrabik.ui_navigation.java.NavigationArgs.REQUEST_REMOVE_TRAKT
 import com.michaldrabik.ui_show.ShowDetailsEvent.Finish
-import com.michaldrabik.ui_show.ShowDetailsEvent.RemoveFromTrakt
 import com.michaldrabik.ui_show.databinding.FragmentShowDetailsBinding
 import com.michaldrabik.ui_show.views.AddToShowsButton
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 import java.util.Locale.ENGLISH
 
 @SuppressLint("SetTextI18n", "DefaultLocale", "SourceLockedOrientationActivity")
@@ -181,7 +173,6 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
   private fun handleEvent(event: Event<*>) {
     when (event) {
       is Finish -> requireActivity().onBackPressed()
-      is RemoveFromTrakt -> openRemoveTraktSheet(event)
     }
   }
 
@@ -336,21 +327,6 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
       return
     }
     showSnack(event)
-  }
-
-  private fun openRemoveTraktSheet(event: RemoveFromTrakt) {
-    setFragmentResultListener(REQUEST_REMOVE_TRAKT) { _, bundle ->
-      if (bundle.getBoolean(NavigationArgs.RESULT, false)) {
-        val text = resources.getString(R.string.textTraktSyncRemovedFromTrakt)
-        (requireActivity() as SnackbarHost).provideSnackbarLayout().showInfoSnackbar(text)
-
-        if (event.actionId == R.id.actionShowDetailsFragmentToRemoveTraktProgress) {
-          viewModel.refreshSeasons()
-        }
-      }
-    }
-    val args = RemoveTraktBottomSheet.createBundle(event.traktIds, event.mode)
-    navigateToSafe(event.actionId, args)
   }
 
   private fun openListsDialog() {

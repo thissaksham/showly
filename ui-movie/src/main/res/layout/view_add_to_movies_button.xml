@@ -25,7 +25,7 @@
       android:layout_weight="2"
       android:gravity="center"
       android:includeFontPadding="false"
-      android:text="@string/textAddToMyMovies"
+      android:text="@string/textInMyMovies"
       android:textColor="?android:attr/textColorPrimary"
       android:textSize="@dimen/addToButtonTextSize"
       app:rippleColor="?android:attr/textColorPrimary"

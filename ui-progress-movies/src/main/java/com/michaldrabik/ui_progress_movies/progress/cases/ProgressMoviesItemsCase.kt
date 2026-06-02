@@ -11,9 +11,9 @@ import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.ui_base.dates.DateFormatProvider
 import com.michaldrabik.ui_base.utilities.extensions.removeDiacritics
 import com.michaldrabik.ui_model.ImageType
+import com.michaldrabik.ui_model.Movie
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
-import com.michaldrabik.ui_model.Translation
 import com.michaldrabik.ui_progress_movies.helpers.ProgressMoviesItemsSorter
 import com.michaldrabik.ui_progress_movies.progress.recycler.ProgressMovieListItem
 import kotlinx.coroutines.async
@@ -35,55 +35,48 @@ class ProgressMoviesItemsCase @Inject constructor(
   private val sorter: ProgressMoviesItemsSorter,
 ) {
 
-  suspend fun loadItems(searchQuery: String) =
+  suspend fun loadItems(searchQuery: String = ""): List<ProgressMovieListItem> =
     withContext(dispatchers.IO) {
       val language = translationsRepository.getLanguage()
-      val dateFormat = dateFormatProvider.loadFullDayFormat()
-      val spoilers = settingsRepository.spoilers.getAll()
-
       val sortOrder = settingsRepository.sorting.progressMoviesSortOrder
       val sortType = settingsRepository.sorting.progressMoviesSortType
+      val filtersItem = loadFiltersItem(sortOrder, sortType)
+      val spoilers = settingsRepository.spoilers.getAll()
 
-      val watchlistMovies = moviesRepository.watchlistMovies.loadAll()
-      val items = watchlistMovies
-        .map { movie ->
-          async {
-            val rating = ratingsRepository.movies.loadRatings(listOf(movie))
-            var translation: Translation? = null
-            if (language != Config.DEFAULT_LANGUAGE) {
-              translation = translationsRepository.loadTranslation(movie, language, onlyLocal = true)
-            }
-
-            ProgressMovieListItem.MovieItem(
-              movie = movie,
-              image = imagesProvider.findCachedImage(movie, ImageType.POSTER),
-              isLoading = false,
-              isPinned = pinnedItemsRepository.isItemPinned(movie),
-              translation = translation,
-              dateFormat = dateFormat,
-              sortOrder = sortOrder,
-              userRating = rating.firstOrNull()?.rating,
-              spoilers = spoilers,
-            )
+      val myMovies = moviesRepository.myMovies.loadAll()
+      val items = myMovies.map { movie ->
+        async {
+          val image = imagesProvider.findCachedImage(movie, ImageType.POSTER)
+          val rating = ratingsRepository.movies.loadRatings(listOf(movie)).firstOrNull()
+          val isPinned = pinnedItemsRepository.isItemPinned(movie)
+          val translation = if (language != Config.DEFAULT_LANGUAGE) {
+            translationsRepository.loadTranslation(movie, language, onlyLocal = true)
+          } else {
+            null
           }
-        }.awaitAll()
 
-      val filtered = filterItems(searchQuery, items)
-      val sorted = filtered.sortedWith(sorter.sort(sortOrder, sortType))
-      val preparedItems = prepareItems(sorted)
+          ProgressMovieListItem.MovieItem(
+            movie = movie,
+            image = image,
+            translation = translation,
+            userRating = rating?.rating,
+            isPinned = isPinned,
+            spoilers = spoilers,
+          )
+        }
+      }.awaitAll()
 
-      if (preparedItems.isNotEmpty()) {
-        val filtersItem = loadFiltersItem(sortOrder, sortType)
-        listOf(filtersItem) + preparedItems
+      val filteredItems = filterItems(searchQuery, items)
+      val sortedItems = prepareItems(filteredItems, sortOrder, sortType)
+
+      if (sortedItems.isNotEmpty()) {
+        listOf(filtersItem) + sortedItems
       } else {
-        preparedItems
+        listOf(filtersItem)
       }
     }
 
-  private fun loadFiltersItem(
-    sortOrder: SortOrder,
-    sortType: SortType,
-  ): ProgressMovieListItem.FiltersItem =
+  fun loadFiltersItem(sortOrder: SortOrder, sortType: SortType): ProgressMovieListItem.FiltersItem =
     ProgressMovieListItem.FiltersItem(
       sortOrder = sortOrder,
       sortType = sortType,
@@ -92,21 +85,19 @@ class ProgressMoviesItemsCase @Inject constructor(
   private fun filterItems(
     query: String,
     items: List<ProgressMovieListItem.MovieItem>,
-  ) = items.filter {
-    it.movie.title
-      .removeDiacritics()
-      .contains(query, true) ||
-      it.translation
-        ?.title
-        ?.removeDiacritics()
-        ?.contains(query, true) == true
+  ): List<ProgressMovieListItem.MovieItem> {
+    if (query.isBlank()) return items
+    return items.filter {
+      it.movie.title.removeDiacritics().contains(query, true) ||
+        it.translation?.title?.removeDiacritics()?.contains(query, true) == true
+    }
   }
 
-  private fun prepareItems(items: List<ProgressMovieListItem.MovieItem>) =
-    items
-      .asSequence()
-      .filter { !it.movie.hasNoDate() }
-      .filter { it.movie.released == null || it.movie.hasAired() }
-      .sortedByDescending { it.isPinned }
-      .toList()
+  private fun prepareItems(
+    items: List<ProgressMovieListItem.MovieItem>,
+    sortOrder: SortOrder,
+    sortType: SortType,
+  ): List<ProgressMovieListItem.MovieItem> {
+    return items.sortedWith(sorter.sort(sortOrder, sortType))
+  }
 }

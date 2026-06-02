@@ -13,8 +13,6 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.michaldrabik.common.Config
 import com.michaldrabik.ui_base.BaseBottomSheetFragment
 import com.michaldrabik.ui_base.R
-import com.michaldrabik.ui_base.common.sheets.remove_trakt.RemoveTraktBottomSheet
-import com.michaldrabik.ui_base.common.sheets.remove_trakt.RemoveTraktBottomSheet.Mode
 import com.michaldrabik.ui_base.databinding.ViewContextMenuBinding
 import com.michaldrabik.ui_base.utilities.SnackbarHost
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
@@ -35,7 +33,6 @@ import com.michaldrabik.ui_model.ImageStatus
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_ID
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_OPTIONS
 import com.michaldrabik.ui_navigation.java.NavigationArgs.REQUEST_ITEM_MENU
-import com.michaldrabik.ui_navigation.java.NavigationArgs.REQUEST_REMOVE_TRAKT
 import com.michaldrabik.ui_navigation.java.NavigationArgs.RESULT
 
 abstract class ContextMenuBottomSheet : BaseBottomSheetFragment(R.layout.view_context_menu) {
@@ -115,21 +112,6 @@ abstract class ContextMenuBottomSheet : BaseBottomSheetFragment(R.layout.view_co
       is MessageEvent.Info -> binding.contextMenuItemSnackbarHost.showInfoSnackbar(getString(message.textRestId))
       is MessageEvent.Error -> binding.contextMenuItemSnackbarHost.showErrorSnackbar(getString(message.textRestId))
     }
-  }
-
-  protected fun openRemoveTraktSheet(
-    @IdRes action: Int,
-    mode: Mode,
-  ) {
-    setFragmentResultListener(REQUEST_REMOVE_TRAKT) { _, bundle ->
-      if (bundle.getBoolean(RESULT, false)) {
-        val text = resources.getQuantityString(R.plurals.textTraktQuickSyncComplete, 1)
-        (requireActivity() as SnackbarHost).provideSnackbarLayout().showInfoSnackbar(text)
-      }
-      close()
-    }
-    val args = RemoveTraktBottomSheet.createBundle(itemId, mode)
-    navigateTo(action, args)
   }
 
   protected fun close() {

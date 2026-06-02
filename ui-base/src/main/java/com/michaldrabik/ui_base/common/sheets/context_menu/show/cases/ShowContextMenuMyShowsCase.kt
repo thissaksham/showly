@@ -9,14 +9,11 @@ import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.repository.mappers.Mappers
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
-import com.michaldrabik.ui_base.common.sheets.context_menu.events.RemoveTraktUiEvent
 import com.michaldrabik.ui_base.notifications.AnnouncementManager
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Ids
 import com.michaldrabik.ui_model.Show
 import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import com.michaldrabik.data_local.database.model.Episode as EpisodeDb
@@ -38,11 +35,6 @@ class ShowContextMenuMyShowsCase @Inject constructor(
   suspend fun moveToMyShows(traktId: IdTrakt) =
     withContext(dispatchers.IO) {
       val show = Show.EMPTY.copy(ids = Ids.EMPTY.copy(traktId))
-
-      val (isWatchlist, isHidden) = awaitAll(
-        async { showsRepository.watchlistShows.exists(traktId) },
-        async { showsRepository.hiddenShows.exists(traktId) },
-      )
 
       val seasons = remoteSource.trakt
         .fetchSeasons(traktId.id)
@@ -80,8 +72,6 @@ class ShowContextMenuMyShowsCase @Inject constructor(
 
       pinnedItemsRepository.removePinnedItem(show)
       announcementManager.refreshShowsAnnouncements()
-
-      RemoveTraktUiEvent(removeWatchlist = isWatchlist, removeHidden = isHidden)
     }
 
   suspend fun removeFromMyShows(

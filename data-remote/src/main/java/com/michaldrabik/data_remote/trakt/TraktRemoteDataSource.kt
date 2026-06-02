@@ -6,7 +6,6 @@ import com.michaldrabik.data_remote.trakt.model.Episode
 import com.michaldrabik.data_remote.trakt.model.Ids
 import com.michaldrabik.data_remote.trakt.model.Movie
 import com.michaldrabik.data_remote.trakt.model.MovieCollection
-import com.michaldrabik.data_remote.trakt.model.OAuthResponse
 import com.michaldrabik.data_remote.trakt.model.PersonCredit
 import com.michaldrabik.data_remote.trakt.model.SearchResult
 import com.michaldrabik.data_remote.trakt.model.Season
@@ -14,20 +13,7 @@ import com.michaldrabik.data_remote.trakt.model.SeasonTranslation
 import com.michaldrabik.data_remote.trakt.model.Show
 import com.michaldrabik.data_remote.trakt.model.Translation
 
-/**
- * Fetch/post remote resources via unauthorized Trakt API
- */
 interface TraktRemoteDataSource {
-
-  // Auth
-
-  suspend fun fetchAuthTokens(code: String): OAuthResponse
-
-  suspend fun refreshAuthTokens(refreshToken: String): OAuthResponse
-
-  suspend fun revokeAuthTokens(token: String)
-
-  // Shows
 
   suspend fun fetchShow(traktId: Long): Show
 
@@ -82,8 +68,6 @@ interface TraktRemoteDataSource {
     code: String,
   ): List<SeasonTranslation>
 
-  // Movies
-
   suspend fun fetchMovie(traktId: Long): Movie
 
   suspend fun fetchMovie(traktSlug: String): Movie
@@ -122,8 +106,6 @@ interface TraktRemoteDataSource {
 
   suspend fun fetchMovieCollectionItems(collectionId: Long): List<Movie>
 
-  // People
-
   suspend fun fetchPersonIds(
     idType: String,
     id: String,
@@ -139,8 +121,6 @@ interface TraktRemoteDataSource {
     type: TmdbPerson.Type,
   ): List<PersonCredit>
 
-  // Search
-
   suspend fun fetchSearch(
     query: String,
     withMovies: Boolean,
@@ -150,8 +130,6 @@ interface TraktRemoteDataSource {
     idType: String,
     id: String,
   ): List<SearchResult>
-
-  // Misc
 
   suspend fun fetchCommentReplies(commentId: Long): List<Comment>
 }

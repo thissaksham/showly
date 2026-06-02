@@ -9,6 +9,7 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
+import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_base.utilities.extensions.onClick
 import com.michaldrabik.ui_base.utilities.extensions.visibleIf
 import com.michaldrabik.ui_model.SortOrder
@@ -66,6 +67,7 @@ class CollectionMovieFiltersView : FrameLayout {
       followedMoviesListViewChip.setChipIconResource(
         when (viewMode) {
           LIST_NORMAL -> R.drawable.ic_view_list
+          POSTER -> R.drawable.ic_view_list
         },
       )
 

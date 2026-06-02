@@ -2,7 +2,7 @@ package com.michaldrabik.ui_discover_movies.recycler
 
 import androidx.recyclerview.widget.DiffUtil
 
-class DiscoverMovieItemDiffCallback : DiffUtil.ItemCallback<DiscoverMovieListItem>() {
+internal class DiscoverMovieItemDiffCallback : DiffUtil.ItemCallback<DiscoverMovieListItem>() {
 
   override fun areItemsTheSame(
     oldItem: DiscoverMovieListItem,

@@ -126,11 +126,9 @@ class ProgressMoviesMainFragment :
       with(progressMoviesSearchView) {
         hint = getString(R.string.textSearchFor)
         settingsIconVisible = true
-        traktIconVisible = true
         isClickable = false
         onClick { openMainSearch() }
         onSettingsClickListener = { openSettings() }
-        onTraktClickListener = { navigateTo(R.id.actionProgressMoviesFragmentToTraktSyncFragment) }
       }
 
       with(progressMoviesModeTabs) {
@@ -239,12 +237,6 @@ class ProgressMoviesMainFragment :
     navigateToSafe(R.id.actionProgressMoviesFragmentToSettingsFragment)
   }
 
-  fun openTraktSync() {
-    hideNavigation()
-    exitSearch()
-    navigateToSafe(R.id.actionProgressMoviesFragmentToTraktSyncFragment)
-  }
-
   private fun openMainSearch() {
     disableUi()
     hideNavigation()
@@ -326,10 +318,7 @@ class ProgressMoviesMainFragment :
     childFragmentManager.fragments.forEach { (it as? OnScrollResetListener)?.onScrollReset() }
 
   private fun render(uiState: ProgressMoviesMainUiState) {
-    with(binding) {
-      progressMoviesSearchView.setTraktProgress(uiState.isSyncing, withIcon = true)
-      progressMoviesSearchView.isEnabled = !uiState.isSyncing
-    }
+    // Removed.
   }
 
   private val pageChangeListener = object : ViewPager.OnPageChangeListener {

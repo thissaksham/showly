@@ -7,16 +7,15 @@
   tools:parentTag="android.widget.FrameLayout"
   >
 
-  <com.google.android.material.checkbox.MaterialCheckBox
-    android:id="@+id/viewListDeleteConfirmCheckbox"
-    style="@style/ShowlyCheckbox"
-    android:layout_width="wrap_content"
+  <TextView
+    android:id="@+id/viewListDeleteConfirmText"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/spaceNormal"
     android:layout_marginEnd="@dimen/spaceNormal"
-    android:checked="true"
-    android:gravity="center"
-    android:text="@string/textRemoveFromTrakt"
+    android:text="@string/textConfirmDeleteListSubtitle"
+    android:textColor="?android:attr/textColorPrimary"
+    android:textSize="16sp"
     />
 
 </merge>

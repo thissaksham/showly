@@ -4,12 +4,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.annotation.VisibleForTesting.Companion.PRIVATE
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import com.michaldrabik.common.Config
 import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.repository.images.MovieImagesProvider
-import com.michaldrabik.ui_base.trakt.TraktSyncWorker
 import com.michaldrabik.ui_base.utilities.events.Event
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
@@ -23,7 +20,6 @@ import com.michaldrabik.ui_discover_movies.recycler.DiscoverMovieListItem
 import com.michaldrabik.ui_model.DiscoverFilters
 import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.ImageFamily.MOVIE
-import com.michaldrabik.ui_model.ImageSource.TMDB
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -41,13 +37,11 @@ internal class DiscoverMoviesViewModel @Inject constructor(
   private val moviesCase: DiscoverMoviesCase,
   private val filtersCase: DiscoverFiltersCase,
   private val imagesProvider: MovieImagesProvider,
-  workManager: WorkManager,
 ) : ViewModel(),
   ChannelsDelegate by DefaultChannelsDelegate() {
 
   private val itemsState = MutableStateFlow<List<DiscoverMovieListItem>?>(null)
   private val loadingState = MutableStateFlow(false)
-  private val syncingState = MutableStateFlow(false)
   private val filtersState = MutableStateFlow<DiscoverFilters?>(null)
   private val scrollState = MutableStateFlow(Event(false))
 
@@ -55,9 +49,6 @@ internal class DiscoverMoviesViewModel @Inject constructor(
   private var initialFilters: DiscoverFilters? = null
 
   init {
-    workManager.getWorkInfosByTagLiveData(TraktSyncWorker.TAG_ID).observeForever { work ->
-      syncingState.value = work.any { it.state == WorkInfo.State.RUNNING }
-    }
     viewModelScope.launch {
       initialFilters = filtersCase.loadFilters()
     }
@@ -137,7 +128,7 @@ internal class DiscoverMoviesViewModel @Inject constructor(
         val image = imagesProvider.loadRemoteImage(item.movie, item.image.type, force)
         updateItem(item.copy(isLoading = false, image = image))
       } catch (t: Throwable) {
-        updateItem(item.copy(isLoading = false, image = Image.createUnavailable(item.image.type, MOVIE, TMDB)))
+        updateItem(item.copy(isLoading = false, image = Image.createUnavailable(item.image.type, MOVIE)))
         rethrowCancellation(t)
       } finally {
         loadingJob.cancel()
@@ -171,16 +162,14 @@ internal class DiscoverMoviesViewModel @Inject constructor(
   val uiState = combine(
     itemsState,
     loadingState,
-    syncingState,
     filtersState,
     scrollState,
-  ) { s1, s2, s3, s4, s5 ->
+  ) { s1, s2, s3, s4 ->
     DiscoverMoviesUiState(
       items = s1,
       isLoading = s2,
-      isSyncing = s3,
-      filters = s4,
-      resetScroll = s5,
+      filters = s3,
+      resetScroll = s4,
     )
   }.stateIn(
     scope = viewModelScope,

@@ -1,30 +1,24 @@
 package com.michaldrabik.ui_discover.cases
 
-import com.michaldrabik.common.Config
+import com.michaldrabik.common.Config.DEFAULT_LANGUAGE
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
-import com.michaldrabik.common.extensions.isSameDayOrAfter
-import com.michaldrabik.common.extensions.nowUtc
-import com.michaldrabik.common.extensions.nowUtcMillis
-import com.michaldrabik.common.extensions.toUtcDateTime
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.ShowImagesProvider
-import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
 import com.michaldrabik.ui_discover.helpers.itemtype.ImageTypeProvider
 import com.michaldrabik.ui_discover.recycler.DiscoverListItem
 import com.michaldrabik.ui_model.DiscoverFeed
 import com.michaldrabik.ui_model.DiscoverFilters
-import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.ImageType
 import com.michaldrabik.ui_model.Show
-import dagger.hilt.android.scopes.ViewModelScoped
+import com.michaldrabik.ui_model.Translation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 internal class DiscoverShowsCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val showsRepository: ShowsRepository,
@@ -33,54 +27,39 @@ internal class DiscoverShowsCase @Inject constructor(
   private val translationsRepository: TranslationsRepository,
 ) {
 
-  suspend fun isCacheValid() =
-    withContext(dispatchers.IO) {
-      showsRepository.discoverShows.isCacheValid()
-    }
+  suspend fun isCacheValid() = showsRepository.discoverShows.isCacheValid()
 
-  suspend fun loadCachedShows(filters: DiscoverFilters) =
+  suspend fun loadCachedShows(filters: DiscoverFilters): List<DiscoverListItem> =
     withContext(dispatchers.IO) {
-      val myShowsIds = async { showsRepository.myShows.loadAllIds() }
-      val watchlistShowsIds = async { showsRepository.watchlistShows.loadAllIds() }
-      val archiveShowsIds = async { showsRepository.hiddenShows.loadAllIds() }
-      val cachedShows = async { showsRepository.discoverShows.loadAllCached() }
+      val shows = showsRepository.discoverShows.loadAllCached()
+      val myShowsIds = showsRepository.myShows.loadAllIds()
+      val watchlistShowsIds = showsRepository.watchlistShows.loadAllIds()
 
       prepareItems(
-        shows = cachedShows.await(),
-        myShowsIds = myShowsIds.await(),
-        watchlistShowsIds = watchlistShowsIds.await(),
-        hiddenShowsIds = archiveShowsIds.await(),
+        shows = shows,
+        myShowsIds = myShowsIds,
+        watchlistShowsIds = watchlistShowsIds,
         filters = filters,
       )
     }
 
-  suspend fun loadRemoteShows(filters: DiscoverFilters) =
+  suspend fun loadRemoteShows(filters: DiscoverFilters): List<DiscoverListItem> =
     withContext(dispatchers.IO) {
-      val showCollection = !filters.hideCollection
-      val genres = filters.genres.toList()
-      val networks = filters.networks.toList()
-
-      val myAsync = async { showsRepository.myShows.loadAllIds() }
-      val watchlistSync = async { showsRepository.watchlistShows.loadAllIds() }
-      val archiveAsync = async { showsRepository.hiddenShows.loadAllIds() }
-      val (myIds, watchlistIds, hiddenIds) = awaitAll(myAsync, watchlistSync, archiveAsync)
-      val collectionSize = myIds.size + watchlistIds.size + hiddenIds.size
-
-      val remoteShows = showsRepository.discoverShows.loadAllRemote(
+      val shows = showsRepository.discoverShows.loadAllRemote(
         order = filters.feedOrder,
-        showCollection = showCollection,
-        collectionSize = collectionSize,
-        genres = genres,
-        networks = networks,
+        showCollection = false,
+        collectionSize = 50,
+        genres = filters.genres,
+        networks = filters.networks
       )
 
-      showsRepository.discoverShows.cacheDiscoverShows(remoteShows)
+      val myShowsIds = showsRepository.myShows.loadAllIds()
+      val watchlistShowsIds = showsRepository.watchlistShows.loadAllIds()
 
       prepareItems(
-        shows = remoteShows,
-        myShowsIds = myIds,
-        watchlistShowsIds = watchlistIds,
-        hiddenShowsIds = hiddenIds,
+        shows = shows,
+        myShowsIds = myShowsIds,
+        watchlistShowsIds = watchlistShowsIds,
         filters = filters,
       )
     }
@@ -89,59 +68,40 @@ internal class DiscoverShowsCase @Inject constructor(
     shows: List<Show>,
     myShowsIds: List<Long>,
     watchlistShowsIds: List<Long>,
-    hiddenShowsIds: List<Long>,
     filters: DiscoverFilters,
-  ) = coroutineScope {
-    val language = translationsRepository.getLanguage()
-    val collectionIds = myShowsIds + watchlistShowsIds + hiddenShowsIds
-    shows
-      .filter { it.traktId !in hiddenShowsIds }
-      .filter {
-        if (!filters.hideCollection) {
-          true
-        } else {
-          it.traktId !in collectionIds
-        }
-      }.sortedBy(filters.feedOrder)
-      .mapIndexed { index, show ->
-        async {
-          val itemType = imageTypeProvider.getImageType(index)
-          val image = imagesProvider.findCachedImage(show, itemType)
-          val translation = loadTranslation(language, itemType, show)
-          DiscoverListItem(
-            show = show,
-            image = image,
-            isFollowed = show.traktId in myShowsIds,
-            isWatchlist = show.traktId in watchlistShowsIds,
-            translation = translation,
-          )
-        }
-      }.awaitAll()
-  }
+  ): List<DiscoverListItem> =
+    withContext(dispatchers.IO) {
+      val language = translationsRepository.getLanguage()
+
+      shows
+        .filter { if (filters.hideCollection) it.traktId !in myShowsIds else true }
+        .mapIndexed { index, show ->
+          async {
+            val itemType = imageTypeProvider.getImageType(index)
+            val image = imagesProvider.findCachedImage(show, itemType)
+            val translation = loadTranslation(language, show)
+
+            DiscoverListItem(
+              show = show,
+              image = image,
+              isLoading = false,
+              isFollowed = show.traktId in myShowsIds,
+              isWatchlist = show.traktId in watchlistShowsIds,
+              translation = translation,
+            )
+          }
+        }.awaitAll()
+    }
 
   private suspend fun loadTranslation(
     language: String,
-    itemType: ImageType,
     show: Show,
-  ) = if (language == Config.DEFAULT_LANGUAGE || itemType == ImageType.POSTER) {
-    null
-  } else {
-    translationsRepository.loadTranslation(show, language, true)
-  }
-
-  private fun List<Show>.sortedBy(order: DiscoverFeed): List<Show> {
-    val nowUtc = nowUtc()
-    return when (order) {
-      DiscoverFeed.RECENT -> {
-        this
-          .filter {
-            it.firstAired.isNotBlank() &&
-              nowUtc.isSameDayOrAfter(it.firstAired.toUtcDateTime() ?: return@filter false)
-          }.sortedWith(compareByDescending { it.firstAired })
-      }
-      else -> {
-        this
-      }
+  ): Translation? {
+    if (language == DEFAULT_LANGUAGE) return null
+    return try {
+      translationsRepository.loadTranslation(show, language, onlyLocal = true)
+    } catch (t: Throwable) {
+      null
     }
   }
 }

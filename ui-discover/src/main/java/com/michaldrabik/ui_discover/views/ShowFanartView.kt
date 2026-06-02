@@ -16,7 +16,7 @@ import com.michaldrabik.ui_discover.recycler.DiscoverListItem
 import com.michaldrabik.ui_model.ImageStatus.AVAILABLE
 import com.michaldrabik.ui_model.ImageStatus.UNAVAILABLE
 
-class ShowFanartView : ShowView<DiscoverListItem> {
+internal class ShowFanartView : ShowView<DiscoverListItem> {
 
   constructor(context: Context) : super(context)
   constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)

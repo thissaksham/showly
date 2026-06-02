@@ -5,7 +5,7 @@ import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.Movie
 import com.michaldrabik.ui_model.Translation
 
-data class DiscoverMovieListItem(
+internal data class DiscoverMovieListItem(
   override val movie: Movie,
   override val image: Image,
   override var isLoading: Boolean = false,

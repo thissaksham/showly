@@ -7,6 +7,7 @@ import com.michaldrabik.ui_base.BaseAdapter
 import com.michaldrabik.ui_base.BaseMovieAdapter
 import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
+import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
 import com.michaldrabik.ui_my_shows.common.recycler.CollectionListItem.FiltersItem
@@ -50,6 +51,7 @@ class CollectionAdapter(
     VIEW_TYPE_SHOW -> BaseMovieAdapter.BaseViewHolder(
       when (listViewMode) {
         LIST_NORMAL -> CollectionShowView(parent.context)
+        POSTER -> CollectionShowView(parent.context)
       }.apply {
         itemClickListener = this@CollectionAdapter.itemClickListener
         itemLongClickListener = this@CollectionAdapter.itemLongClickListener
@@ -81,6 +83,7 @@ class CollectionAdapter(
       is ShowItem -> {
         when (listViewMode) {
           LIST_NORMAL -> (holder.itemView as CollectionShowView).bind(item)
+          POSTER -> (holder.itemView as CollectionShowView).bind(item)
         }
       }
     }

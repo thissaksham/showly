@@ -1,26 +1,23 @@
 package com.michaldrabik.ui_discover_movies.cases
 
-import com.michaldrabik.common.Config
+import com.michaldrabik.common.Config.DEFAULT_LANGUAGE
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
-import com.michaldrabik.common.extensions.nowUtcDay
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.MovieImagesProvider
 import com.michaldrabik.repository.movies.MoviesRepository
 import com.michaldrabik.ui_discover_movies.helpers.itemtype.ImageTypeProvider
 import com.michaldrabik.ui_discover_movies.recycler.DiscoverMovieListItem
-import com.michaldrabik.ui_model.DiscoverFeed
 import com.michaldrabik.ui_model.DiscoverFilters
-import com.michaldrabik.ui_model.ImageType
-import com.michaldrabik.ui_model.ImageType.POSTER
 import com.michaldrabik.ui_model.Movie
-import dagger.hilt.android.scopes.ViewModelScoped
+import com.michaldrabik.ui_model.Translation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 internal class DiscoverMoviesCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val moviesRepository: MoviesRepository,
@@ -29,50 +26,46 @@ internal class DiscoverMoviesCase @Inject constructor(
   private val translationsRepository: TranslationsRepository,
 ) {
 
-  suspend fun isCacheValid() =
-    withContext(dispatchers.IO) {
-      moviesRepository.discoverMovies.isCacheValid()
-    }
+  suspend fun isCacheValid() = moviesRepository.discoverMovies.isCacheValid()
 
-  suspend fun loadCachedMovies(filters: DiscoverFilters) =
+  suspend fun loadCachedMovies(filters: DiscoverFilters): List<DiscoverMovieListItem> =
     withContext(dispatchers.IO) {
-      val myIds = async { moviesRepository.myMovies.loadAllIds() }
-      val watchlistIds = async { moviesRepository.watchlistMovies.loadAllIds() }
-      val hiddenIds = async { moviesRepository.hiddenMovies.loadAllIds() }
-      val cachedMovies = async { moviesRepository.discoverMovies.loadAllCached() }
-      val language = translationsRepository.getLanguage()
+      val movies = moviesRepository.discoverMovies.loadAllCached()
+      val myMoviesIds = moviesRepository.myMovies.loadAllIds()
+      val watchlistMoviesIds = moviesRepository.watchlistMovies.loadAllIds()
+      val hiddenMoviesIds = moviesRepository.hiddenMovies.loadAllIds()
 
       prepareItems(
-        cachedMovies.await(),
-        myIds.await(),
-        watchlistIds.await(),
-        hiddenIds.await(),
-        filters,
-        language,
+        movies = movies,
+        myMoviesIds = myMoviesIds,
+        watchlistMoviesIds = watchlistMoviesIds,
+        hiddenMoviesIds = hiddenMoviesIds,
+        filters = filters,
+        language = translationsRepository.getLanguage(),
       )
     }
 
-  suspend fun loadRemoteMovies(filters: DiscoverFilters) =
+  suspend fun loadRemoteMovies(filters: DiscoverFilters): List<DiscoverMovieListItem> =
     withContext(dispatchers.IO) {
-      val showCollection = !filters.hideCollection
-      val genres = filters.genres.toList()
-
-      val myAsync = async { moviesRepository.myMovies.loadAllIds() }
-      val watchlistSync = async { moviesRepository.watchlistMovies.loadAllIds() }
-      val hiddenAsync = async { moviesRepository.hiddenMovies.loadAllIds() }
-      val (myIds, watchlistIds, hiddenIds) = awaitAll(myAsync, watchlistSync, hiddenAsync)
-      val collectionSize = myIds.size + watchlistIds.size + hiddenIds.size
-
-      val remoteMovies = moviesRepository.discoverMovies.loadAllRemote(
-        filters.feedOrder,
-        showCollection,
-        collectionSize,
-        genres,
+      val movies = moviesRepository.discoverMovies.loadAllRemote(
+        order = filters.feedOrder,
+        showCollection = false,
+        collectionSize = 50,
+        genres = filters.genres,
       )
-      val language = translationsRepository.getLanguage()
 
-      moviesRepository.discoverMovies.cacheDiscoverMovies(remoteMovies)
-      prepareItems(remoteMovies, myIds, watchlistIds, hiddenIds, filters, language)
+      val myMoviesIds = moviesRepository.myMovies.loadAllIds()
+      val watchlistMoviesIds = moviesRepository.watchlistMovies.loadAllIds()
+      val hiddenMoviesIds = moviesRepository.hiddenMovies.loadAllIds()
+
+      prepareItems(
+        movies = movies,
+        myMoviesIds = myMoviesIds,
+        watchlistMoviesIds = watchlistMoviesIds,
+        hiddenMoviesIds = hiddenMoviesIds,
+        filters = filters,
+        language = translationsRepository.getLanguage(),
+      )
     }
 
   private suspend fun prepareItems(
@@ -92,12 +85,12 @@ internal class DiscoverMoviesCase @Inject constructor(
         } else {
           !collectionIds.contains(it.traktId)
         }
-      }.sortedBy(filters.feedOrder)
+      }
       .mapIndexed { index, movie ->
         async {
           val itemType = imageTypeProvider.getImageType(index)
           val image = imagesProvider.findCachedImage(movie, itemType)
-          val translation = loadTranslation(language, itemType, movie)
+          val translation = loadTranslation(language, movie)
           DiscoverMovieListItem(
             movie,
             image,
@@ -112,26 +105,13 @@ internal class DiscoverMoviesCase @Inject constructor(
 
   private suspend fun loadTranslation(
     language: String,
-    itemType: ImageType,
     movie: Movie,
-  ) = if (language == Config.DEFAULT_LANGUAGE || itemType == POSTER) {
-    null
-  } else {
-    translationsRepository.loadTranslation(movie, language, true)
-  }
-
-  private fun List<Movie>.sortedBy(order: DiscoverFeed): List<Movie> {
-    val nowUtcDay = nowUtcDay()
-    return when (order) {
-      DiscoverFeed.RECENT -> {
-        this
-          .filter {
-            it.released != null && (it.released!!.isBefore(nowUtcDay) || it.released!!.isEqual(nowUtcDay))
-          }.sortedWith(compareByDescending { it.released })
-      }
-      else -> {
-        this
-      }
+  ): Translation? {
+    if (language == DEFAULT_LANGUAGE) return null
+    return try {
+      translationsRepository.loadTranslation(movie, language, onlyLocal = true)
+    } catch (t: Throwable) {
+      null
     }
   }
 }

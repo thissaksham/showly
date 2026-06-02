@@ -105,7 +105,7 @@ class RatingsSheetViewModel @Inject constructor(
   private suspend fun handleError(error: Throwable) {
     when (ErrorHelper.parse(error)) {
       is CoroutineCancellation -> throw error
-      is UnauthorizedError -> messageChannel.send(MessageEvent.Error(R.string.errorTraktAuthorization))
+      is UnauthorizedError -> messageChannel.send(MessageEvent.Error(R.string.errorAuthorization))
       else -> messageChannel.send(MessageEvent.Error(R.string.errorGeneral))
     }
   }

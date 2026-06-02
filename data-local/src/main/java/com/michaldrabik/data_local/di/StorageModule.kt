@@ -32,7 +32,9 @@ class StorageModule {
         DATABASE_NAME,
       ).apply {
         migrations.getAll().forEach { addMigrations(it) }
-      }.build()
+      }
+      .fallbackToDestructiveMigration()
+      .build()
   }
 
   @Provides

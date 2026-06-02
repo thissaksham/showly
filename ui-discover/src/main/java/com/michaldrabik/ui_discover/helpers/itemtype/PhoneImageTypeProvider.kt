@@ -4,7 +4,7 @@ import com.michaldrabik.ui_model.ImageType
 
 private const val BUFFER = 14
 
-internal class PhoneImageTypeProvider : ImageTypeProvider {
+class PhoneImageTypeProvider : ImageTypeProvider {
 
   override val twitterAdPosition = 14
 

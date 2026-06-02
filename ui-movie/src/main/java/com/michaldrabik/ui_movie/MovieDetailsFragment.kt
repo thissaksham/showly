@@ -1,14 +1,12 @@
 package com.michaldrabik.ui_movie
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
-import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.os.bundleOf
 import androidx.core.view.WindowInsetsCompat
@@ -34,9 +32,6 @@ import com.michaldrabik.ui_base.BaseFragment
 import com.michaldrabik.ui_base.common.WidgetsProvider
 import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottomSheet
 import com.michaldrabik.ui_base.common.sheets.date_selection.DateSelectionBottomSheet.Result
-import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Operation
-import com.michaldrabik.ui_base.common.sheets.ratings.RatingsBottomSheet.Options.Type
-import com.michaldrabik.ui_base.common.sheets.remove_trakt.RemoveTraktBottomSheet
 import com.michaldrabik.ui_base.utilities.SnackbarHost
 import com.michaldrabik.ui_base.utilities.events.Event
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
@@ -73,7 +68,6 @@ import com.michaldrabik.ui_model.SpoilersSettings
 import com.michaldrabik.ui_model.Translation
 import com.michaldrabik.ui_movie.MovieDetailsEvent.Finish
 import com.michaldrabik.ui_movie.MovieDetailsEvent.OpenDateSelectionSheet
-import com.michaldrabik.ui_movie.MovieDetailsEvent.RemoveFromTrakt
 import com.michaldrabik.ui_movie.MovieDetailsEvent.RequestWidgetsUpdate
 import com.michaldrabik.ui_movie.databinding.FragmentMovieDetailsBinding
 import com.michaldrabik.ui_movie.helpers.MovieDetailsMeta
@@ -81,14 +75,12 @@ import com.michaldrabik.ui_movie.views.AddToMoviesButton.State.ADD
 import com.michaldrabik.ui_movie.views.AddToMoviesButton.State.IN_HIDDEN
 import com.michaldrabik.ui_movie.views.AddToMoviesButton.State.IN_MY_MOVIES
 import com.michaldrabik.ui_movie.views.AddToMoviesButton.State.IN_WATCHLIST
-import com.michaldrabik.ui_navigation.java.NavigationArgs
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_FAMILY
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_ID
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_MOVIE_ID
 import com.michaldrabik.ui_navigation.java.NavigationArgs.ARG_TYPE
 import com.michaldrabik.ui_navigation.java.NavigationArgs.REQUEST_MANAGE_LISTS
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 import java.time.ZoneOffset.UTC
 import java.util.Locale.ENGLISH
 import java.util.Locale.ROOT
@@ -151,7 +143,9 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
       }
       movieDetailsAddButton.run {
         isEnabled = false
-        onAddMyMoviesClickListener = { viewModel.addToMyMovies() }
+        onAddMyMoviesClickListener = {
+          viewModel.uiState.value.movie?.let { openDateSelectionSheet(it) }
+        }
         onAddWatchLaterClickListener = { viewModel.addToWatchlist() }
         onRemoveClickListener = { viewModel.removeFromMyMovies() }
       }
@@ -175,7 +169,7 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
 
   private fun setupInsets() {
     with(binding) {
-      root.doOnApplyWindowInsets { view, insets, _, _ ->
+      root.doOnApplyWindowInsets { _, insets, _, _ ->
         val inset = insets.getInsets(WindowInsetsCompat.Type.systemBars())
         if (imagePadded) {
           movieDetailsMainLayout
@@ -346,13 +340,11 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
 
   private fun renderSnack(event: MessageEvent) {
     if (event.textResId == R.string.errorMalformedMovie) {
-      event.consume()?.let {
-        val host = (requireActivity() as SnackbarHost).provideSnackbarLayout()
-        val snack = host.showInfoSnackbar(getString(it), length = Snackbar.LENGTH_INDEFINITE) {
-          viewModel.removeMalformedMovie(movieId)
-        }
-        snackbars.add(snack)
+      val host = (requireActivity() as SnackbarHost).provideSnackbarLayout()
+      val snack = host.showInfoSnackbar(getString(event.textResId), length = Snackbar.LENGTH_INDEFINITE) {
+        viewModel.removeMalformedMovie(movieId)
       }
+      snackbars.add(snack)
       return
     }
     showSnack(event)
@@ -360,24 +352,10 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
 
   private fun handleEvent(event: Event<*>) {
     when (event) {
-      is RemoveFromTrakt -> openRemoveTraktSheet(event.navigationId)
       is OpenDateSelectionSheet -> openDateSelectionSheet(event.movie)
       is RequestWidgetsUpdate -> (requireAppContext() as WidgetsProvider).requestMoviesWidgetsUpdate()
       is Finish -> requireActivity().onBackPressed()
     }
-  }
-
-  private fun openRemoveTraktSheet(
-    @IdRes action: Int,
-  ) {
-    setFragmentResultListener(NavigationArgs.REQUEST_REMOVE_TRAKT) { _, bundle ->
-      if (bundle.getBoolean(NavigationArgs.RESULT, false)) {
-        val text = resources.getString(R.string.textTraktSyncMovieRemovedFromTrakt)
-        (requireActivity() as SnackbarHost).provideSnackbarLayout().showInfoSnackbar(text)
-      }
-    }
-    val args = RemoveTraktBottomSheet.createBundle(movieId, RemoveTraktBottomSheet.Mode.MOVIE)
-    navigateToSafe(action, args)
   }
 
   private fun openDateSelectionSheet(movie: Movie) {

@@ -1,22 +1,22 @@
 package com.michaldrabik.ui_base.common.sheets.context_menu.show.cases
 
+import com.michaldrabik.common.Config
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
-import com.michaldrabik.repository.OnHoldItemsRepository
 import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.repository.RatingsRepository
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
+import com.michaldrabik.repository.OnHoldItemsRepository
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.helpers.ShowContextItem
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.ImageType
-import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 class ShowContextMenuLoadItemCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val showsRepository: ShowsRepository,
@@ -28,35 +28,29 @@ class ShowContextMenuLoadItemCase @Inject constructor(
   private val settingsRepository: SettingsRepository,
 ) {
 
-  suspend fun loadItem(traktId: IdTrakt) =
+  suspend fun loadItem(idTrakt: IdTrakt): ShowContextItem =
     withContext(dispatchers.IO) {
-      val show = showsRepository.detailsShow.load(traktId)
+      val show = showsRepository.detailsShow.load(idTrakt)
+      val image = imagesProvider.findCachedImage(show, ImageType.POSTER)
       val language = translationsRepository.getLanguage()
-      val spoilers = settingsRepository.spoilers.getAll()
-
-      val imageAsync = async { imagesProvider.loadRemoteImage(show, ImageType.POSTER) }
-      val translationAsync =
-        async { translationsRepository.loadTranslation(show, language = language, onlyLocal = true) }
-      val ratingAsync = async { ratingsRepository.shows.loadRatings(listOf(show)) }
-
-      val isMyShowAsync = async { showsRepository.myShows.exists(traktId) }
-      val isWatchlistAsync = async { showsRepository.watchlistShows.exists(traktId) }
-      val isHiddenAsync = async { showsRepository.hiddenShows.exists(traktId) }
-
-      val isPinnedAsync = async { pinnedItemsRepository.isItemPinned(show) }
-      val isOnHoldAsync = async { onHoldItemsRepository.isOnHold(show) }
+      val translation = if (language != Config.DEFAULT_LANGUAGE) {
+        translationsRepository.loadTranslation(show, language, onlyLocal = true)
+      } else {
+        null
+      }
+      val rating = ratingsRepository.shows.loadRatings(listOf(show)).firstOrNull()
 
       ShowContextItem(
         show = show,
-        image = imageAsync.await(),
-        translation = translationAsync.await(),
-        userRating = ratingAsync.await().firstOrNull()?.rating,
-        isMyShow = isMyShowAsync.await(),
-        isWatchlist = isWatchlistAsync.await(),
-        isHidden = isHiddenAsync.await(),
-        isPinnedTop = isPinnedAsync.await(),
-        isOnHold = isOnHoldAsync.await(),
-        spoilers = spoilers,
+        image = image,
+        translation = translation,
+        userRating = rating?.rating,
+        isMyShow = showsRepository.myShows.exists(idTrakt),
+        isWatchlist = showsRepository.watchlistShows.exists(idTrakt),
+        isHidden = showsRepository.hiddenShows.exists(idTrakt),
+        isPinnedTop = pinnedItemsRepository.isItemPinned(show),
+        isOnHold = onHoldItemsRepository.isOnHold(show),
+        spoilers = settingsRepository.spoilers.getAll(),
       )
     }
 }
