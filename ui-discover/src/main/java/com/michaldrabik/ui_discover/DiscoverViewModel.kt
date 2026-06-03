@@ -48,6 +48,10 @@ internal class DiscoverViewModel @Inject constructor(
   @VisibleForTesting(otherwise = PRIVATE) var lastPullToRefreshMs = 0L
   private var initialFilters: DiscoverFilters? = null
 
+  companion object {
+    @VisibleForTesting(otherwise = PRIVATE) var hasRefreshedThisSession = false
+  }
+
   init {
     viewModelScope.launch {
       initialFilters = filtersCase.loadFilters()
@@ -85,11 +89,12 @@ internal class DiscoverViewModel @Inject constructor(
           scrollState.value = Event(resetScroll)
         }
 
-        if (pullToRefresh || skipCache || !showsCase.isCacheValid()) {
+        if (pullToRefresh || skipCache || !hasRefreshedThisSession) {
           val shows = showsCase.loadRemoteShows(filters)
           itemsState.value = shows
           scrollState.value = Event(resetScroll)
           initialFilters = filters
+          hasRefreshedThisSession = true
         }
 
         if (pullToRefresh) {

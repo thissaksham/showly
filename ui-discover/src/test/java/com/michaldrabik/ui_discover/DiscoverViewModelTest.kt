@@ -33,9 +33,9 @@ import java.util.concurrent.TimeUnit
 class DiscoverViewModelTest : BaseMockTest() {
 
   @MockK internal lateinit var showsCase: DiscoverShowsCase
-  @MockK lateinit var filtersCase: DiscoverFiltersCase
+  @MockK internal lateinit var filtersCase: DiscoverFiltersCase
   @MockK lateinit var imagesProvider: ShowImagesProvider
-  @RelaxedMockK lateinit var workManager: WorkManager
+  @RelaxedMockK internal lateinit var workManager: WorkManager
 
   private lateinit var SUT: DiscoverViewModel
 
@@ -43,11 +43,12 @@ class DiscoverViewModelTest : BaseMockTest() {
   override fun setUp() {
     super.setUp()
 
+    DiscoverViewModel.hasRefreshedThisSession = false
     coEvery { filtersCase.loadFilters() } returns DiscoverFilters()
     coEvery { showsCase.loadCachedShows(any()) } returns emptyList()
     coEvery { showsCase.loadRemoteShows(any()) } returns emptyList()
 
-    SUT = DiscoverViewModel(showsCase, filtersCase, imagesProvider, workManager)
+    SUT = DiscoverViewModel(showsCase, filtersCase, imagesProvider)
   }
 
   @After
@@ -66,8 +67,8 @@ class DiscoverViewModelTest : BaseMockTest() {
     }
 
   @Test
-  fun `Should load cached data and not load remote data if cache is valid`() {
-    coEvery { showsCase.isCacheValid() } returns true
+  fun `Should load cached data and not load remote data if already refreshed this session`() {
+    DiscoverViewModel.hasRefreshedThisSession = true
 
     SUT.loadShows()
 
@@ -76,8 +77,8 @@ class DiscoverViewModelTest : BaseMockTest() {
   }
 
   @Test
-  fun `Should load cached data and load remote data if cache is no longer valid`() {
-    coEvery { showsCase.isCacheValid() } returns false
+  fun `Should load cached data and load remote data if not yet refreshed this session`() {
+    DiscoverViewModel.hasRefreshedThisSession = false
 
     SUT.loadShows()
 
@@ -87,7 +88,7 @@ class DiscoverViewModelTest : BaseMockTest() {
 
   @Test
   fun `Should load remote data only if pull to refresh`() {
-    coEvery { showsCase.isCacheValid() } returns true
+    DiscoverViewModel.hasRefreshedThisSession = true
 
     SUT.loadShows(pullToRefresh = true)
 
@@ -97,7 +98,7 @@ class DiscoverViewModelTest : BaseMockTest() {
 
   @Test
   fun `Should load remote data only if skipping cache`() {
-    coEvery { showsCase.isCacheValid() } returns true
+    DiscoverViewModel.hasRefreshedThisSession = true
 
     SUT.loadShows(skipCache = true)
 
@@ -114,7 +115,7 @@ class DiscoverViewModelTest : BaseMockTest() {
   @Test
   fun `Should update last PTR stamp if PTR`() =
     runTest {
-      coEvery { showsCase.isCacheValid() } returns false
+      DiscoverViewModel.hasRefreshedThisSession = false
 
       SUT.loadShows(pullToRefresh = true)
       advanceUntilIdle()
@@ -124,7 +125,7 @@ class DiscoverViewModelTest : BaseMockTest() {
 
   @Test
   fun `Should not update last PTR stamp if was not PTR`() {
-    coEvery { showsCase.isCacheValid() } returns false
+    DiscoverViewModel.hasRefreshedThisSession = false
 
     SUT.loadShows(pullToRefresh = false)
     assertThat(SUT.lastPullToRefreshMs).isEqualTo(0)
@@ -234,7 +235,7 @@ class DiscoverViewModelTest : BaseMockTest() {
         delay(1000)
         listOf(remoteItem)
       }
-      coEvery { showsCase.isCacheValid() } returns false
+      DiscoverViewModel.hasRefreshedThisSession = false
 
       SUT.loadShows()
       advanceUntilIdle()
