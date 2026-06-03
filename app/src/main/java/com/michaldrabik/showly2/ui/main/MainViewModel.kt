@@ -12,6 +12,7 @@ import com.michaldrabik.showly2.ui.main.cases.MainBackupCase
 import com.michaldrabik.showly2.ui.main.cases.MainClearingCase
 import com.michaldrabik.showly2.ui.main.cases.MainInitialsCase
 import com.michaldrabik.showly2.ui.main.cases.MainModesCase
+import com.michaldrabik.showly2.ui.main.cases.MainSyncCase
 import com.michaldrabik.showly2.ui.main.cases.MainTipsCase
 import com.michaldrabik.showly2.ui.main.cases.deeplink.MainDeepLinksCase
 import com.michaldrabik.showly2.utilities.deeplink.DeepLinkBundle
@@ -41,6 +42,7 @@ class MainViewModel @Inject constructor(
   private val announcementsCase: MainAnnouncementsCase,
   private val modesCase: MainModesCase,
   private val backupCase: MainBackupCase,
+  private val syncCase: MainSyncCase,
   private val linksCase: MainDeepLinksCase,
   private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
@@ -106,6 +108,10 @@ class MainViewModel @Inject constructor(
     backupCase.run {
       refreshBackupExportSchedule()
     }
+  }
+
+  fun refreshSyncSchedule() {
+    syncCase.refreshSyncSchedule()
   }
 
   fun setMode(mode: Mode) = modesCase.setMode(mode)

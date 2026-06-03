@@ -56,6 +56,7 @@ class SettingsRepository @Inject constructor(
     private const val PROGRESS_NEXT_EPISODE_TYPE = "PROGRESS_NEXT_EPISODE_TYPE"
     private const val PROGRESS_DATE_SELECTION_TYPE = "PROGRESS_DATE_SELECTION_TYPE"
     private const val LOCALE_INITIALISED = "LOCALE_INITIALISED"
+    private const val CLOUD_BACKUP_TIMESTAMP = "CLOUD_BACKUP_TIMESTAMP"
   }
 
   suspend fun isInitialized() =
@@ -102,6 +103,7 @@ class SettingsRepository @Inject constructor(
     ProgressDateSelectionType::class.java,
   )
   var isLocaleInitialised by BooleanPreference(preferences, LOCALE_INITIALISED, false)
+  var cloudBackupTimestamp by LongPreference(preferences, CLOUD_BACKUP_TIMESTAMP, 0L)
 
   var mode: Mode
     get() {

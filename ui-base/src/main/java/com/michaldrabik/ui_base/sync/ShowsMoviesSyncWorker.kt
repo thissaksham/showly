@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy.KEEP
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
@@ -20,6 +22,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 @HiltWorker
 class ShowsMoviesSyncWorker @AssistedInject constructor(
@@ -46,6 +49,20 @@ class ShowsMoviesSyncWorker @AssistedInject constructor(
 
       workManager.enqueueUniqueWork(TAG, KEEP, request)
       Timber.i("ShowsMoviesSyncWorker scheduled.")
+    }
+
+    fun schedulePeriodic(workManager: WorkManager) {
+      val request = PeriodicWorkRequestBuilder<ShowsMoviesSyncWorker>(24, TimeUnit.HOURS)
+        .setConstraints(
+          Constraints
+            .Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build(),
+        ).addTag(TAG)
+        .build()
+
+      workManager.enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.KEEP, request)
+      Timber.i("ShowsMoviesSyncWorker periodic scheduled.")
     }
   }
 

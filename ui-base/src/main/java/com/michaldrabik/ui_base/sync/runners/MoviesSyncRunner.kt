@@ -1,5 +1,6 @@
 package com.michaldrabik.ui_base.sync.runners
 
+import com.michaldrabik.common.ConfigVariant.MOVIE_STATIC_SYNC_COOLDOWN
 import com.michaldrabik.common.ConfigVariant.MOVIE_SYNC_COOLDOWN
 import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.data_local.LocalDataSource
@@ -8,6 +9,7 @@ import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.ui_model.MovieStatus.IN_PRODUCTION
 import com.michaldrabik.ui_model.MovieStatus.PLANNED
 import com.michaldrabik.ui_model.MovieStatus.POST_PRODUCTION
+import com.michaldrabik.ui_model.MovieStatus.RELEASED
 import com.michaldrabik.ui_model.MovieStatus.RUMORED
 import kotlinx.coroutines.delay
 import timber.log.Timber
@@ -38,7 +40,7 @@ class MoviesSyncRunner @Inject constructor(
 
     val movies = moviesRepository.loadCollection()
 
-    val moviesToSync = movies.filter { it.status in arrayOf(PLANNED, IN_PRODUCTION, POST_PRODUCTION, RUMORED) }
+    val moviesToSync = movies.filter { it.status in arrayOf(PLANNED, IN_PRODUCTION, POST_PRODUCTION, RUMORED, RELEASED) }
     if (moviesToSync.isEmpty()) {
       Timber.i("Nothing to process. Exiting...")
       return 0
@@ -48,8 +50,9 @@ class MoviesSyncRunner @Inject constructor(
     var syncCount = 0
     val syncLog = localSource.moviesSyncLog.getAll()
     moviesToSync.forEach { movie ->
+      val cooldown = if (movie.status == RELEASED) MOVIE_STATIC_SYNC_COOLDOWN else MOVIE_SYNC_COOLDOWN
       val lastSync = syncLog.find { it.idTrakt == movie.ids.trakt.id }?.syncedAt ?: 0
-      if (nowUtcMillis() - lastSync < MOVIE_SYNC_COOLDOWN) {
+      if (nowUtcMillis() - lastSync < cooldown) {
         Timber.i("${movie.title} is on cooldown. No need to sync.")
         return@forEach
       }

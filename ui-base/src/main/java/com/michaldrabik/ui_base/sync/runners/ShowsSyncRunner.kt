@@ -1,9 +1,9 @@
 package com.michaldrabik.ui_base.sync.runners
 
+import com.michaldrabik.common.ConfigVariant.SHOW_STATIC_SYNC_COOLDOWN
 import com.michaldrabik.common.ConfigVariant.SHOW_SYNC_COOLDOWN
 import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.data_local.LocalDataSource
-import com.michaldrabik.data_local.database.model.EpisodesSyncLog
 import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.repository.EpisodesManager
 import com.michaldrabik.repository.mappers.Mappers
@@ -37,10 +37,9 @@ class ShowsSyncRunner @Inject constructor(
 
     val myShows = showsRepository.myShows.loadAll()
     val watchlistShows = showsRepository.watchlistShows.loadAll()
-    val watchlistShowsIds = watchlistShows.map { it.traktId }
 
     val showsToSync = (myShows + watchlistShows)
-      .filter { it.status !in arrayOf(ENDED, CANCELED, UNKNOWN) }
+      .filter { it.status != UNKNOWN }
 
     Timber.i("Shows to sync: ${showsToSync.size}.")
     if (showsToSync.isEmpty()) {
@@ -51,10 +50,9 @@ class ShowsSyncRunner @Inject constructor(
     var syncCount = 0
     val syncLog = localSource.episodesSyncLog.getAll()
     showsToSync.forEach { show ->
-      val isInWatchlist = show.traktId in watchlistShowsIds
-
+      val cooldown = if (show.status in arrayOf(ENDED, CANCELED)) SHOW_STATIC_SYNC_COOLDOWN else SHOW_SYNC_COOLDOWN
       val lastSync = syncLog.find { it.idTrakt == show.traktId }?.syncedAt ?: 0
-      if (nowUtcMillis() - lastSync < SHOW_SYNC_COOLDOWN) {
+      if (nowUtcMillis() - lastSync < cooldown) {
         Timber.i("${show.title} is on cooldown. No need to sync.")
         return@forEach
       }
@@ -68,24 +66,20 @@ class ShowsSyncRunner @Inject constructor(
         Timber.e("${show.title}(${show.ids.trakt}) show sync error. Skipping... \n$t")
       }
 
-      if (isInWatchlist) {
-        localSource.episodesSyncLog.upsert(EpisodesSyncLog(show.traktId, nowUtcMillis()))
-      } else {
-        try {
-          Timber.i("Syncing ${show.title}(${show.ids.trakt}) episodes...")
+      try {
+        Timber.i("Syncing ${show.title}(${show.ids.trakt}) episodes...")
 
-          val remoteSeasons = remoteSource.trakt
-            .fetchSeasons(show.traktId)
-            .map { mappers.season.fromNetwork(it) }
-          episodesManager.invalidateSeasons(show, remoteSeasons)
-          syncCount++
+        val remoteSeasons = remoteSource.trakt
+          .fetchSeasons(show.traktId)
+          .map { mappers.season.fromNetwork(it) }
+        episodesManager.invalidateSeasons(show, remoteSeasons)
+        syncCount++
 
-          Timber.i("${show.title}(${show.ids.trakt}) episodes synced.")
-        } catch (t: Throwable) {
-          Timber.e("${show.title}(${show.ids.trakt}) episodes sync error. Skipping... \n$t")
-        } finally {
-          delay(DELAY_MS)
-        }
+        Timber.i("${show.title}(${show.ids.trakt}) episodes synced.")
+      } catch (t: Throwable) {
+        Timber.e("${show.title}(${show.ids.trakt}) episodes sync error. Skipping... \n$t")
+      } finally {
+        delay(DELAY_MS)
       }
     }
 

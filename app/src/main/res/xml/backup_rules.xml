@@ -36,6 +36,11 @@
     path="PREFERENCES_TUTORIALS.xml"
     />
 
+  <include
+    domain="sharedpref"
+    path="PREFERENCES_SYNC.xml"
+    />
+
   <!-- Include external so we can exclude its cache directory specifically -->
   <include
     domain="external"

@@ -117,7 +117,7 @@ class MainActivity :
 
   override fun onStart() {
     super.onStart()
-    ShowsMoviesSyncWorker.schedule(workManager)
+    viewModel.refreshSyncSchedule()
   }
 
   override fun onResume() {

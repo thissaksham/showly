@@ -49,6 +49,10 @@
   <string name="textSettingsBackupExportDescription">Export your data to create a backup or transfer it to new device.</string>
   <string name="textSettingsBackupImportTitle">Import</string>
   <string name="textSettingsBackupImportDescription">Import your backup file to restore data on this device.</string>
+  <string name="textSettingsCloudBackupTitle">Cloud Backup</string>
+  <string name="textSettingsCloudBackupDescription">Automatically backup your data to Google Drive using Android Auto Backup.</string>
+  <string name="textSettingsCloudBackupLastTimestamp">Last backup: %s</string>
+  <string name="textSettingsCloudBackupLastTimestampNever">Last backup: Never</string>
 
   <string name="textSettingsSpoilers">Spoilers</string>
   <string name="textSettingsSpoilersShows">Shows</string>

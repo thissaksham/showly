@@ -36,5 +36,10 @@
       path="PREFERENCES_TUTORIALS.xml"
       />
 
+    <include
+      domain="sharedpref"
+      path="PREFERENCES_SYNC.xml"
+      />
+
   </cloud-backup>
 </data-extraction-rules>

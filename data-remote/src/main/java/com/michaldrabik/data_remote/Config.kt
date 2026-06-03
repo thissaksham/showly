@@ -25,6 +25,6 @@ object Config {
     androidVersion: Int,
   ): String {
     // "Showly/3.55.1 (com.michaldrabik.showly; build:1254; Android)"
-    return "Showly/$buildVersion (com.michaldrabik.showly; build:$buildCode; Android $androidVersion)"
+    return "Showly/$buildVersion (com.thissaksham.showly; build:$buildCode; Android $androidVersion)"
   }
 }
