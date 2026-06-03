@@ -190,12 +190,13 @@ class ShowDetailsEpisodesViewModel @Inject constructor(
     isChecked: Boolean,
     customDate: ZonedDateTime? = null,
     isCustomDateSelected: Boolean = false,
+    useReleaseDate: Boolean = false,
   ) {
     viewModelScope.launch {
       seasonState.value?.let {
         val bundle = EpisodeBundle(episode, it.season, show)
         val date = if (isCustomDateSelected) customDate else nowUtc()
-        episodeWatchedCase.setEpisodeWatched(bundle, isChecked, date)
+        episodeWatchedCase.setEpisodeWatched(bundle, isChecked, date, useReleaseDate)
         refreshWatchedEpisodes()
         announcementsCase.refreshAnnouncements(show.ids.trakt)
       }
@@ -225,10 +226,11 @@ class ShowDetailsEpisodesViewModel @Inject constructor(
     isChecked: Boolean,
     customDate: ZonedDateTime? = null,
     isCustomDateSelected: Boolean = false,
+    useReleaseDate: Boolean = false,
   ) {
     viewModelScope.launch {
       val date = if (isCustomDateSelected) customDate else nowUtc()
-      seasonWatchedCase.setSeasonWatched(show, season.season, isChecked, date)
+      seasonWatchedCase.setSeasonWatched(show, season.season, isChecked, date, useReleaseDate)
       refreshWatchedEpisodes()
       announcementsCase.refreshAnnouncements(show.ids.trakt)
     }

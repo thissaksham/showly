@@ -181,7 +181,7 @@ class ShowDetailsSeasonsFragment : BaseFragment<ShowDetailsSeasonsViewModel>(R.l
         is Result.Now -> viewModel.setSeasonWatched(season, true, nowUtc(), true)
         is Result.Unknown -> viewModel.setSeasonWatched(season, true, UNKNOWN_DATE, true)
         is Result.CustomDate -> viewModel.setSeasonWatched(season, true, result.date, true)
-        is Result.ReleaseDate -> viewModel.setSeasonWatched(season, true, result.date, true)
+        is Result.ReleaseDate -> viewModel.setSeasonWatched(season, true, result.date, true, useReleaseDate = true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(season.firstAired)
@@ -194,7 +194,7 @@ class ShowDetailsSeasonsFragment : BaseFragment<ShowDetailsSeasonsViewModel>(R.l
         is Result.Now -> viewModel.setQuickProgress(item, nowUtc(), true)
         is Result.Unknown -> viewModel.setQuickProgress(item, UNKNOWN_DATE, true)
         is Result.CustomDate -> viewModel.setQuickProgress(item, result.date, true)
-        is Result.ReleaseDate -> viewModel.setQuickProgress(item, result.date, true)
+        is Result.ReleaseDate -> viewModel.setQuickProgress(item, result.date, true, useReleaseDate = true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(item.episode.firstAired)

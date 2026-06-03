@@ -20,6 +20,7 @@ class ShowDetailsQuickProgressCase @Inject constructor(
     seasons: List<SeasonListItem>,
     show: Show,
     customDate: ZonedDateTime?,
+    useReleaseDate: Boolean = false,
   ) {
     val (targetEpisode, targetSeason) = item
 
@@ -35,6 +36,7 @@ class ShowDetailsQuickProgressCase @Inject constructor(
             episodesManager.setEpisodeWatched(
               episodeBundle = EpisodeBundle(episode, seasonItem.season, show),
               customDate = customDate,
+              useReleaseDate = useReleaseDate,
             )
           }
       }

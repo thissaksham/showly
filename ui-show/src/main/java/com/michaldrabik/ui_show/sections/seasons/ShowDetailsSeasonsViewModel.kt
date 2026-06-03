@@ -95,6 +95,7 @@ class ShowDetailsSeasonsViewModel @Inject constructor(
     isChecked: Boolean,
     customDate: ZonedDateTime? = null,
     isCustomDateSelected: Boolean = false,
+    useReleaseDate: Boolean = false,
   ) {
     viewModelScope.launch {
       val date = if (isCustomDateSelected) customDate else nowUtc()
@@ -103,6 +104,7 @@ class ShowDetailsSeasonsViewModel @Inject constructor(
         season = season,
         isWatched = isChecked,
         customDate = date,
+        useReleaseDate = useReleaseDate,
       )
       refreshSeasons()
     }
@@ -128,6 +130,7 @@ class ShowDetailsSeasonsViewModel @Inject constructor(
     item: QuickSetupListItem?,
     customDate: ZonedDateTime?,
     isCustomDateSelected: Boolean = false,
+    useReleaseDate: Boolean = false,
   ) {
     viewModelScope.launch {
       if (item == null || !checkSeasonsLoaded()) {
@@ -136,7 +139,7 @@ class ShowDetailsSeasonsViewModel @Inject constructor(
 
       val date = if (isCustomDateSelected) customDate else nowUtc()
       val seasonItems = seasonsState.value?.toList() ?: emptyList()
-      quickProgressCase.setQuickProgress(item, seasonItems, show, date)
+      quickProgressCase.setQuickProgress(item, seasonItems, show, date, useReleaseDate)
       refreshSeasons()
 
       messageChannel.send(MessageEvent.Info(R.string.textShowQuickProgressDone))

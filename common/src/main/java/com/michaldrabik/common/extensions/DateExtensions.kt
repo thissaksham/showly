@@ -30,6 +30,8 @@ fun ZonedDateTime.toLocalZone(): ZonedDateTime = this.withZoneSameInstant(ZoneId
 
 fun ZonedDateTime.toUtcZone(): ZonedDateTime = this.withZoneSameInstant(ZoneId.of("UTC"))
 
+fun ZonedDateTime.toReleaseDate(): ZonedDateTime = this.toUtcZone()
+
 fun ZonedDateTime.isSameDayOrAfter(date: ZonedDateTime): Boolean =
   this.isEqual(date.truncatedTo(DAYS)) || this.isAfter(date.truncatedTo(DAYS))
 

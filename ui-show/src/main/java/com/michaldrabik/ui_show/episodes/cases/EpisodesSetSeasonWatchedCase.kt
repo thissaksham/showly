@@ -18,10 +18,11 @@ class EpisodesSetSeasonWatchedCase @Inject constructor(
     season: Season,
     isWatched: Boolean,
     customDate: ZonedDateTime?,
+    useReleaseDate: Boolean = false,
   ): Result {
     val bundle = SeasonBundle(season, show)
     if (isWatched) {
-      episodesManager.setSeasonWatched(bundle, customDate)
+      episodesManager.setSeasonWatched(bundle, customDate, useReleaseDate)
     } else {
       episodesManager.setSeasonUnwatched(bundle)
     }

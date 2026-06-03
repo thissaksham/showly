@@ -172,12 +172,7 @@ class DateSelectionBottomSheet : BaseBottomSheetFragment(R.layout.view_date_sele
   }
 
   private fun onReleaseDateSelected() {
-    val resultDate = releaseDate
-      ?.toLocalZone()
-      ?.withHour(20)
-      ?.withMinute(0)
-      ?.toUtcZone()
-      ?: nowUtc()
+    val resultDate = releaseDate?.toUtcZone() ?: nowUtc()
 
     closeSheet()
 

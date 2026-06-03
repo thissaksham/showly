@@ -280,7 +280,7 @@ class ShowDetailsEpisodesFragment :
         is Result.Now -> viewModel.setEpisodeWatched(episode, true, nowUtc(), true)
         is Result.Unknown -> viewModel.setEpisodeWatched(episode, true, UNKNOWN_DATE, true)
         is Result.CustomDate -> viewModel.setEpisodeWatched(episode, true, result.date, true)
-        is Result.ReleaseDate -> viewModel.setEpisodeWatched(episode, true, result.date, true)
+        is Result.ReleaseDate -> viewModel.setEpisodeWatched(episode, true, result.date, true, useReleaseDate = true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(episode.firstAired)
@@ -293,7 +293,7 @@ class ShowDetailsEpisodesFragment :
         is Result.Now -> viewModel.setSeasonWatched(season, true, nowUtc(), true)
         is Result.Unknown -> viewModel.setSeasonWatched(season, true, UNKNOWN_DATE, true)
         is Result.CustomDate -> viewModel.setSeasonWatched(season, true, result.date, true)
-        is Result.ReleaseDate -> viewModel.setSeasonWatched(season, true, result.date, true)
+        is Result.ReleaseDate -> viewModel.setSeasonWatched(season, true, result.date, true, useReleaseDate = true)
       }
     }
     val options = DateSelectionBottomSheet.createBundle(season.season.firstAired)

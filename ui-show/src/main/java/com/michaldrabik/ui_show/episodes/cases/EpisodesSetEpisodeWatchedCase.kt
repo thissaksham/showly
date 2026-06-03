@@ -15,9 +15,10 @@ class EpisodesSetEpisodeWatchedCase @Inject constructor(
     episodeBundle: EpisodeBundle,
     isWatched: Boolean,
     customDate: ZonedDateTime?,
+    useReleaseDate: Boolean = false,
   ): Result {
     if (isWatched) {
-      episodesManager.setEpisodeWatched(episodeBundle, customDate)
+      episodesManager.setEpisodeWatched(episodeBundle, customDate, useReleaseDate)
     } else {
       episodesManager.setEpisodeUnwatched(episodeBundle)
     }

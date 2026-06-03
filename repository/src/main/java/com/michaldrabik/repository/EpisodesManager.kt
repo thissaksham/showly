@@ -2,6 +2,7 @@ package com.michaldrabik.repository
 
 import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.common.extensions.toMillis
+import com.michaldrabik.common.extensions.toReleaseDate
 import com.michaldrabik.common.extensions.toUtcZone
 import com.michaldrabik.data_local.database.model.EpisodesSyncLog
 import com.michaldrabik.data_local.sources.EpisodesLocalDataSource
@@ -43,6 +44,7 @@ class EpisodesManager @Inject constructor(
   suspend fun setSeasonWatched(
     seasonBundle: SeasonBundle,
     customDate: ZonedDateTime?,
+    useReleaseDate: Boolean = false,
   ): List<Episode> {
     val date = customDate?.toUtcZone()
     val toAdd = mutableListOf<EpisodeDb>()
@@ -58,7 +60,8 @@ class EpisodesManager @Inject constructor(
       val watchedEpisodes = episodesLocalSource.getAllForSeason(season.ids.trakt.id).filter { it.isWatched }
       season.episodes.forEach { ep ->
         if (watchedEpisodes.none { it.idTrakt == ep.ids.trakt.id }) {
-          val dbEpisode = mappers.episode.toDatabase(ep, season, show.ids.trakt, true, null, date)
+          val episodeDate = if (useReleaseDate) ep.firstAired?.toReleaseDate() else date
+          val dbEpisode = mappers.episode.toDatabase(ep, season, show.ids.trakt, true, null, episodeDate)
           toAdd.add(dbEpisode)
         }
       }
@@ -115,10 +118,11 @@ class EpisodesManager @Inject constructor(
   suspend fun setEpisodeWatched(
     episodeBundle: EpisodeBundle,
     customDate: ZonedDateTime?,
+    useReleaseDate: Boolean = false,
   ) {
     transactions.withTransaction {
       val (episode, season, show) = episodeBundle
-      val date = customDate?.toUtcZone()
+      val date = if (useReleaseDate) episode.firstAired?.toReleaseDate() else customDate?.toUtcZone()
 
       val dbEpisode = mappers.episode.toDatabase(episode, season, show.ids.trakt, true, null, date)
       val dbSeason = mappers.season.toDatabase(season, show.ids.trakt, false)
