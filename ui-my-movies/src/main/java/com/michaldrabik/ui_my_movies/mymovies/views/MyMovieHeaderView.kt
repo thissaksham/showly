@@ -7,9 +7,6 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
-import com.michaldrabik.ui_base.common.ListViewMode
-import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
-import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_base.utilities.extensions.onClick
 import com.michaldrabik.ui_base.utilities.extensions.visibleIf
 import com.michaldrabik.ui_model.MyMoviesSection.ALL
@@ -37,24 +34,14 @@ class MyMovieHeaderView : FrameLayout {
 
   fun bind(
     item: MyMoviesItem.Header,
-    viewMode: ListViewMode,
     sortClickListener: (SortOrder, SortType) -> Unit,
     genresClickListener: () -> Unit,
-    listModeClickListener: (() -> Unit)?,
   ) {
     bindLabel(item)
     with(binding) {
       myMoviesFilterChipsScroll.visibleIf(item.section == ALL)
       myMoviesSortChip.visibleIf(item.sortOrder != null)
       myMoviesGenresChip.visibleIf(item.genres != null)
-
-      with(myMoviesSortListViewChip) {
-        when (viewMode) {
-          LIST_NORMAL -> setChipIconResource(R.drawable.ic_view_list)
-          POSTER -> setChipIconResource(R.drawable.ic_view_list)
-        }
-        onClick { listModeClickListener?.invoke() }
-      }
 
       item.sortOrder?.let { sortOrder ->
         myMoviesSortChip.text = context.getString(sortOrder.first.displayString)

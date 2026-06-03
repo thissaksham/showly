@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.michaldrabik.common.Config
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
-import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.events.EventsManager
 import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.utilities.events.Event
@@ -60,7 +59,6 @@ class MyShowsViewModel @Inject constructor(
 
   private val itemsState = MutableStateFlow<List<MyShowsItem>?>(null)
   private val itemsUpdateState = MutableStateFlow<Event<List<Type>?>?>(null)
-  private val viewModeState = MutableStateFlow(ListViewMode.LIST_NORMAL)
   private val showEmptyViewState = MutableStateFlow(false)
 
   private var searchQuery: String? = null
@@ -233,14 +231,12 @@ class MyShowsViewModel @Inject constructor(
   val uiState = combine(
     itemsState,
     itemsUpdateState,
-    viewModeState,
     showEmptyViewState,
-  ) { s1, s2, s3, s4 ->
+  ) { s1, s2, s3 ->
     MyShowsUiState(
       items = s1,
       resetScrollMap = s2,
-      viewMode = s3,
-      showEmptyView = s4,
+      showEmptyView = s3,
     )
   }.stateIn(
     scope = viewModelScope,

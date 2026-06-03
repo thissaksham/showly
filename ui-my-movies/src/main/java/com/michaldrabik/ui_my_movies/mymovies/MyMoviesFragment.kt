@@ -13,8 +13,6 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.michaldrabik.common.Config.LISTS_GRID_SPAN
 import com.michaldrabik.repository.settings.SettingsViewModeRepository
 import com.michaldrabik.ui_base.BaseFragment
-import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
-import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_base.common.OnScrollResetListener
 import com.michaldrabik.ui_base.common.OnSearchClickListener
 import com.michaldrabik.ui_base.common.sheets.sort_order.SortOrderBottomSheet
@@ -89,7 +87,6 @@ class MyMoviesFragment :
   private fun setupRecycler() {
     layoutManager = MyMoviesLayoutManagerProvider.provideLayoutManger(
       context = requireContext(),
-      viewMode = LIST_NORMAL,
       gridSpanSize = gridSpanSize,
     )
     adapter = MyMoviesAdapter(
@@ -97,7 +94,6 @@ class MyMoviesFragment :
       itemLongClickListener = { openMovieMenu(it.movie) },
       onSortOrderClickListener = ::openSortOrderDialog,
       onGenresClickListener = ::openGenresDialog,
-      onListViewModeClickListener = { },
       missingImageListener = { item, force -> viewModel.loadMissingImage(item, force) },
       missingTranslationListener = { viewModel.loadMissingTranslation(it) },
       listChangeListener = {
@@ -131,18 +127,6 @@ class MyMoviesFragment :
   private fun render(uiState: MyMoviesUiState) {
     uiState.run {
       with(binding) {
-        viewMode.let {
-          if (adapter?.listViewMode != it) {
-            val state = myMoviesRecycler.layoutManager?.onSaveInstanceState()
-            layoutManager = MyMoviesLayoutManagerProvider.provideLayoutManger(requireContext(), it, gridSpanSize)
-            adapter?.listViewMode = it
-            myMoviesRecycler.let { recycler ->
-              recycler.layoutManager = layoutManager
-              recycler.adapter = adapter
-              recycler.layoutManager?.onRestoreInstanceState(state)
-            }
-          }
-        }
         items?.let {
           val notifyChange = resetScroll?.consume() == true
           adapter?.setItems(it, notifyChange)
@@ -150,10 +134,7 @@ class MyMoviesFragment :
             val item = adapter?.getItems()?.get(pos)
             when (item?.type) {
               RECENT_MOVIES, HEADER -> {
-                when (viewMode) {
-                  LIST_NORMAL -> if (isTablet) gridSpanSize else LISTS_GRID_SPAN
-                  POSTER -> if (isTablet) gridSpanSize else LISTS_GRID_SPAN
-                }
+                if (isTablet) gridSpanSize else LISTS_GRID_SPAN
               }
               ALL_MOVIES_ITEM -> {
                 1

@@ -19,7 +19,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.michaldrabik.common.Mode
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.ui_base.BaseFragment
-import com.michaldrabik.ui_base.common.sheets.context_menu.ContextMenuBottomSheet
 import com.michaldrabik.ui_base.utilities.extensions.disableUi
 import com.michaldrabik.ui_base.utilities.extensions.doOnApplyWindowInsets
 import com.michaldrabik.ui_base.utilities.extensions.fadeOut
@@ -62,7 +61,6 @@ class ListDetailsFragment :
 
   private var adapter: ListDetailsAdapter? = null
   private var touchHelper: ItemTouchHelper? = null
-  private var layoutManager: RecyclerView.LayoutManager? = null
 
   private var headerTranslation = 0F
   private var isReorderMode = false
@@ -254,7 +252,6 @@ class ListDetailsFragment :
   override fun onDestroyView() {
     adapter = null
     touchHelper = null
-    layoutManager = null
     super.onDestroyView()
   }
 }

@@ -2,10 +2,8 @@ package com.michaldrabik.ui_my_movies.dropped
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.michaldrabik.common.Config
 import com.michaldrabik.repository.images.MovieImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
-import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.events.EventsManager
 import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.utilities.events.Event
@@ -17,6 +15,7 @@ import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
 import com.michaldrabik.ui_my_movies.common.recycler.CollectionListItem
+import com.michaldrabik.ui_my_movies.common.recycler.CollectionListItem.MovieItem
 import com.michaldrabik.ui_my_movies.dropped.cases.DroppedLoadMoviesCase
 import com.michaldrabik.ui_my_movies.dropped.cases.DroppedSortOrderCase
 import com.michaldrabik.ui_my_movies.main.FollowedMoviesUiState
@@ -44,16 +43,13 @@ class DroppedViewModel @Inject constructor(
   private var loadItemsJob: Job? = null
 
   private val itemsState = MutableStateFlow<List<CollectionListItem>>(emptyList())
-  private val viewModeState = MutableStateFlow(ListViewMode.LIST_NORMAL)
   private val sortOrderState = MutableStateFlow<Event<Pair<SortOrder, SortType>>?>(null)
   private val scrollState = MutableStateFlow<Event<Boolean>?>(null)
 
   private var searchQuery: String? = null
 
   init {
-    viewModelScope.launch {
-      eventsManager.events.collect { onEvent(it) }
-    }
+    viewModelScope.launch { eventsManager.events.collect { onEvent(it) } }
   }
 
   fun onParentState(state: FollowedMoviesUiState) {
@@ -87,7 +83,7 @@ class DroppedViewModel @Inject constructor(
     item: CollectionListItem,
     force: Boolean,
   ) {
-    check(item is CollectionListItem.MovieItem)
+    check(item is MovieItem)
     viewModelScope.launch {
       updateItem(item.copy(isLoading = true))
       try {
@@ -100,21 +96,13 @@ class DroppedViewModel @Inject constructor(
   }
 
   fun loadMissingTranslation(item: CollectionListItem) {
-    check(item is CollectionListItem.MovieItem)
-    if (item.translation != null || settingsRepository.language == Config.DEFAULT_LANGUAGE) return
-    viewModelScope.launch {
-      try {
-        val translation = loadMoviesCase.loadTranslation(item.movie, false)
-        updateItem(item.copy(translation = translation))
-      } catch (error: Throwable) {
-        Timber.e(error)
-      }
-    }
+    check(item is MovieItem)
+    // Removed.
   }
 
   private fun updateItem(new: CollectionListItem) {
     val currentItems = uiState.value.items.toMutableList()
-    currentItems.findReplace(new) { it isSameAs (new) }
+    currentItems.findReplace(new) { it.isSameAs(new) }
     itemsState.value = currentItems
   }
 
@@ -128,13 +116,11 @@ class DroppedViewModel @Inject constructor(
     itemsState,
     sortOrderState,
     scrollState,
-    viewModeState,
-  ) { s1, s2, s3, s4 ->
+  ) { s1, s2, s3 ->
     DroppedUiState(
       items = s1,
       sortOrder = s2,
       resetScroll = s3,
-      viewMode = s4,
     )
   }.stateIn(
     scope = viewModelScope,

@@ -25,11 +25,14 @@ class CollectionItemFilter @Inject constructor() {
         val isUpcomingYear = releasedAt == null && item.movie.year > nowUtcDay.year
         isUpcomingDay || isUpcomingYear
       }
-      UpcomingFilter.RELEASED -> {
+      UpcomingFilter.FINISHED -> {
         val nowUtcDay = nowUtcDay()
         val isReleasedDay = releasedAt != null && releasedAt.toEpochDay() < nowUtcDay.toEpochDay()
         val isReleasedYear = releasedAt == null && item.movie.year > 0 && item.movie.year < nowUtcDay.year
         isReleasedDay || isReleasedYear
+      }
+      UpcomingFilter.ONGOING -> {
+        true // For movies, maybe ONGOING doesn't make much sense, but let's keep All for now or a sensible default.
       }
     }
   }

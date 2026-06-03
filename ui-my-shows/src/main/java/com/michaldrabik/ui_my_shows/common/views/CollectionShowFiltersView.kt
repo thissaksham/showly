@@ -7,9 +7,6 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
-import com.michaldrabik.ui_base.common.ListViewMode
-import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
-import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_base.utilities.extensions.onClick
 import com.michaldrabik.ui_base.utilities.extensions.visibleIf
 import com.michaldrabik.ui_model.SortOrder
@@ -31,7 +28,6 @@ class CollectionShowFiltersView : FrameLayout {
 
   var onSortChipClicked: ((SortOrder, SortType) -> Unit)? = null
   var onFilterUpcomingClicked: (() -> Unit)? = null
-  var onListViewModeClicked: (() -> Unit)? = null
   var onNetworksChipClick: (() -> Unit)? = null
   var onGenresChipClick: (() -> Unit)? = null
 
@@ -49,7 +45,6 @@ class CollectionShowFiltersView : FrameLayout {
 
   fun bind(
     item: CollectionListItem.FiltersItem,
-    viewMode: ListViewMode,
   ) {
     with(binding) {
       val sortIcon = when (item.sortType) {
@@ -83,18 +78,12 @@ class CollectionShowFiltersView : FrameLayout {
       followedShowsUpcomingChip.text = when (item.upcoming) {
         UpcomingFilter.OFF -> context.getString(R.string.textWatchlistIncoming)
         UpcomingFilter.UPCOMING -> context.getString(R.string.textWatchlistIncoming)
-        UpcomingFilter.RELEASED -> context.getString(R.string.textMovieStatusReleased)
+        UpcomingFilter.FINISHED -> context.getString(R.string.textShowStatusEnded)
+        UpcomingFilter.ONGOING -> context.getString(R.string.watchlistOngoing)
       }
-      followedShowsListViewChip.setChipIconResource(
-        when (viewMode) {
-          LIST_NORMAL -> R.drawable.ic_view_list
-          POSTER -> R.drawable.ic_view_list
-        },
-      )
 
       followedShowsSortingChip.onClick { onSortChipClicked?.invoke(item.sortOrder, item.sortType) }
       followedShowsUpcomingChip.onClick { onFilterUpcomingClicked?.invoke() }
-      followedShowsListViewChip.onClick { onListViewModeClicked?.invoke() }
       followedShowsNetworksChip.onClick { onNetworksChipClick?.invoke() }
       followedShowsGenresChip.onClick { onGenresChipClick?.invoke() }
     }

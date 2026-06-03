@@ -14,8 +14,6 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.michaldrabik.common.Config.LISTS_GRID_SPAN
 import com.michaldrabik.repository.settings.SettingsViewModeRepository
 import com.michaldrabik.ui_base.BaseFragment
-import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
-import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_base.common.OnScrollResetListener
 import com.michaldrabik.ui_base.common.OnSearchClickListener
 import com.michaldrabik.ui_base.common.sheets.sort_order.SortOrderBottomSheet
@@ -92,13 +90,12 @@ class MyShowsFragment :
   }
 
   private fun setupRecycler() {
-    layoutManager = MyShowsLayoutManagerProvider.provideLayoutManger(requireContext(), LIST_NORMAL, tabletGridSpanSize)
+    layoutManager = MyShowsLayoutManagerProvider.provideLayoutManger(requireContext(), tabletGridSpanSize)
     adapter = MyShowsAdapter(
       itemClickListener = { openShowDetails(it.show) },
       itemLongClickListener = { item -> openShowMenu(item.show) },
       onSortOrderClickListener = { section, order, type -> openSortOrderDialog(section, order, type) },
       onTypeClickListener = { navigateToSafe(R.id.actionFollowedShowsFragmentToMyShowsFilters) },
-      onListViewModeClickListener = { },
       onNetworksClickListener = ::openNetworksDialog,
       onGenresClickListener = ::openGenresDialog,
       missingImageListener = { item, force -> viewModel.loadMissingImage(item as MyShowsItem, force) },
@@ -136,18 +133,6 @@ class MyShowsFragment :
   private fun render(uiState: MyShowsUiState) {
     uiState.run {
       with(binding) {
-        viewMode.let {
-          if (adapter?.listViewMode != it) {
-            val state = myShowsRecycler.layoutManager?.onSaveInstanceState()
-            layoutManager = MyShowsLayoutManagerProvider.provideLayoutManger(requireContext(), it, tabletGridSpanSize)
-            adapter?.listViewMode = it
-            myShowsRecycler.let { recycler ->
-              recycler.layoutManager = layoutManager
-              recycler.adapter = adapter
-              recycler.layoutManager?.onRestoreInstanceState(state)
-            }
-          }
-        }
         items?.let { items ->
           val notifyChangeList = resetScrollMap?.consume()
           adapter?.setItems(items, notifyChangeList)
@@ -155,10 +140,7 @@ class MyShowsFragment :
             val item = adapter?.getItems()?.get(pos)
             when (item?.type) {
               RECENT_SHOWS, ALL_SHOWS_HEADER -> {
-                when (viewMode) {
-                  LIST_NORMAL -> if (isTablet) tabletGridSpanSize else LISTS_GRID_SPAN
-                  POSTER -> if (isTablet) tabletGridSpanSize else LISTS_GRID_SPAN
-                }
+                if (isTablet) tabletGridSpanSize else LISTS_GRID_SPAN
               }
               ALL_SHOWS_ITEM -> {
                 1

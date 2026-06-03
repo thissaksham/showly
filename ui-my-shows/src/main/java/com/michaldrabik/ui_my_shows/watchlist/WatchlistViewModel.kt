@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.michaldrabik.common.Config
 import com.michaldrabik.repository.images.ShowImagesProvider
-import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.events.EventsManager
 import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.utilities.events.Event
@@ -47,7 +46,6 @@ class WatchlistViewModel @Inject constructor(
   private var loadItemsJob: Job? = null
 
   private val itemsState = MutableStateFlow<List<CollectionListItem>>(emptyList())
-  private val viewModeState = MutableStateFlow(ListViewMode.LIST_NORMAL)
   private val sortOrderState = MutableStateFlow<Event<Pair<SortOrder, SortType>>?>(null)
   private val scrollState = MutableStateFlow<Event<Boolean>?>(null)
 
@@ -136,13 +134,11 @@ class WatchlistViewModel @Inject constructor(
     itemsState,
     sortOrderState,
     scrollState,
-    viewModeState,
-  ) { s1, s2, s3, s4 ->
+  ) { s1, s2, s3 ->
     WatchlistUiState(
       items = s1,
       sortOrder = s2,
       resetScroll = s3,
-      viewMode = s4,
     )
   }.stateIn(
     scope = viewModelScope,

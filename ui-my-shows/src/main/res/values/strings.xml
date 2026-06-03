@@ -7,4 +7,8 @@
   <string name="textMyShowsEmpty">Your shows collection is currently empty.\n\nVisit <b>Discover</b> tab to add your first show.</string>
   <string name="textWatchlistEmpty">Your <b>Watchlist</b> is currently empty.\n\nVisit <b>Discover</b> tab to add shows you might want to watch in the future.</string>
   <string name="textDroppedEmpty">Your <b>Dropped</b> list is currently empty.\n\n<b>Dropped</b> is a list of items that you are not interested in.\n\nDropped items will no longer appear in <b>Progress</b>, <b>Discover</b> and other sections.</string>
+
+  <string name="watchlistGroupEnded">Ended / Cancelled</string>
+  <string name="watchlistGroupOngoing">Ongoing</string>
+  <string name="watchlistOngoing">Ongoing</string>
 </resources>

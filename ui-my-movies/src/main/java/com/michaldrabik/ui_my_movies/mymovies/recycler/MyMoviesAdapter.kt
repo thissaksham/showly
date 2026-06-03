@@ -5,9 +5,6 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
 import com.michaldrabik.ui_base.BaseAdapter
 import com.michaldrabik.ui_base.BaseMovieAdapter
-import com.michaldrabik.ui_base.common.ListViewMode
-import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
-import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
 import com.michaldrabik.ui_my_movies.mymovies.recycler.MyMoviesItem.Type
@@ -22,7 +19,6 @@ class MyMoviesAdapter(
   private val missingTranslationListener: (MyMoviesItem) -> Unit,
   private val onSortOrderClickListener: (SortOrder, SortType) -> Unit,
   private val onGenresClickListener: () -> Unit,
-  private val onListViewModeClickListener: () -> Unit,
   listChangeListener: (() -> Unit),
 ) : BaseMovieAdapter<MyMoviesItem>(
     listChangeListener = listChangeListener,
@@ -40,12 +36,6 @@ class MyMoviesAdapter(
 
   override val asyncDiffer = AsyncListDiffer(this, MyMoviesItemDiffCallback())
 
-  var listViewMode: ListViewMode = LIST_NORMAL
-    set(value) {
-      field = value
-      notifyItemRangeChanged(0, asyncDiffer.currentList.size)
-    }
-
   override fun onCreateViewHolder(
     parent: ViewGroup,
     viewType: Int,
@@ -53,10 +43,7 @@ class MyMoviesAdapter(
     VIEW_TYPE_HEADER -> BaseViewHolder(MyMovieHeaderView(parent.context))
     VIEW_TYPE_RECENTS_SECTION -> BaseViewHolder(MyMoviesRecentsView(parent.context))
     VIEW_TYPE_MOVIE_ITEM -> BaseAdapter.BaseViewHolder(
-      when (listViewMode) {
-        LIST_NORMAL -> MyMovieAllView(parent.context)
-        POSTER -> MyMovieAllView(parent.context)
-      }.apply {
+      MyMovieAllView(parent.context).apply {
         itemClickListener = this@MyMoviesAdapter.itemClickListener
         itemLongClickListener = this@MyMoviesAdapter.itemLongClickListener
         missingImageListener = this@MyMoviesAdapter.missingImageListener
@@ -74,19 +61,16 @@ class MyMoviesAdapter(
     when (holder.itemViewType) {
       VIEW_TYPE_HEADER -> (holder.itemView as MyMovieHeaderView).bind(
         item.header!!,
-        listViewMode,
         onSortOrderClickListener,
         onGenresClickListener,
-        onListViewModeClickListener,
       )
       VIEW_TYPE_RECENTS_SECTION -> (holder.itemView as MyMoviesRecentsView).bind(
         item.recentsSection!!,
         itemClickListener,
         itemLongClickListener,
       )
-      VIEW_TYPE_MOVIE_ITEM -> when (listViewMode) {
-        LIST_NORMAL -> (holder.itemView as MyMovieAllView).bind(item)
-        POSTER -> (holder.itemView as MyMovieAllView).bind(item)
+      VIEW_TYPE_MOVIE_ITEM -> {
+        (holder.itemView as MyMovieAllView).bind(item)
       }
     }
   }

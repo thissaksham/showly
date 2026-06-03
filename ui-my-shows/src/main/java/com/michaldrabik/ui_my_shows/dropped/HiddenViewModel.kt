@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.michaldrabik.common.Config
 import com.michaldrabik.repository.images.ShowImagesProvider
-import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.events.EventsManager
 import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.utilities.events.Event
@@ -47,7 +46,6 @@ class DroppedViewModel @Inject constructor(
   private val itemsState = MutableStateFlow<List<CollectionListItem>>(emptyList())
   private val sortOrderState = MutableStateFlow<Event<Pair<SortOrder, SortType>>?>(null)
   private val scrollState = MutableStateFlow<Event<Boolean>?>(null)
-  private val viewModeState = MutableStateFlow(ListViewMode.LIST_NORMAL)
 
   private var searchQuery: String? = null
 
@@ -127,13 +125,11 @@ class DroppedViewModel @Inject constructor(
     itemsState,
     sortOrderState,
     scrollState,
-    viewModeState,
-  ) { s1, s2, s3, s4 ->
+  ) { s1, s2, s3 ->
     DroppedUiState(
       items = s1,
       sortOrder = s2,
       resetScroll = s3,
-      viewMode = s4,
     )
   }.stateIn(
     scope = viewModelScope,

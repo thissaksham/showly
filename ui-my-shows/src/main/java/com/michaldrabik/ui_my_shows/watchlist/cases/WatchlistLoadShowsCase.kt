@@ -13,7 +13,10 @@ import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SpoilersSettings
 import com.michaldrabik.ui_model.TraktRating
 import com.michaldrabik.ui_model.Translation
+import com.michaldrabik.ui_model.ShowStatus
+import com.michaldrabik.ui_my_shows.R
 import com.michaldrabik.ui_my_shows.common.recycler.CollectionListItem
+import com.michaldrabik.ui_my_shows.common.recycler.CollectionListItem.HeaderItem
 import com.michaldrabik.ui_my_shows.watchlist.helpers.WatchlistItemFilter
 import com.michaldrabik.ui_my_shows.watchlist.helpers.WatchlistItemSorter
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -74,12 +77,27 @@ class WatchlistLoadShowsCase @Inject constructor(
             filters.filterGenres(item, filtersGenres)
         }.sortedWith(sorter.sort(filtersItem.sortOrder, filtersItem.sortType))
 
+      val endedStatuses = listOf(ShowStatus.ENDED, ShowStatus.CANCELED)
+      val endedShows = showsItems.filter { it.show.status in endedStatuses }
+      val ongoingShows = showsItems.filter { it.show.status !in endedStatuses }
+
+      val groupedItems = mutableListOf<CollectionListItem>().apply {
+        if (endedShows.isNotEmpty()) {
+          add(HeaderItem(R.string.watchlistGroupEnded))
+          addAll(endedShows)
+        }
+        if (ongoingShows.isNotEmpty()) {
+          add(HeaderItem(R.string.watchlistGroupOngoing))
+          addAll(ongoingShows)
+        }
+      }
+
       filtersItem = filtersItem.copy(count = showsItems.size)
 
-      if (showsItems.isNotEmpty() || filtersItem.hasActiveFilters()) {
-        listOf(filtersItem) + showsItems
+      if (groupedItems.isNotEmpty() || filtersItem.hasActiveFilters()) {
+        listOf(filtersItem) + groupedItems
       } else {
-        showsItems
+        groupedItems
       }
     }
 

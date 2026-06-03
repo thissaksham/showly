@@ -7,9 +7,6 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
-import com.michaldrabik.ui_base.common.ListViewMode
-import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
-import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_base.utilities.extensions.onClick
 import com.michaldrabik.ui_base.utilities.extensions.visibleIf
 import com.michaldrabik.ui_model.SortOrder
@@ -32,7 +29,6 @@ class CollectionMovieFiltersView : FrameLayout {
   var onSortChipClicked: ((SortOrder, SortType) -> Unit)? = null
   var onGenreChipClicked: (() -> Unit)? = null
   var onFilterUpcomingClicked: (() -> Unit)? = null
-  var onListViewModeClicked: (() -> Unit)? = null
 
   init {
     layoutParams = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
@@ -48,7 +44,6 @@ class CollectionMovieFiltersView : FrameLayout {
 
   fun bind(
     item: CollectionListItem.FiltersItem,
-    viewMode: ListViewMode,
   ) {
     with(binding) {
       val sortIcon = when (item.sortType) {
@@ -62,14 +57,9 @@ class CollectionMovieFiltersView : FrameLayout {
       followedMoviesUpcomingChip.text = when (item.upcoming) {
         UpcomingFilter.OFF -> context.getString(R.string.textWatchlistIncoming)
         UpcomingFilter.UPCOMING -> context.getString(R.string.textWatchlistIncoming)
-        UpcomingFilter.RELEASED -> context.getString(R.string.textMovieStatusReleased)
+        UpcomingFilter.FINISHED -> context.getString(R.string.textMovieStatusReleased)
+        UpcomingFilter.ONGOING -> context.getString(R.string.textWatchlistIncoming) // Defaulting to something for movies
       }
-      followedMoviesListViewChip.setChipIconResource(
-        when (viewMode) {
-          LIST_NORMAL -> R.drawable.ic_view_list
-          POSTER -> R.drawable.ic_view_list
-        },
-      )
 
       followedMoviesGenresChip.isSelected = item.genres.isNotEmpty()
       followedMoviesGenresChip.text = when {
@@ -84,7 +74,6 @@ class CollectionMovieFiltersView : FrameLayout {
       followedMoviesGenresChip.onClick { onGenreChipClicked?.invoke() }
       followedMoviesSortingChip.onClick { onSortChipClicked?.invoke(item.sortOrder, item.sortType) }
       followedMoviesUpcomingChip.onClick { onFilterUpcomingClicked?.invoke() }
-      followedMoviesListViewChip.onClick { onListViewModeClicked?.invoke() }
     }
   }
 }

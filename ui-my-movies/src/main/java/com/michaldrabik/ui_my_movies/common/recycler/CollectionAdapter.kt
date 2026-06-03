@@ -4,9 +4,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
 import com.michaldrabik.ui_base.BaseMovieAdapter
-import com.michaldrabik.ui_base.common.ListViewMode
-import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
-import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
 import com.michaldrabik.ui_my_movies.common.recycler.CollectionListItem.FiltersItem
@@ -21,7 +18,6 @@ class CollectionAdapter(
   private val sortChipClickListener: (SortOrder, SortType) -> Unit,
   private val upcomingChipClickListener: () -> Unit,
   private val genreChipClickListener: () -> Unit,
-  private val listViewChipClickListener: () -> Unit,
   private val missingImageListener: (CollectionListItem, Boolean) -> Unit,
   private val missingTranslationListener: (CollectionListItem) -> Unit,
   private val upcomingChipVisible: Boolean = true,
@@ -36,21 +32,12 @@ class CollectionAdapter(
 
   override val asyncDiffer = AsyncListDiffer(this, CollectionItemDiffCallback())
 
-  var listViewMode: ListViewMode = LIST_NORMAL
-    set(value) {
-      field = value
-      notifyItemRangeChanged(0, asyncDiffer.currentList.size)
-    }
-
   override fun onCreateViewHolder(
     parent: ViewGroup,
     viewType: Int,
   ) = when (viewType) {
     VIEW_TYPE_SHOW -> BaseViewHolder(
-      when (listViewMode) {
-        LIST_NORMAL -> CollectionMovieView(parent.context)
-        POSTER -> CollectionMovieView(parent.context)
-      }.apply {
+      CollectionMovieView(parent.context).apply {
         itemClickListener = this@CollectionAdapter.itemClickListener
         itemLongClickListener = this@CollectionAdapter.itemLongClickListener
         missingImageListener = this@CollectionAdapter.missingImageListener
@@ -62,7 +49,6 @@ class CollectionAdapter(
         onSortChipClicked = this@CollectionAdapter.sortChipClickListener
         onFilterUpcomingClicked = this@CollectionAdapter.upcomingChipClickListener
         onGenreChipClicked = this@CollectionAdapter.genreChipClickListener
-        onListViewModeClicked = this@CollectionAdapter.listViewChipClickListener
         isUpcomingChipVisible = upcomingChipVisible
       },
     )
@@ -75,13 +61,10 @@ class CollectionAdapter(
   ) {
     when (val item = asyncDiffer.currentList[position]) {
       is FiltersItem -> {
-        (holder.itemView as CollectionMovieFiltersView).bind(item, listViewMode)
+        (holder.itemView as CollectionMovieFiltersView).bind(item)
       }
       is MovieItem -> {
-        when (listViewMode) {
-          LIST_NORMAL -> (holder.itemView as CollectionMovieView).bind(item)
-          POSTER -> (holder.itemView as CollectionMovieView).bind(item)
-        }
+        (holder.itemView as CollectionMovieView).bind(item)
       }
     }
   }

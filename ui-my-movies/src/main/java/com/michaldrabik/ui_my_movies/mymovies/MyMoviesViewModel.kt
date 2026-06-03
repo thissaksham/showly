@@ -2,9 +2,9 @@ package com.michaldrabik.ui_my_movies.mymovies
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.michaldrabik.common.Config.DEFAULT_LANGUAGE
+import com.michaldrabik.common.Config
+import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
-import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.events.EventsManager
 import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.utilities.events.Event
@@ -28,8 +28,6 @@ import com.michaldrabik.ui_my_movies.mymovies.cases.MyMoviesRatingsCase
 import com.michaldrabik.ui_my_movies.mymovies.cases.MyMoviesSortingCase
 import com.michaldrabik.ui_my_movies.mymovies.recycler.MyMoviesItem
 import com.michaldrabik.ui_my_movies.mymovies.recycler.MyMoviesItem.Type
-import com.michaldrabik.ui_my_movies.mymovies.recycler.MyMoviesItem.Type.ALL_MOVIES_ITEM
-import com.michaldrabik.ui_my_movies.mymovies.recycler.MyMoviesItem.Type.RECENT_MOVIES
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -59,7 +57,6 @@ class MyMoviesViewModel @Inject constructor(
 
   private val itemsState = MutableStateFlow<List<MyMoviesItem>?>(null)
   private val itemsUpdateState = MutableStateFlow<Event<Boolean>?>(null)
-  private val viewModeState = MutableStateFlow(ListViewMode.LIST_NORMAL)
   private val showEmptyViewState = MutableStateFlow(false)
 
   private var searchQuery: String? = null
@@ -72,56 +69,57 @@ class MyMoviesViewModel @Inject constructor(
     when {
       this.searchQuery != state.searchQuery -> {
         this.searchQuery = state.searchQuery
-        loadMovies(notifyListsUpdate = state.searchQuery.isNullOrBlank())
+        loadMovies(resetScroll = state.searchQuery.isNullOrBlank())
       }
     }
   }
 
-  fun loadMovies(notifyListsUpdate: Boolean = false) {
+  fun loadMovies(resetScroll: Boolean = false) {
     loadItemsJob?.cancel()
     loadItemsJob = viewModelScope.launch {
       val settings = loadMoviesCase.loadSettings()
-      val dateFormat = loadMoviesCase.loadDateFormat()
-      val shortDateFormat = loadMoviesCase.loadShortDateFormat()
       val ratings = ratingsCase.loadRatings()
-      val sortOrder = sortingCase.loadSortOrder()
-      val genresFilter = settingsRepository.filters.myMoviesGenres
+      val sortOrder = settingsRepository.sorting.myMoviesAllSortOrder
+      val genres = settingsRepository.filters.myMoviesGenres
       val spoilers = settingsRepository.spoilers.getAll()
+      val dateFormat = loadMoviesCase.loadDateFormat()
+      val fullDateFormat = loadMoviesCase.loadShortDateFormat()
 
       val movies = loadMoviesCase
         .loadAll()
         .map {
           toListItemAsync(
-            itemType = ALL_MOVIES_ITEM,
+            itemType = Type.ALL_MOVIES_ITEM,
             movie = it,
             dateFormat = dateFormat,
-            shortDateFormat = shortDateFormat,
+            fullDateFormat = fullDateFormat,
             type = POSTER,
             userRating = ratings[it.ids.trakt],
-            sortOrder = sortOrder.first,
+            sortOrder = sortOrder,
             spoilers = spoilers,
           )
         }.awaitAll()
 
       val allMovies = loadMoviesCase.filterSectionMovies(
         allMovies = movies,
-        sortOrder = sortOrder,
-        genres = genresFilter.map { it.slug },
+        sortOrder = sortingCase.loadSortOrder(),
+        genres = genres.map { it.slug },
         searchQuery = searchQuery,
       )
+
       val recentMovies = if (settings.myRecentsAmount > 0) {
         loadMoviesCase
           .loadRecentMovies()
           .map {
             toListItemAsync(
-              itemType = RECENT_MOVIES,
-              movie = it,
-              dateFormat = dateFormat,
-              shortDateFormat = shortDateFormat,
-              type = ImageType.FANART,
-              userRating = ratings[it.ids.trakt],
-              sortOrder = sortOrder.first,
-              spoilers = spoilers,
+              Type.RECENT_MOVIES,
+              it,
+              dateFormat,
+              fullDateFormat,
+              ImageType.FANART,
+              ratings[it.ids.trakt],
+              null,
+              spoilers,
             )
           }.awaitAll()
       } else {
@@ -129,20 +127,19 @@ class MyMoviesViewModel @Inject constructor(
       }
 
       val isNotSearching = searchQuery.isNullOrBlank()
-      val hasAnyFilters = genresFilter.isNotEmpty()
       val listItems = mutableListOf<MyMoviesItem>()
       listItems.run {
         if (isNotSearching && recentMovies.isNotEmpty()) {
           add(MyMoviesItem.createHeader(RECENTS, recentMovies.count(), null, null))
           add(MyMoviesItem.createRecentsSection(recentMovies))
         }
-        if (allMovies.isNotEmpty() || hasAnyFilters) {
+        if (movies.isNotEmpty()) {
           add(
             MyMoviesItem.createHeader(
               section = ALL,
               itemCount = allMovies.count(),
-              sortOrder = sortOrder,
-              genres = genresFilter,
+              sortOrder = sortingCase.loadSortOrder(),
+              genres = settingsRepository.filters.myMoviesGenres,
             ),
           )
           addAll(allMovies)
@@ -150,18 +147,18 @@ class MyMoviesViewModel @Inject constructor(
       }
 
       itemsState.value = listItems
-      itemsUpdateState.value = Event(notifyListsUpdate)
+      itemsUpdateState.value = Event(resetScroll)
       showEmptyViewState.value = movies.isEmpty()
     }
   }
 
   fun setSortOrder(
-    order: SortOrder,
-    type: SortType,
+    sortOrder: SortOrder,
+    sortType: SortType,
   ) {
     viewModelScope.launch {
-      sortingCase.setSortOrder(order, type)
-      loadMovies(notifyListsUpdate = true)
+      sortingCase.setSortOrder(sortOrder, sortType)
+      loadMovies()
     }
   }
 
@@ -181,7 +178,7 @@ class MyMoviesViewModel @Inject constructor(
   }
 
   fun loadMissingTranslation(item: MyMoviesItem) {
-    if (item.translation != null || settingsRepository.language == DEFAULT_LANGUAGE) return
+    if (item.translation != null) return
     viewModelScope.launch {
       try {
         val translation = loadMoviesCase.loadTranslation(item.movie, false)
@@ -194,7 +191,7 @@ class MyMoviesViewModel @Inject constructor(
 
   private fun updateItem(new: MyMoviesItem) {
     val items = uiState.value.items?.toMutableList()
-    items?.findReplace(new) { it isSameAs new }
+    items?.findReplace(new) { it.isSameAs(new) }
     itemsState.value = items
   }
 
@@ -202,7 +199,7 @@ class MyMoviesViewModel @Inject constructor(
     itemType: Type,
     movie: Movie,
     dateFormat: DateTimeFormatter,
-    shortDateFormat: DateTimeFormatter,
+    fullDateFormat: DateTimeFormatter,
     type: ImageType = POSTER,
     userRating: TraktRating?,
     sortOrder: SortOrder?,
@@ -220,7 +217,7 @@ class MyMoviesViewModel @Inject constructor(
       translation = translation,
       userRating = userRating?.rating,
       dateFormat = dateFormat,
-      shortDateFormat = shortDateFormat,
+      shortDateFormat = fullDateFormat,
       sortOrder = sortOrder,
       spoilers = MyMoviesItem.Spoilers(
         isSpoilerHidden = spoilers.isMyMoviesHidden,
@@ -239,14 +236,12 @@ class MyMoviesViewModel @Inject constructor(
   val uiState = combine(
     itemsState,
     itemsUpdateState,
-    viewModeState,
     showEmptyViewState,
-  ) { s1, s2, s3, s4 ->
+  ) { s1, s2, s3 ->
     MyMoviesUiState(
       items = s1,
       resetScroll = s2,
-      viewMode = s3,
-      showEmptyView = s4,
+      showEmptyView = s3,
     )
   }.stateIn(
     scope = viewModelScope,

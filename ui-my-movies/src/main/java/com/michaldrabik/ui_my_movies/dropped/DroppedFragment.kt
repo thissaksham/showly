@@ -13,8 +13,6 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.michaldrabik.common.Config
 import com.michaldrabik.repository.settings.SettingsViewModeRepository
 import com.michaldrabik.ui_base.BaseFragment
-import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
-import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_base.common.OnScrollResetListener
 import com.michaldrabik.ui_base.common.OnSearchClickListener
 import com.michaldrabik.ui_base.common.sheets.sort_order.SortOrderBottomSheet
@@ -58,7 +56,7 @@ class DroppedFragment :
 
   @Inject lateinit var settings: SettingsViewModeRepository
 
-  override val navigationId = R.id.followedMoviesFragment
+  override val navigationId = R.id.followedShowsFragment
   private val binding by viewBinding(FragmentDroppedMoviesBinding::bind)
 
   private val parentViewModel by viewModels<FollowedMoviesViewModel>({ requireParentFragment() })
@@ -86,13 +84,12 @@ class DroppedFragment :
 
   private fun setupRecycler() {
     layoutManager = CollectionMovieLayoutManagerProvider
-      .provideLayoutManger(requireContext(), LIST_NORMAL, tabletGridSpanSize)
+      .provideLayoutManger(requireContext(), tabletGridSpanSize)
     adapter = CollectionAdapter(
       itemClickListener = { openMovieDetails(it.movie) },
       itemLongClickListener = { openMovieMenu(it.movie) },
       sortChipClickListener = ::openSortOrderDialog,
       genreChipClickListener = ::openGenresDialog,
-      listViewChipClickListener = { },
       missingImageListener = viewModel::loadMissingImage,
       missingTranslationListener = viewModel::loadMissingTranslation,
       upcomingChipVisible = false,
@@ -127,30 +124,13 @@ class DroppedFragment :
 
   private fun render(uiState: DroppedUiState) {
     uiState.run {
-      viewMode.let {
-        if (adapter?.listViewMode != it) {
-          layoutManager = CollectionMovieLayoutManagerProvider.provideLayoutManger(
-            context = requireContext(),
-            viewMode = it,
-            gridSpanSize = tabletGridSpanSize,
-          )
-          adapter?.listViewMode = it
-          binding.droppedMoviesRecycler?.let { recycler ->
-            recycler.layoutManager = layoutManager
-            recycler.adapter = adapter
-          }
-        }
-      }
       items.let {
         val notifyChange = resetScroll?.consume() == true
         adapter?.setItems(it, notifyChange = notifyChange)
         (layoutManager as? GridLayoutManager)?.withSpanSizeLookup { pos ->
           when (adapter?.getItems()?.get(pos)) {
             is FiltersItem -> {
-              when (viewMode) {
-                LIST_NORMAL -> if (isTablet) tabletGridSpanSize else Config.LISTS_GRID_SPAN
-                POSTER -> if (isTablet) tabletGridSpanSize else Config.LISTS_GRID_SPAN
-              }
+              if (isTablet) tabletGridSpanSize else Config.LISTS_GRID_SPAN
             }
             is MovieItem -> {
               1

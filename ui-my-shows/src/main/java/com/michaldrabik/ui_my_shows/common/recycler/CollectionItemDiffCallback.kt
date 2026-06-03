@@ -10,6 +10,7 @@ class CollectionItemDiffCallback : DiffUtil.ItemCallback<CollectionListItem>() {
   ): Boolean {
     val areMovies = oldItem is CollectionListItem.ShowItem && newItem is CollectionListItem.ShowItem
     val areFilters = oldItem is CollectionListItem.FiltersItem && newItem is CollectionListItem.FiltersItem
+    val areHeaders = oldItem is CollectionListItem.HeaderItem && newItem is CollectionListItem.HeaderItem
 
     return when {
       areMovies -> areItemsTheSame(
@@ -17,6 +18,7 @@ class CollectionItemDiffCallback : DiffUtil.ItemCallback<CollectionListItem>() {
         (newItem as CollectionListItem.ShowItem),
       )
       areFilters -> true
+      areHeaders -> oldItem.isSameAs(newItem)
       else -> false
     }
   }
@@ -28,6 +30,7 @@ class CollectionItemDiffCallback : DiffUtil.ItemCallback<CollectionListItem>() {
     when (oldItem) {
       is CollectionListItem.ShowItem -> areContentsTheSame(oldItem, (newItem as CollectionListItem.ShowItem))
       is CollectionListItem.FiltersItem -> areContentsTheSame(oldItem, (newItem as CollectionListItem.FiltersItem))
+      is CollectionListItem.HeaderItem -> oldItem == newItem
     }
 
   private fun areItemsTheSame(

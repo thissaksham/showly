@@ -2,10 +2,8 @@ package com.michaldrabik.ui_my_movies.watchlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.michaldrabik.common.Config.DEFAULT_LANGUAGE
 import com.michaldrabik.repository.images.MovieImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
-import com.michaldrabik.ui_base.common.ListViewMode
 import com.michaldrabik.ui_base.events.EventsManager
 import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.utilities.events.Event
@@ -29,7 +27,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 import com.michaldrabik.ui_base.events.Event as EventSync
 
@@ -47,7 +44,6 @@ class WatchlistViewModel @Inject constructor(
   private var loadItemsJob: Job? = null
 
   private val itemsState = MutableStateFlow<List<CollectionListItem>>(emptyList())
-  private val viewModeState = MutableStateFlow(ListViewMode.LIST_NORMAL)
   private val sortOrderState = MutableStateFlow<Event<Pair<SortOrder, SortType>>?>(null)
   private val scrollState = MutableStateFlow<Event<Boolean>?>(null)
 
@@ -109,20 +105,12 @@ class WatchlistViewModel @Inject constructor(
 
   fun loadMissingTranslation(item: CollectionListItem) {
     check(item is MovieItem)
-    if (item.translation != null || settingsRepository.language == DEFAULT_LANGUAGE) return
-    viewModelScope.launch {
-      try {
-        val translation = loadMoviesCase.loadTranslation(item.movie, false)
-        updateItem(item.copy(translation = translation))
-      } catch (error: Throwable) {
-        Timber.e(error)
-      }
-    }
+    // Removed.
   }
 
-  private fun updateItem(item: CollectionListItem) {
+  private fun updateItem(new: CollectionListItem) {
     val currentItems = uiState.value.items.toMutableList()
-    currentItems.findReplace(item) { it isSameAs item }
+    currentItems.findReplace(new) { it.isSameAs(new) }
     itemsState.value = currentItems
   }
 
@@ -136,13 +124,11 @@ class WatchlistViewModel @Inject constructor(
     itemsState,
     sortOrderState,
     scrollState,
-    viewModeState,
-  ) { s1, s2, s3, s4 ->
+  ) { s1, s2, s3 ->
     WatchlistUiState(
       items = s1,
       sortOrder = s2,
       resetScroll = s3,
-      viewMode = s4,
     )
   }.stateIn(
     scope = viewModelScope,

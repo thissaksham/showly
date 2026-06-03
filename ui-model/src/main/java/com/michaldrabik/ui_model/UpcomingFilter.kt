@@ -3,7 +3,8 @@ package com.michaldrabik.ui_model
 enum class UpcomingFilter {
   OFF,
   UPCOMING,
-  RELEASED,
+  FINISHED,
+  ONGOING,
   ;
 
   fun isActive() = this != OFF

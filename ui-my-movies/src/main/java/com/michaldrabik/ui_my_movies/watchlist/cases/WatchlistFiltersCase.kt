@@ -14,8 +14,9 @@ class WatchlistFiltersCase @Inject constructor(
     val current = settingsRepository.filters.watchlistMoviesUpcoming
     settingsRepository.filters.watchlistMoviesUpcoming = when (current) {
       UpcomingFilter.OFF -> UpcomingFilter.UPCOMING
-      UpcomingFilter.UPCOMING -> UpcomingFilter.RELEASED
-      UpcomingFilter.RELEASED -> UpcomingFilter.OFF
+      UpcomingFilter.UPCOMING -> UpcomingFilter.FINISHED
+      UpcomingFilter.FINISHED -> UpcomingFilter.ONGOING
+      UpcomingFilter.ONGOING -> UpcomingFilter.OFF
     }
   }
 }

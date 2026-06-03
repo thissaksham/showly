@@ -2,9 +2,11 @@ package com.michaldrabik.ui_my_shows.watchlist.helpers
 
 import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.ui_base.utilities.extensions.removeDiacritics
+import com.michaldrabik.ui_model.ShowStatus
 import com.michaldrabik.ui_model.UpcomingFilter
+import com.michaldrabik.ui_model.UpcomingFilter.FINISHED
 import com.michaldrabik.ui_model.UpcomingFilter.OFF
-import com.michaldrabik.ui_model.UpcomingFilter.RELEASED
+import com.michaldrabik.ui_model.UpcomingFilter.ONGOING
 import com.michaldrabik.ui_model.UpcomingFilter.UPCOMING
 import com.michaldrabik.ui_my_shows.common.recycler.CollectionListItem
 import javax.inject.Inject
@@ -18,10 +20,12 @@ class WatchlistItemFilter @Inject constructor() {
     upcomingFilter: UpcomingFilter,
   ): Boolean {
     val releasedAt = item.getReleaseDate()
+    val isEnded = item.show.status in listOf(ShowStatus.ENDED, ShowStatus.CANCELED)
     return when (upcomingFilter) {
       OFF -> true
-      UPCOMING -> releasedAt != null && releasedAt.isAfter(nowUtc())
-      RELEASED -> releasedAt != null && releasedAt.isBefore(nowUtc())
+      UPCOMING -> (releasedAt != null) && releasedAt.isAfter(nowUtc())
+      FINISHED -> isEnded
+      ONGOING -> !isEnded
     }
   }
 

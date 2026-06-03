@@ -158,9 +158,19 @@ class ShowDetailsViewModel @Inject constructor(
 
   fun removeFromFollowed() {
     viewModelScope.launch {
-      myShowsCase.removeFromMyShows(show, false)
-      followedState.value = followedState.value?.copy(isMyShows = false)
-      messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromMyShows))
+      val state = followedState.value ?: return@launch
+      when {
+        state.isMyShows -> {
+          myShowsCase.removeFromMyShows(show, false)
+          followedState.value = state.copy(isMyShows = false)
+          messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromMyShows))
+        }
+        state.isWatchlist -> {
+          watchlistCase.removeFromWatchlist(show)
+          followedState.value = state.copy(isWatchlist = false)
+          messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemoveFromWatchlist))
+        }
+      }
     }
   }
 

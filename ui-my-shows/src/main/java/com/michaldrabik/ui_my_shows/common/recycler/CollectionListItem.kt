@@ -11,6 +11,7 @@ import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
 import com.michaldrabik.ui_model.Translation
 import com.michaldrabik.ui_model.UpcomingFilter
+import androidx.annotation.StringRes
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -58,5 +59,16 @@ sealed class CollectionListItem(
     ) {
 
     fun hasActiveFilters() = upcoming.isActive() || networks.isNotEmpty() || genres.isNotEmpty()
+  }
+
+  data class HeaderItem(
+    @StringRes val titleResId: Int,
+  ) : CollectionListItem(
+    show = Show.EMPTY,
+    image = Image.createUnknown(ImageType.POSTER),
+    isLoading = false,
+  ) {
+    override fun isSameAs(other: ListItem) =
+      other is HeaderItem && titleResId == other.titleResId
   }
 }

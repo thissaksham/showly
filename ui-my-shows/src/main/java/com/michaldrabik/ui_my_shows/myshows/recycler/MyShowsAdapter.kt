@@ -5,9 +5,6 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
 import com.michaldrabik.ui_base.BaseAdapter
 import com.michaldrabik.ui_base.common.ListItem
-import com.michaldrabik.ui_base.common.ListViewMode
-import com.michaldrabik.ui_base.common.ListViewMode.LIST_NORMAL
-import com.michaldrabik.ui_base.common.ListViewMode.POSTER
 import com.michaldrabik.ui_model.MyShowsSection
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
@@ -20,7 +17,6 @@ class MyShowsAdapter(
   private val itemClickListener: (ListItem) -> Unit,
   private val itemLongClickListener: (ListItem) -> Unit,
   private val onSortOrderClickListener: (MyShowsSection, SortOrder, SortType) -> Unit,
-  private val onListViewModeClickListener: () -> Unit,
   private val onNetworksClickListener: () -> Unit,
   private val onGenresClickListener: () -> Unit,
   private val onTypeClickListener: () -> Unit,
@@ -39,12 +35,6 @@ class MyShowsAdapter(
 
   override val asyncDiffer = AsyncListDiffer(this, MyShowsItemDiffCallback())
 
-  var listViewMode: ListViewMode = LIST_NORMAL
-    set(value) {
-      field = value
-      notifyItemRangeChanged(0, asyncDiffer.currentList.size)
-    }
-
   fun setItems(
     newItems: List<MyShowsItem>,
     notifyChangeList: List<Type>?,
@@ -60,10 +50,7 @@ class MyShowsAdapter(
     VIEW_TYPE_HEADER -> BaseViewHolder(MyShowHeaderView(parent.context))
     VIEW_TYPE_RECENTS_SECTION -> BaseViewHolder(MyShowsRecentsView(parent.context))
     VIEW_TYPE_SHOW_ITEM -> BaseViewHolder(
-      when (listViewMode) {
-        LIST_NORMAL -> MyShowAllView(parent.context)
-        POSTER -> MyShowAllView(parent.context)
-      }.apply {
+      MyShowAllView(parent.context).apply {
         itemClickListener = this@MyShowsAdapter.itemClickListener
         itemLongClickListener = this@MyShowsAdapter.itemLongClickListener
         missingImageListener = this@MyShowsAdapter.missingImageListener
@@ -82,12 +69,10 @@ class MyShowsAdapter(
       VIEW_TYPE_HEADER -> {
         (holder.itemView as MyShowHeaderView).bind(
           item = item.header!!,
-          viewMode = listViewMode,
           typeClickListener = onTypeClickListener,
           sortClickListener = onSortOrderClickListener,
           networksClickListener = onNetworksClickListener,
           genresClickListener = onGenresClickListener,
-          listModeClickListener = onListViewModeClickListener,
         )
       }
       VIEW_TYPE_RECENTS_SECTION -> {
@@ -98,10 +83,7 @@ class MyShowsAdapter(
         )
       }
       VIEW_TYPE_SHOW_ITEM -> {
-        when (listViewMode) {
-          LIST_NORMAL -> (holder.itemView as MyShowAllView).bind(item)
-          POSTER -> (holder.itemView as MyShowAllView).bind(item)
-        }
+        (holder.itemView as MyShowAllView).bind(item)
       }
     }
   }
