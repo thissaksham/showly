@@ -44,11 +44,13 @@ class SettingsBackupViewModel @Inject constructor(
   fun onGoogleAccountConnected(context: Context) {
     _isGoogleConnected.value = true
     CloudBackupWorker.schedule(context)
+    runCloudRestore()
   }
 
   fun checkAndScheduleWorker(context: Context) {
     if (_isGoogleConnected.value) {
       CloudBackupWorker.schedule(context)
+      _cloudBackupTimestamp.value = settingsRepository.cloudBackupTimestamp
     }
   }
 

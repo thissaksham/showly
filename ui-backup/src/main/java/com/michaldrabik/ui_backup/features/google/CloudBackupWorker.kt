@@ -41,7 +41,7 @@ class CloudBackupWorker @AssistedInject constructor(
 
       WorkManager.getInstance(context).enqueueUniquePeriodicWork(
         TAG,
-        ExistingPeriodicWorkPolicy.KEEP,
+        ExistingPeriodicWorkPolicy.UPDATE,
         request
       )
     }

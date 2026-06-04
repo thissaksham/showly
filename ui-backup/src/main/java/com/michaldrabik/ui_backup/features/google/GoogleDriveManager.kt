@@ -48,7 +48,11 @@ class GoogleDriveManager @Inject constructor(
       val content = ByteArrayContent.fromString("application/json", jsonContent)
 
       if (existingFileId != null) {
-        service.files().update(existingFileId, null, content).execute()
+        try {
+          service.files().update(existingFileId, null, content).execute()
+        } catch (e: Exception) {
+          service.files().create(metadata, content).execute()
+        }
       } else {
         service.files().create(metadata, content).execute()
       }
