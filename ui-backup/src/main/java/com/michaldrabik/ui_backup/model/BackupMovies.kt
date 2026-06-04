@@ -5,7 +5,7 @@ import com.squareup.moshi.Json
 data class BackupMovies(
   @Json(name = "cH") val collectionHistory: List<BackupMovie> = emptyList(),
   @Json(name = "cW") val collectionWatchlist: List<BackupMovie> = emptyList(),
-  @Json(name = "cHid") val collectionHidden: List<BackupMovie> = emptyList(),
+  @Json(name = "cHid") val collectionDropped: List<BackupMovie> = emptyList(),
   @Json(name = "pP") val progressPinned: List<Long> = emptyList(),
   @Json(name = "rM") val ratingsMovies: List<BackupMovieRating> = emptyList(),
 )

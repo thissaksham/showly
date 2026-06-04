@@ -5,7 +5,7 @@ import com.squareup.moshi.Json
 data class BackupShows(
   @Json(name = "cH") val collectionHistory: List<BackupShow> = emptyList(),
   @Json(name = "cW") val collectionWatchlist: List<BackupShow> = emptyList(),
-  @Json(name = "cHid") val collectionHidden: List<BackupShow> = emptyList(),
+  @Json(name = "cHid") val collectionDropped: List<BackupShow> = emptyList(),
   @Json(name = "pEp") val progressEpisodes: List<BackupEpisode> = emptyList(),
   @Json(name = "pSe") val progressSeasons: List<BackupSeason> = emptyList(),
   @Json(name = "pP") val progressPinned: List<Long> = emptyList(),

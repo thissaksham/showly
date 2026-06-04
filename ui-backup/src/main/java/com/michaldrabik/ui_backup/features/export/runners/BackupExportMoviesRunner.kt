@@ -38,7 +38,7 @@ internal class BackupExportMoviesRunner @Inject constructor(
       BackupMovies(
         collectionHistory = backupMoviesCollection.collectionHistory,
         collectionWatchlist = backupMoviesCollection.collectionWatchlist,
-        collectionHidden = backupMoviesCollection.collectionHidden,
+        collectionDropped = backupMoviesCollection.collectionDropped,
         progressPinned = backupMoviesProgress.progressPinned,
         ratingsMovies = backupMoviesRatings.ratingsMovies,
       )
@@ -48,11 +48,11 @@ internal class BackupExportMoviesRunner @Inject constructor(
     withContext(dispatchers.IO) {
       val historyMoviesAsync = async { localSource.myMovies.getAll() }
       val watchlistMoviesAsync = async { localSource.watchlistMovies.getAll() }
-      val hiddenMoviesAsync = async { localSource.archiveMovies.getAll() }
+      val droppedMoviesAsync = async { localSource.archiveMovies.getAll() }
 
       val historyMovies = historyMoviesAsync.await()
       val watchlistMovies = watchlistMoviesAsync.await()
-      val hiddenMovies = hiddenMoviesAsync.await()
+      val droppedMovies = droppedMoviesAsync.await()
 
       val collectionHistory = historyMovies.map {
         BackupMovie(
@@ -70,7 +70,7 @@ internal class BackupExportMoviesRunner @Inject constructor(
           addedAt = dateIsoStringFromMillis(it.createdAt),
         )
       }
-      val collectionHidden = hiddenMovies.map {
+      val collectionDropped = droppedMovies.map {
         BackupMovie(
           traktId = it.idTrakt,
           tmdbId = it.idTmdb,
@@ -82,7 +82,7 @@ internal class BackupExportMoviesRunner @Inject constructor(
       BackupMovies(
         collectionHistory = collectionHistory,
         collectionWatchlist = collectionWatchlist,
-        collectionHidden = collectionHidden,
+        collectionDropped = collectionDropped,
       )
     }
 

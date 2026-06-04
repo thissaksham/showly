@@ -42,7 +42,7 @@ internal object BackupMigrationV1 {
             updatedAt = it.updatedAt,
           )
         },
-        collectionHidden = scheme.shows.collectionHidden.map {
+        collectionDropped = scheme.shows.collectionHidden.map {
           BackupShow(
             traktId = it.traktId,
             tmdbId = it.tmdbId,
@@ -92,7 +92,7 @@ internal object BackupMigrationV1 {
             addedAt = it.addedAt,
           )
         },
-        collectionHidden = scheme.movies.collectionHidden.map {
+        collectionDropped = scheme.movies.collectionHidden.map {
           BackupMovie(
             traktId = it.traktId,
             tmdbId = it.tmdbId,

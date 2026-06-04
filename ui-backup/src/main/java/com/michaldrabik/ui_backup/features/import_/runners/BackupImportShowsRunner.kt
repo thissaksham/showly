@@ -71,27 +71,24 @@ internal class BackupImportShowsRunner @Inject constructor(
       val localCollection = showsRepository
         .loadCollection()
         .map { it.traktId }
+        .toMutableList()
 
       importMyShows(backup, localCollection)
       importWatchlistShows(backup, localCollection)
-      importHiddenShows(backup, localCollection)
+      importDroppedShows(backup, localCollection)
     }
   }
 
   private suspend fun importMyShows(
     backupShows: BackupShows,
-    localCollection: List<Long>,
+    localCollection: MutableList<Long>,
   ) {
     for (show in backupShows.collectionHistory) {
       Timber.d("Importing show ${show.traktId} ...")
       statusListener?.invoke(Importing(show.title))
 
       if (localCollection.contains(show.traktId)) {
-        if (showsRepository.myShows.exists(IdTrakt(show.traktId))) {
-          importExistingMyShowEpisodes(IdTrakt(show.traktId), backupShows)
-          continue
-        }
-        Timber.d("Show already in collection. Skipping.")
+        importExistingShowEpisodes(IdTrakt(show.traktId), backupShows)
         continue
       }
 
@@ -120,20 +117,22 @@ internal class BackupImportShowsRunner @Inject constructor(
         localSource.myShows.insert(listOf(myShows))
       }
 
+      localCollection.add(show.traktId)
+
       Timber.d("Added to My Shows ${show.traktId} ...")
     }
   }
 
   private suspend fun importWatchlistShows(
     backupShows: BackupShows,
-    localCollection: List<Long>,
+    localCollection: MutableList<Long>,
   ) {
     for (show in backupShows.collectionWatchlist) {
       Timber.d("Importing show ${show.traktId} ...")
       statusListener?.invoke(Importing(show.title))
 
       if (localCollection.contains(show.traktId)) {
-        Timber.d("Show already in collection. Skipping.")
+        importExistingShowEpisodes(IdTrakt(show.traktId), backupShows)
         continue
       }
 
@@ -146,22 +145,32 @@ internal class BackupImportShowsRunner @Inject constructor(
 
       val timestamp = show.addedAt.toUtcDateTime()?.toMillis() ?: nowUtcMillis()
       val watchlistShow = WatchlistShow.fromTraktId(show.traktId, timestamp)
-      localSource.watchlistShows.insert(watchlistShow)
+
+      Timber.d("New show in Watchlist. Importing season, episodes ...")
+      val (seasons, episodes) = loadSeasonsEpisodes(show.traktId, backupShows)
+
+      transactions.withTransaction {
+        localSource.seasons.upsert(seasons)
+        localSource.episodes.upsert(episodes)
+        localSource.watchlistShows.insert(watchlistShow)
+      }
+
+      localCollection.add(show.traktId)
 
       Timber.d("Added to Watchlist ${show.traktId} ...")
     }
   }
 
-  private suspend fun importHiddenShows(
+  private suspend fun importDroppedShows(
     backupShows: BackupShows,
-    localCollection: List<Long>,
+    localCollection: MutableList<Long>,
   ) {
-    for (show in backupShows.collectionHidden) {
+    for (show in backupShows.collectionDropped) {
       Timber.d("Importing show ${show.traktId} ...")
       statusListener?.invoke(Importing(show.title))
 
       if (localCollection.contains(show.traktId)) {
-        Timber.d("Show already in collection. Skipping.")
+        importExistingShowEpisodes(IdTrakt(show.traktId), backupShows)
         continue
       }
 
@@ -174,9 +183,19 @@ internal class BackupImportShowsRunner @Inject constructor(
 
       val timestamp = show.addedAt.toUtcDateTime()?.toMillis() ?: nowUtcMillis()
       val hiddenShow = ArchiveShow.fromTraktId(show.traktId, timestamp)
-      localSource.archiveShows.insert(hiddenShow)
 
-      Timber.d("Added to Hidden ${show.traktId} ...")
+      Timber.d("New show in Dropped. Importing season, episodes ...")
+      val (seasons, episodes) = loadSeasonsEpisodes(show.traktId, backupShows)
+
+      transactions.withTransaction {
+        localSource.seasons.upsert(seasons)
+        localSource.episodes.upsert(episodes)
+        localSource.archiveShows.insert(hiddenShow)
+      }
+
+      localCollection.add(show.traktId)
+
+      Timber.d("Added to Dropped ${show.traktId} ...")
     }
   }
 
@@ -277,11 +296,11 @@ internal class BackupImportShowsRunner @Inject constructor(
     }
   }
 
-  private suspend fun importExistingMyShowEpisodes(
+  private suspend fun importExistingShowEpisodes(
     showId: IdTrakt,
     backup: BackupShows,
   ) {
-    Timber.d("Show already in My Shows. Importing episodes ...")
+    Timber.d("Show already in collection. Importing episodes ...")
     withContext(dispatchers.IO) {
       val show = localSource.shows.getById(showId.id) ?: return@withContext
       val importEpisodes = backup.progressEpisodes

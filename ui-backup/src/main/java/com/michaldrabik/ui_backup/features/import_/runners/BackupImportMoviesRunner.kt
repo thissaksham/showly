@@ -88,16 +88,17 @@ internal class BackupImportMoviesRunner @Inject constructor(
       val localCollection = moviesRepository
         .loadCollection()
         .map { it.traktId }
+        .toMutableList()
 
       importMyMovies(backup, localCollection)
       importWatchlistMovies(backup, localCollection)
-      importHiddenMovies(backup, localCollection)
+      importDroppedMovies(backup, localCollection)
     }
   }
 
   private suspend fun importMyMovies(
     backupMovies: BackupMovies,
-    localCollection: List<Long>,
+    localCollection: MutableList<Long>,
   ) {
     for (movie in backupMovies.collectionHistory) {
       Timber.d("Importing movie ${movie.traktId} ...")
@@ -118,6 +119,7 @@ internal class BackupImportMoviesRunner @Inject constructor(
       val timestamp = movie.addedAt.toUtcDateTime()?.toMillis() ?: nowUtcMillis()
       val myMovie = MyMovie.fromTraktId(movie.traktId, timestamp)
       localSource.myMovies.insert(listOf(myMovie))
+      localCollection.add(movie.traktId)
 
       Timber.d("Added to history ${movie.traktId} ...")
     }
@@ -125,7 +127,7 @@ internal class BackupImportMoviesRunner @Inject constructor(
 
   private suspend fun importWatchlistMovies(
     backupMovies: BackupMovies,
-    localCollection: List<Long>,
+    localCollection: MutableList<Long>,
   ) {
     for (movie in backupMovies.collectionWatchlist) {
       Timber.d("Importing movie ${movie.traktId} ...")
@@ -146,16 +148,17 @@ internal class BackupImportMoviesRunner @Inject constructor(
       val timestamp = movie.addedAt.toUtcDateTime()?.toMillis() ?: nowUtcMillis()
       val watchlistMovie = WatchlistMovie.fromTraktId(movie.traktId, timestamp)
       localSource.watchlistMovies.insert(watchlistMovie)
+      localCollection.add(movie.traktId)
 
       Timber.d("Added to Watchlist ${movie.traktId} ...")
     }
   }
 
-  private suspend fun importHiddenMovies(
+  private suspend fun importDroppedMovies(
     backupMovies: BackupMovies,
-    localCollection: List<Long>,
+    localCollection: MutableList<Long>,
   ) {
-    for (movie in backupMovies.collectionHidden) {
+    for (movie in backupMovies.collectionDropped) {
       Timber.d("Importing movie ${movie.traktId} ...")
       statusListener?.invoke(Importing(movie.title))
 
@@ -172,10 +175,11 @@ internal class BackupImportMoviesRunner @Inject constructor(
       }
 
       val timestamp = movie.addedAt.toUtcDateTime()?.toMillis() ?: nowUtcMillis()
-      val hiddenMovie = ArchiveMovie.fromTraktId(movie.traktId, timestamp)
-      localSource.archiveMovies.insert(hiddenMovie)
+      val droppedMovie = ArchiveMovie.fromTraktId(movie.traktId, timestamp)
+      localSource.archiveMovies.insert(droppedMovie)
+      localCollection.add(movie.traktId)
 
-      Timber.d("Added to Hidden ${movie.traktId} ...")
+      Timber.d("Added to Dropped ${movie.traktId} ...")
     }
   }
 

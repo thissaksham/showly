@@ -48,7 +48,7 @@ internal class BackupExportShowsRunner @Inject constructor(
       BackupShows(
         collectionHistory = backupShowsCollection.collectionHistory,
         collectionWatchlist = backupShowsCollection.collectionWatchlist,
-        collectionHidden = backupShowsCollection.collectionHidden,
+        collectionDropped = backupShowsCollection.collectionDropped,
         progressSeasons = backupEpisodesProgress.progressSeasons,
         progressEpisodes = backupEpisodesProgress.progressEpisodes,
         progressPinned = backupShowsProgress.progressPinned,
@@ -63,11 +63,11 @@ internal class BackupExportShowsRunner @Inject constructor(
     withContext(dispatchers.IO) {
       val myShowsAsync = async { localSource.myShows.getAll() }
       val watchlistShowsAsync = async { localSource.watchlistShows.getAll() }
-      val hiddenShowsAsync = async { localSource.archiveShows.getAll() }
+      val droppedShowsAsync = async { localSource.archiveShows.getAll() }
 
       val myShows = myShowsAsync.await()
       val watchlistShows = watchlistShowsAsync.await()
-      val hiddenShows = hiddenShowsAsync.await()
+      val droppedShows = droppedShowsAsync.await()
 
       val collectionMyShows = myShows.map {
         BackupShow(
@@ -87,7 +87,7 @@ internal class BackupExportShowsRunner @Inject constructor(
           updatedAt = dateIsoStringFromMillis(it.updatedAt),
         )
       }
-      val collectionHidden = hiddenShows.map {
+      val collectionDropped = droppedShows.map {
         BackupShow(
           traktId = it.idTrakt,
           tmdbId = it.idTmdb,
@@ -100,7 +100,7 @@ internal class BackupExportShowsRunner @Inject constructor(
       BackupShows(
         collectionHistory = collectionMyShows,
         collectionWatchlist = collectionWatchlist,
-        collectionHidden = collectionHidden,
+        collectionDropped = collectionDropped,
       )
     }
 
@@ -112,14 +112,16 @@ internal class BackupExportShowsRunner @Inject constructor(
       val watchedEpisodes = watchedEpisodesAsync.await()
       val watchedSeasons = watchedSeasonsAsync.await()
 
-      val seasonsIds = watchedSeasons.map { it.idShowTrakt }.distinct()
-      val shows = localSource.shows.getAllTmdbIds(traktIds = seasonsIds)
+      val seasonsShowIds = watchedSeasons.map { it.idShowTrakt }
+      val episodesShowIds = watchedEpisodes.map { it.idShowTrakt }
+      val allShowIds = (seasonsShowIds + episodesShowIds).distinct()
+      val showsTmdbIds = localSource.shows.getAllTmdbIds(traktIds = allShowIds)
 
       val progressSeasons = watchedSeasons.map { season ->
         BackupSeason(
           traktId = season.idTrakt,
           showTraktId = season.idShowTrakt,
-          showTmdbId = shows.getOrDefault(season.idShowTrakt, -1),
+          showTmdbId = showsTmdbIds.getOrDefault(season.idShowTrakt, -1),
           seasonNumber = season.seasonNumber,
         )
       }
@@ -128,7 +130,7 @@ internal class BackupExportShowsRunner @Inject constructor(
         BackupEpisode(
           traktId = episode.idTrakt,
           showTraktId = episode.idShowTrakt,
-          showTmdbId = episode.idShowTmdb,
+          showTmdbId = showsTmdbIds.getOrDefault(episode.idShowTrakt, -1),
           episodeNumber = episode.episodeNumber,
           seasonNumber = episode.seasonNumber,
           addedAt = episode.lastWatchedAt?.let { dateIsoStringFromMillis(it.toMillis()) },
@@ -207,13 +209,17 @@ internal class BackupExportShowsRunner @Inject constructor(
       val ratings = ratingsRepository.loadEpisodesRatings()
       val episodes = localSource.episodes.getAll(ratings.map { it.idTrakt })
 
+      val showsIds = episodes.map { it.idShowTrakt }.distinct()
+      val showsTmdbIds = localSource.shows.getAllTmdbIds(traktIds = showsIds)
+
       val episodesRatings = ratings.map { rating ->
         val episode = episodes.find { it.idTrakt == rating.idTrakt }
+        val showTraktId = episode?.idShowTrakt ?: -1
 
         BackupEpisodeRating(
           traktId = rating.idTrakt,
-          showTraktId = episode?.idShowTrakt ?: -1,
-          showTmdbId = episode?.idShowTmdb ?: -1,
+          showTraktId = showTraktId,
+          showTmdbId = showsTmdbIds.getOrDefault(showTraktId, -1),
           seasonNumber = rating.seasonNumber ?: -1,
           episodeNumber = rating.episodeNumber ?: -1,
           rating = rating.rating,
