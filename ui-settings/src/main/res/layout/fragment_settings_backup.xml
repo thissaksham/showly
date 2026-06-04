@@ -1,115 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
-  android:id="@+id/settingsContent"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
+  android:orientation="vertical"
   tools:theme="@style/AppTheme"
   >
 
   <TextView
-    android:id="@+id/settingsCategoryBackup"
+    android:id="@+id/settingsBackupHeaderTitle"
     style="@style/Settings.Category"
+    android:layout_width="match_parent"
     android:text="@string/textSettingsBackup"
-    app:layout_constraintBottom_toTopOf="@id/settingsBackupImport"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
     />
 
-  <androidx.constraintlayout.widget.ConstraintLayout
+  <LinearLayout
     android:id="@+id/settingsBackupImport"
     style="@style/Settings.ItemLayout"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/settingsCategoryBackup"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
     >
 
     <TextView
       android:id="@+id/settingsBackupCrashImport"
       style="@style/Settings.Title"
       android:text="@string/textSettingsBackupImportTitle"
-      app:layout_constraintBottom_toTopOf="@id/settingsBackupCrashesDescImport"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintVertical_chainStyle="packed"
       />
 
     <TextView
       android:id="@+id/settingsBackupCrashesDescImport"
       style="@style/Settings.Summary"
-      android:layout_marginEnd="@dimen/spaceSmall"
       android:text="@string/textSettingsBackupImportDescription"
-      app:layout_constrainedWidth="true"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintHorizontal_bias="0"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/settingsBackupCrashImport"
       />
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+  </LinearLayout>
 
-  <androidx.constraintlayout.widget.ConstraintLayout
+  <LinearLayout
     android:id="@+id/settingsBackupExport"
     style="@style/Settings.ItemLayout"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/settingsBackupImport"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
     >
 
     <TextView
       android:id="@+id/settingsBackupExportTitle"
       style="@style/Settings.Title"
       android:text="@string/textSettingsBackupExportTitle"
-      app:layout_constraintBottom_toTopOf="@id/settingsBackupExportDescription"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintVertical_chainStyle="packed"
       />
 
     <TextView
       android:id="@+id/settingsBackupExportDescription"
       style="@style/Settings.Summary"
-      android:layout_marginEnd="@dimen/spaceSmall"
       android:text="@string/textSettingsBackupExportDescription"
-      app:layout_constrainedWidth="true"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintHorizontal_bias="0"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/settingsBackupExportTitle"
       />
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+  </LinearLayout>
 
-  <androidx.constraintlayout.widget.ConstraintLayout
+  <!-- Changed to normal LinearLayout with manual padding to prevent ripple/click -->
+  <LinearLayout
     android:id="@+id/settingsBackupCloud"
-    style="@style/Settings.ItemLayout"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/settingsBackupExport"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/spaceNormal"
+    android:paddingEnd="@dimen/spaceNormal"
+    android:paddingTop="14dp"
+    android:paddingBottom="14dp"
     >
 
     <TextView
       android:id="@+id/settingsBackupCloudTitle"
       style="@style/Settings.Title"
       android:text="@string/textSettingsCloudBackupTitle"
-      app:layout_constraintBottom_toTopOf="@id/settingsBackupCloudDescription"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
-      app:layout_constraintVertical_chainStyle="packed"
       />
 
     <TextView
       android:id="@+id/settingsBackupCloudDescription"
       style="@style/Settings.Summary"
-      android:layout_marginEnd="@dimen/spaceSmall"
       android:text="@string/textSettingsCloudBackupDescription"
-      app:layout_constrainedWidth="true"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintHorizontal_bias="0"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/settingsBackupCloudTitle"
       />
 
     <TextView
@@ -123,11 +93,57 @@
       android:paddingVertical="2dp"
       android:textColor="@color/colorWhite"
       android:textSize="11sp"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/settingsBackupCloudDescription"
       tools:text="Last backup: 2 mins ago"
       />
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/settingsBackupCloudConnect"
+      style="@style/RoundMaterialButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="@dimen/spaceNormal"
+      android:text="@string/textSettingsCloudBackupConnect"
+      android:textColor="@color/colorWhite"
+      />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+      android:id="@+id/settingsBackupCloudActions"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="@dimen/spaceNormal"
+      android:orientation="horizontal"
+      >
+
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/settingsBackupCloudBackupNow"
+        style="@style/RoundMaterialButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/textSettingsCloudBackupBackupNow"
+        android:textColor="@color/colorWhite"
+        />
+
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/settingsBackupCloudRestore"
+        style="@style/RoundTextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spaceSmall"
+        android:text="@string/textSettingsCloudBackupRestore"
+        android:textColor="@color/colorWhite"
+        />
+
+    </LinearLayout>
+
+    <ProgressBar
+      android:id="@+id/settingsBackupCloudProgress"
+      style="?android:attr/progressBarStyleSmall"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="@dimen/spaceSmall"
+      android:visibility="gone"
+      />
+
+  </LinearLayout>
+
+</LinearLayout>

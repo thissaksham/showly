@@ -57,6 +57,14 @@ dependencies {
   implementation libs.hilt.work
   ksp libs.hilt.work.compiler
 
+  api libs.google.auth
+  api(libs.google.drive) {
+    exclude group: 'org.apache.httpcomponents'
+  }
+  api libs.google.api.client
+  api libs.google.http.gson
+  api libs.google.http.android
+
   api libs.phoenix
 
   coreLibraryDesugaring libs.android.desugar
