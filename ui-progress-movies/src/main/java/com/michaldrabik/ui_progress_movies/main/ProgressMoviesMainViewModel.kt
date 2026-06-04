@@ -3,6 +3,9 @@ package com.michaldrabik.ui_progress_movies.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.michaldrabik.common.extensions.nowUtc
+import com.michaldrabik.ui_base.events.EventsManager
+import com.michaldrabik.ui_base.events.ReloadData
+import com.michaldrabik.ui_base.events.ShowsMoviesSyncComplete
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
 import com.michaldrabik.ui_model.CalendarMode
 import com.michaldrabik.ui_model.Movie
@@ -19,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProgressMoviesMainViewModel @Inject constructor(
   private val moviesCase: ProgressMoviesMainCase,
+  private val eventsManager: EventsManager,
 ) : ViewModel() {
 
   private val timestampState = MutableStateFlow<Long?>(null)
@@ -26,6 +30,20 @@ class ProgressMoviesMainViewModel @Inject constructor(
   private val calendarModeState = MutableStateFlow<CalendarMode?>(null)
 
   private var calendarMode = CalendarMode.PRESENT_FUTURE
+
+  init {
+    viewModelScope.launch {
+      eventsManager.events.collect { onEvent(it) }
+    }
+  }
+
+  private fun onEvent(event: com.michaldrabik.ui_base.events.Event) {
+    when (event) {
+      is ReloadData, is ShowsMoviesSyncComplete -> {
+        timestampState.value = System.currentTimeMillis()
+      }
+    }
+  }
 
   fun loadProgress() {
     viewModelScope.launch {

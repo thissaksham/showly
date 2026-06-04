@@ -3,6 +3,9 @@ package com.michaldrabik.ui_progress.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.michaldrabik.common.extensions.nowUtc
+import com.michaldrabik.ui_base.events.EventsManager
+import com.michaldrabik.ui_base.events.ReloadData
+import com.michaldrabik.ui_base.events.ShowsMoviesSyncComplete
 import com.michaldrabik.ui_base.utilities.events.Event
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
@@ -26,6 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProgressMainViewModel @Inject constructor(
   private val episodesCase: ProgressMainEpisodesCase,
+  private val eventsManager: EventsManager,
 ) : ViewModel(),
   ChannelsDelegate by DefaultChannelsDelegate() {
 
@@ -35,6 +39,20 @@ class ProgressMainViewModel @Inject constructor(
   private val scrollState = MutableStateFlow<Event<Boolean>?>(null)
 
   private var calendarMode = CalendarMode.PRESENT_FUTURE
+
+  init {
+    viewModelScope.launch {
+      eventsManager.events.collect { onBaseEvent(it) }
+    }
+  }
+
+  private fun onBaseEvent(event: com.michaldrabik.ui_base.events.Event) {
+    when (event) {
+      is ReloadData, is ShowsMoviesSyncComplete -> {
+        timestampState.value = System.currentTimeMillis()
+      }
+    }
+  }
 
   fun loadProgress() {
     viewModelScope.launch {

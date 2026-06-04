@@ -7,6 +7,8 @@ import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.MovieImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.ui_base.dates.DateFormatProvider
+import com.michaldrabik.ui_base.events.EventsManager
+import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.notifications.AnnouncementManager
 import com.michaldrabik.ui_base.utilities.events.Event
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
@@ -52,6 +54,7 @@ class MovieDetailsViewModel @Inject constructor(
   private val imagesProvider: MovieImagesProvider,
   private val dateFormatProvider: DateFormatProvider,
   private val announcementManager: AnnouncementManager,
+  private val eventsManager: EventsManager,
 ) : ViewModel() {
 
   lateinit var movie: Movie
@@ -144,6 +147,7 @@ class MovieDetailsViewModel @Inject constructor(
       myMoviesCase.addToMyMovies(movie, customDate)
       followedState.value = followedState.value?.copy(isMyMovie = true, isWatchlist = false, isDropped = false)
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToMyMovies))
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
@@ -152,6 +156,7 @@ class MovieDetailsViewModel @Inject constructor(
       watchlistCase.addToWatchlist(movie)
       followedState.value = followedState.value?.copy(isWatchlist = true, isMyMovie = false, isDropped = false)
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToWatchlist))
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
@@ -160,6 +165,7 @@ class MovieDetailsViewModel @Inject constructor(
       droppedCase.addToDropped(movie)
       followedState.value = followedState.value?.copy(isDropped = true, isMyMovie = false, isWatchlist = false)
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToDropped))
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
@@ -183,6 +189,7 @@ class MovieDetailsViewModel @Inject constructor(
           messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromDropped))
         }
       }
+      eventsManager.sendEvent(ReloadData)
     }
   }
 

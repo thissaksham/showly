@@ -13,6 +13,8 @@ import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
 import com.michaldrabik.ui_model.ImageType
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
+import com.michaldrabik.ui_model.EpisodeBundle
+import com.michaldrabik.ui_progress.main.EpisodeCheckActionUiEvent
 import com.michaldrabik.ui_progress.main.ProgressMainUiState
 import com.michaldrabik.ui_progress.progress.cases.ProgressFiltersCase
 import com.michaldrabik.ui_progress.progress.cases.ProgressHeadersCase
@@ -87,7 +89,10 @@ class ProgressViewModel @Inject constructor(
   }
 
   fun onEpisodeChecked(item: ProgressListItem.Episode) {
-    updateItem(item.copy(isWatched = true))
+    viewModelScope.launch {
+      val bundle = EpisodeBundle(item.requireEpisode(), item.requireSeason(), item.show)
+      eventChannel.send(EpisodeCheckActionUiEvent(bundle, settingsRepository.progressDateSelectionType))
+    }
   }
 
   fun findMissingImage(item: ProgressListItem, withLoading: Boolean) {

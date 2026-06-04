@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.repository.settings.SettingsRepository
+import com.michaldrabik.ui_base.events.EventsManager
+import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
 import com.michaldrabik.ui_base.utilities.extensions.findReplace
 import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
@@ -56,6 +58,7 @@ class ShowDetailsEpisodesViewModel @Inject constructor(
   private val markWatchedCase: EpisodesMarkWatchedCase,
   private val seasonsCache: SeasonsCache,
   private val settingsRepository: SettingsRepository,
+  private val eventsManager: EventsManager,
 ) : ViewModel(),
   ChannelsDelegate by DefaultChannelsDelegate() {
 
@@ -199,6 +202,7 @@ class ShowDetailsEpisodesViewModel @Inject constructor(
         episodeWatchedCase.setEpisodeWatched(bundle, isChecked, date, useReleaseDate)
         refreshWatchedEpisodes()
         announcementsCase.refreshAnnouncements(show.ids.trakt)
+        eventsManager.sendEvent(ReloadData)
       }
     }
   }
@@ -233,6 +237,7 @@ class ShowDetailsEpisodesViewModel @Inject constructor(
       seasonWatchedCase.setSeasonWatched(show, season.season, isChecked, date, useReleaseDate)
       refreshWatchedEpisodes()
       announcementsCase.refreshAnnouncements(show.ids.trakt)
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
