@@ -115,6 +115,7 @@ class DateSelectionBottomSheet : BaseBottomSheetFragment(R.layout.view_date_sele
     val now = nowUtc().toLocalZone()
     val dialog = MaterialDatePicker.Builder
       .datePicker()
+      .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
       .setCalendarConstraints(
         CalendarConstraints
           .Builder()
@@ -139,7 +140,7 @@ class DateSelectionBottomSheet : BaseBottomSheetFragment(R.layout.view_date_sele
       .Builder()
       .setTheme(R.style.ShowlyTimePicker)
       .setTimeFormat(if (is24HourFormat) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H)
-      .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+      .setInputMode(MaterialTimePicker.INPUT_MODE_KEYBOARD)
       .setHour(now.hour)
       .setMinute(now.minute)
       .build()

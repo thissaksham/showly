@@ -4,6 +4,7 @@
 /.idea
 .DS_Store
 **/build/
+/.navigation
 /captures
 .externalNativeBuild
 .cxx
@@ -14,4 +15,4 @@ ktlint2.jar
 /app/keystore
 /app/firebase-service-key.json
 /app/gpp-services-key.json
-**/app/release/
+/app/release/
