@@ -58,11 +58,7 @@ internal class GetHistoryItemsCase @Inject constructor(
 
   suspend fun loadItems(searchQuery: String? = "") =
     withContext(dispatchers.IO) {
-      val shows = coroutineScope {
-        val async1 = async { showsRepository.myShows.loadAll() }
-        val async2 = async { showsRepository.watchlistShows.loadAll() }
-        awaitAll(async1, async2).flatten()
-      }
+      val shows = showsRepository.loadCollection(skipDropped = false)
       val showsIds = shows.map { it.traktId }.chunked(250)
 
       val periodFilter = settingsRepository.filters.historyShowsPeriod

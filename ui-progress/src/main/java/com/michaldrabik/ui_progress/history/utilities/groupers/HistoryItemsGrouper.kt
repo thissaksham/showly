@@ -37,16 +37,18 @@ internal class HistoryItemsGrouper @Inject constructor() {
             ),
           )
           addAll(
-            entry.value.sortedWith { e1, e2 ->
+            entry.value.sortedWith(
               if (entry.key == null) {
-                compareValues(e1.episode.firstAired?.toMillis(), e2.episode.firstAired?.toMillis())
-              } else {
-                compareByDescending<Episode> { it.episode.lastWatchedAt?.toMillis() }
+                compareByDescending<Episode> { it.episode.firstAired?.toMillis() ?: 0L }
+                  .thenByDescending { it.show.year }
                   .thenByDescending { it.episode.season }
                   .thenByDescending { it.episode.number }
-                  .compare(e1, e2)
+              } else {
+                compareByDescending<Episode> { it.episode.lastWatchedAt?.toMillis() ?: 0L }
+                  .thenByDescending { it.episode.season }
+                  .thenByDescending { it.episode.number }
               }
-            },
+            ),
           )
         }
       }

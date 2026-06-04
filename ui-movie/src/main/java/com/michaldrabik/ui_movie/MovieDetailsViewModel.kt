@@ -165,9 +165,24 @@ class MovieDetailsViewModel @Inject constructor(
 
   fun removeFromMyMovies() {
     viewModelScope.launch {
-      myMoviesCase.removeFromMyMovies(movie)
-      followedState.value = followedState.value?.copy(isMyMovie = false)
-      messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromMyMovies))
+      val state = followedState.value ?: return@launch
+      when {
+        state.isMyMovie -> {
+          myMoviesCase.removeFromMyMovies(movie)
+          followedState.value = state.copy(isMyMovie = false, withAnimation = true)
+          messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromMyMovies))
+        }
+        state.isWatchlist -> {
+          watchlistCase.removeFromWatchlist(movie)
+          followedState.value = state.copy(isWatchlist = false, withAnimation = true)
+          messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromWatchlist))
+        }
+        state.isDropped -> {
+          droppedCase.removeFromDropped(movie)
+          followedState.value = state.copy(isDropped = false, withAnimation = true)
+          messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromDropped))
+        }
+      }
     }
   }
 

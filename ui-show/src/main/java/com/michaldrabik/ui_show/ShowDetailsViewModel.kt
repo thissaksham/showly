@@ -162,13 +162,18 @@ class ShowDetailsViewModel @Inject constructor(
       when {
         state.isMyShows -> {
           myShowsCase.removeFromMyShows(show, false)
-          followedState.value = state.copy(isMyShows = false)
+          followedState.value = state.copy(isMyShows = false, withAnimation = true)
           messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromMyShows))
         }
         state.isWatchlist -> {
           watchlistCase.removeFromWatchlist(show)
-          followedState.value = state.copy(isWatchlist = false)
-          messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemoveFromWatchlist))
+          followedState.value = state.copy(isWatchlist = false, withAnimation = true)
+          messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromWatchlist))
+        }
+        state.isDropped -> {
+          droppedCase.removeFromDropped(show)
+          followedState.value = state.copy(isDropped = false, withAnimation = true)
+          messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromDropped))
         }
       }
     }

@@ -125,7 +125,9 @@
   <string name="textRemovedFromMyShows">Removed from My Shows</string>
   <string name="textRemovedFromMyMovies">Removed from History</string>
   <string name="textRemoveFromWatchlist">Remove from Watchlist</string>
+  <string name="textRemovedFromWatchlist">Removed from Watchlist</string>
   <string name="textRemoveFromDropped">Remove from Dropped</string>
+  <string name="textRemovedFromDropped">Removed from Dropped</string>
   <string name="textWatchlist">Watchlist</string>
   <string name="textWatchlistIncoming">Upcoming</string>
   <string name="textNewAlwaysAtTop">New episodes always first</string>

@@ -21,3 +21,10 @@
 #-renamesourcefileattribute SourceFile
 
 -dontwarn okhttp3.internal.platform.ConscryptPlatform
+
+# Google Drive API and Apache HTTP Client compatibility
+-dontwarn javax.naming.**
+-dontwarn org.apache.http.**
+-dontwarn com.google.api.client.extensions.android.http.AndroidHttp
+-keep class com.google.api.services.drive.** { *; }
+-keep class com.google.api.client.** { *; }
