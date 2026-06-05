@@ -4,6 +4,7 @@ import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.ui_model.Movie
 import com.michaldrabik.ui_progress_movies.BaseMockTest
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.test.runTest
@@ -30,18 +31,14 @@ class ProgressMoviesPinnedCaseTest : BaseMockTest() {
   }
 
   @Test
-  fun `Should set pinned item properly`() =
+  fun `Should toggle pinned item properly`() =
     runTest {
-      SUT.addPinnedItem(Movie.EMPTY)
+      coEvery { pinnedItemsRepository.isItemPinned(any<Movie>()) } returns false
+      SUT.togglePinned(Movie.EMPTY)
+      coVerify(exactly = 1) { pinnedItemsRepository.addPinnedItem(any<Movie>()) }
 
-      coVerify(exactly = 1) { pinnedItemsRepository.addPinnedItem(Movie.EMPTY) }
-    }
-
-  @Test
-  fun `Should remove pinned item properly`() =
-    runTest {
-      SUT.removePinnedItem(Movie.EMPTY)
-
-      coVerify(exactly = 1) { pinnedItemsRepository.removePinnedItem(Movie.EMPTY) }
+      coEvery { pinnedItemsRepository.isItemPinned(any<Movie>()) } returns true
+      SUT.togglePinned(Movie.EMPTY)
+      coVerify(exactly = 1) { pinnedItemsRepository.removePinnedItem(any<Movie>()) }
     }
 }

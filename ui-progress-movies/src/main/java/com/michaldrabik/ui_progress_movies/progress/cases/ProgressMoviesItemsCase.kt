@@ -2,6 +2,7 @@ package com.michaldrabik.ui_progress_movies.progress.cases
 
 import com.michaldrabik.common.Config
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
+import com.michaldrabik.common.extensions.nowUtcDay
 import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.repository.RatingsRepository
 import com.michaldrabik.repository.TranslationsRepository
@@ -43,8 +44,8 @@ class ProgressMoviesItemsCase @Inject constructor(
       val filtersItem = loadFiltersItem(sortOrder, sortType)
       val spoilers = settingsRepository.spoilers.getAll()
 
-      val myMovies = moviesRepository.myMovies.loadAll()
-      val items = myMovies.map { movie ->
+      val watchlistMovies = moviesRepository.watchlistMovies.loadAll()
+      val items = watchlistMovies.map { movie ->
         async {
           val image = imagesProvider.findCachedImage(movie, ImageType.POSTER)
           val rating = ratingsRepository.movies.loadRatings(listOf(movie)).firstOrNull()
@@ -67,12 +68,13 @@ class ProgressMoviesItemsCase @Inject constructor(
       }.awaitAll()
 
       val filteredItems = filterItems(searchQuery, items)
-      val sortedItems = prepareItems(filteredItems, sortOrder, sortType)
+      val validItems = filteredItems.filter { it.movie.hasAired() }
+      val sortedItems = prepareItems(validItems, sortOrder, sortType)
 
       if (sortedItems.isNotEmpty()) {
         listOf(filtersItem) + sortedItems
       } else {
-        listOf(filtersItem)
+        emptyList()
       }
     }
 
@@ -98,6 +100,9 @@ class ProgressMoviesItemsCase @Inject constructor(
     sortOrder: SortOrder,
     sortType: SortType,
   ): List<ProgressMovieListItem.MovieItem> {
-    return items.sortedWith(sorter.sort(sortOrder, sortType))
+    return items.sortedWith(
+      compareByDescending<ProgressMovieListItem.MovieItem> { it.isPinned }
+        .then(sorter.sort(sortOrder, sortType)),
+    )
   }
 }

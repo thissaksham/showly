@@ -45,30 +45,30 @@ class ProgressMoviesViewModelTest : BaseMockTest() {
   @Test
   fun `Should load items if parent timestamp changed`(): TestResult =
     runTest {
-      coEvery { itemsCase.loadItems(any(), any()) } returns emptyList()
+      coEvery { itemsCase.loadItems(any()) } returns emptyList()
 
       SUT.onParentState(parentState.copy(timestamp = 123L))
 
-      coVerify { itemsCase.loadItems("", true) }
+      coVerify { itemsCase.loadItems("") }
     }
 
   @Test
   fun `Should not reload items if parent timestamp is the same`(): TestResult =
     runTest {
-      coEvery { itemsCase.loadItems(any(), any()) } returns emptyList()
+      coEvery { itemsCase.loadItems(any()) } returns emptyList()
 
       SUT.onParentState(parentState.copy(timestamp = 0L))
 
-      coVerify(exactly = 0) { itemsCase.loadItems(any(), any()) }
+      coVerify(exactly = 0) { itemsCase.loadItems(any()) }
     }
 
   @Test
   fun `Should load items if search query changed`(): TestResult =
     runTest {
-      coEvery { itemsCase.loadItems(any(), any()) } returns emptyList()
+      coEvery { itemsCase.loadItems(any()) } returns emptyList()
 
       SUT.onParentState(parentState.copy(searchQuery = "query"))
 
-      coVerify { itemsCase.loadItems("query", false) }
+      coVerify { itemsCase.loadItems("query") }
     }
 }
