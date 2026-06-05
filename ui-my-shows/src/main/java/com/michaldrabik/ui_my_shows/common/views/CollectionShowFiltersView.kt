@@ -76,7 +76,7 @@ class CollectionShowFiltersView : FrameLayout {
 
       followedShowsUpcomingChip.isChecked = item.upcoming.isActive()
       followedShowsUpcomingChip.text = when (item.upcoming) {
-        UpcomingFilter.OFF -> context.getString(R.string.textWatchlistIncoming)
+        UpcomingFilter.OFF -> context.getString(R.string.textHeaderAll)
         UpcomingFilter.UPCOMING -> context.getString(R.string.textWatchlistIncoming)
         UpcomingFilter.FINISHED -> context.getString(R.string.textShowStatusEnded)
         UpcomingFilter.ONGOING -> context.getString(R.string.watchlistOngoing)

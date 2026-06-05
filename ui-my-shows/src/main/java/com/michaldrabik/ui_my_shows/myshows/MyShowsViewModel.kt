@@ -15,6 +15,7 @@ import com.michaldrabik.ui_base.viewmodel.DefaultChannelsDelegate
 import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.ImageType
 import com.michaldrabik.ui_model.ImageType.POSTER
+import com.michaldrabik.ui_model.MyShowsSection
 import com.michaldrabik.ui_model.MyShowsSection.ALL
 import com.michaldrabik.ui_model.MyShowsSection.RECENTS
 import com.michaldrabik.ui_model.Show
@@ -158,6 +159,21 @@ class MyShowsViewModel @Inject constructor(
     viewModelScope.launch {
       sortingCase.setSectionSortOrder(ALL, sortOrder, sortType)
       loadShows()
+    }
+  }
+
+  fun toggleSectionType() {
+    viewModelScope.launch {
+      val current = settingsRepository.filters.myShowsType
+      val next = when (current) {
+        MyShowsSection.ALL -> MyShowsSection.WATCHING
+        MyShowsSection.WATCHING -> MyShowsSection.UPCOMING
+        MyShowsSection.UPCOMING -> MyShowsSection.FINISHED
+        MyShowsSection.FINISHED -> MyShowsSection.ALL
+        else -> MyShowsSection.ALL
+      }
+      settingsRepository.filters.myShowsType = next
+      loadShows(resetScroll = listOf(Type.ALL_SHOWS_ITEM))
     }
   }
 

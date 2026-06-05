@@ -137,7 +137,7 @@ class WatchlistFragment :
         adapter?.setItems(it, notifyChange = notifyChange)
         (layoutManager as? GridLayoutManager)?.withSpanSizeLookup { pos ->
           when (adapter?.getItems()?.get(pos)) {
-            is FiltersItem, is CollectionListItem.HeaderItem -> {
+            is FiltersItem -> {
               if (isTablet) tabletGridSpanSize else LISTS_GRID_SPAN
             }
             is ShowItem -> {

@@ -54,6 +54,14 @@
         >
 
         <com.google.android.material.chip.Chip
+          android:id="@+id/followedShowsUpcomingChip"
+          style="@style/ShowlyChip.Filter"
+          android:text="@string/textWatchlistIncoming"
+          android:visibility="gone"
+          tools:visibility="visible"
+          />
+
+        <com.google.android.material.chip.Chip
           android:id="@+id/followedShowsSortingChip"
           style="@style/ShowlyChip.Sort"
           android:text="@string/textSortName"
@@ -71,14 +79,6 @@
           style="@style/ShowlyChip.Filter"
           android:checkable="false"
           android:text="@string/textGenres"
-          />
-
-        <com.google.android.material.chip.Chip
-          android:id="@+id/followedShowsUpcomingChip"
-          style="@style/ShowlyChip.Filter"
-          android:text="@string/textWatchlistIncoming"
-          android:visibility="gone"
-          tools:visibility="visible"
           />
 
       </com.google.android.material.chip.ChipGroup>

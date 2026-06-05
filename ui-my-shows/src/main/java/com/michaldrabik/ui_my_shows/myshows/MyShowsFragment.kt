@@ -95,7 +95,7 @@ class MyShowsFragment :
       itemClickListener = { openShowDetails(it.show) },
       itemLongClickListener = { item -> openShowMenu(item.show) },
       onSortOrderClickListener = { section, order, type -> openSortOrderDialog(section, order, type) },
-      onTypeClickListener = { navigateToSafe(R.id.actionFollowedShowsFragmentToMyShowsFilters) },
+      onTypeClickListener = viewModel::toggleSectionType,
       onNetworksClickListener = ::openNetworksDialog,
       onGenresClickListener = ::openGenresDialog,
       missingImageListener = { item, force -> viewModel.loadMissingImage(item as MyShowsItem, force) },
