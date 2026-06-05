@@ -4,8 +4,10 @@ import com.michaldrabik.common.dispatchers.CoroutineDispatchers
 import com.michaldrabik.common.extensions.toMillis
 import com.michaldrabik.data_local.LocalDataSource
 import com.michaldrabik.data_local.utilities.TransactionsProvider
+import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.repository.mappers.Mappers
+import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
 import com.michaldrabik.ui_base.notifications.AnnouncementManager
 import com.michaldrabik.ui_model.Episode
@@ -23,10 +25,12 @@ import com.michaldrabik.data_local.database.model.Season as SeasonDb
 class ShowDetailsMyShowsCase @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
   private val localSource: LocalDataSource,
+  private val remoteSource: RemoteDataSource,
   private val mappers: Mappers,
   private val transactions: TransactionsProvider,
   private val showsRepository: ShowsRepository,
   private val pinnedItemsRepository: PinnedItemsRepository,
+  private val settingsRepository: SettingsRepository,
   private val announcementManager: AnnouncementManager,
 ) {
 
@@ -49,6 +53,19 @@ class ShowDetailsMyShowsCase @Inject constructor(
     seasons: List<Season>,
     episodes: List<Episode>,
   ) = withContext(dispatchers.IO) {
+    val showSpecials = settingsRepository.load().specialSeasonsEnabled
+
+    val (finalSeasons, finalEpisodes) = if (seasons.isEmpty()) {
+      val remoteSeasons = remoteSource.trakt
+        .fetchSeasons(show.traktId)
+        .map { mappers.season.fromNetwork(it) }
+        .filter { it.episodes.isNotEmpty() }
+        .filter { if (!showSpecials) !it.isSpecial() else true }
+      Pair(remoteSeasons, remoteSeasons.flatMap { it.episodes })
+    } else {
+      Pair(seasons, episodes)
+    }
+
     transactions.withTransaction {
       val localSeasons = localSource.seasons.getAllByShowId(show.traktId)
       val localEpisodes = localSource.episodes.getAllByShowId(show.traktId)
@@ -59,14 +76,14 @@ class ShowDetailsMyShowsCase @Inject constructor(
       val seasonsToAdd = mutableListOf<SeasonDb>()
       val episodesToAdd = mutableListOf<EpisodeDb>()
 
-      seasons.forEach { season ->
+      finalSeasons.forEach { season ->
         if (localSeasons.none { it.idTrakt == season.ids.trakt.id }) {
           seasonsToAdd.add(mappers.season.toDatabase(season, show.ids.trakt, false))
         }
       }
-      episodes.forEach { episode ->
+      finalEpisodes.forEach { episode ->
         if (localEpisodes.none { it.idTrakt == episode.ids.trakt.id }) {
-          val season = seasons.find { it.number == episode.season }!!
+          val season = finalSeasons.find { it.number == episode.season }!!
           episodesToAdd.add(mappers.episode.toDatabase(episode, season, show.ids.trakt, false, null, null))
         }
       }

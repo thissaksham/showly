@@ -10,6 +10,8 @@ import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContex
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuPinnedCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.cases.ShowContextMenuWatchlistCase
 import com.michaldrabik.ui_base.common.sheets.context_menu.show.helpers.ShowContextItem
+import com.michaldrabik.ui_base.events.EventsManager
+import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.utilities.events.Event
 import com.michaldrabik.ui_base.utilities.events.FinishUiEvent
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
@@ -39,6 +41,7 @@ class ShowContextMenuViewModel @Inject constructor(
   private val pinnedCase: ShowContextMenuPinnedCase,
   private val onHoldCase: OnHoldItemsRepository,
   private val imagesProvider: ShowImagesProvider,
+  private val eventsManager: EventsManager,
 ) : ViewModel() {
 
   var showIdValue: Long = -1L
@@ -75,6 +78,7 @@ class ShowContextMenuViewModel @Inject constructor(
       try {
         myShowsCase.moveToMyShows(IdTrakt(showIdValue))
         loadShow(IdTrakt(showIdValue))
+        eventsManager.sendEvent(ReloadData)
       } catch (e: Throwable) {
         onError(e)
       } finally {
@@ -89,6 +93,7 @@ class ShowContextMenuViewModel @Inject constructor(
       try {
         myShowsCase.removeFromMyShows(IdTrakt(showIdValue), false)
         loadShow(IdTrakt(showIdValue))
+        eventsManager.sendEvent(ReloadData)
       } catch (e: Throwable) {
         onError(e)
       } finally {
@@ -103,6 +108,7 @@ class ShowContextMenuViewModel @Inject constructor(
       try {
         watchlistCase.moveToWatchlist(IdTrakt(showIdValue), false)
         loadShow(IdTrakt(showIdValue))
+        eventsManager.sendEvent(ReloadData)
       } catch (e: Throwable) {
         onError(e)
       } finally {
@@ -117,6 +123,7 @@ class ShowContextMenuViewModel @Inject constructor(
       try {
         watchlistCase.removeFromWatchlist(IdTrakt(showIdValue))
         loadShow(IdTrakt(showIdValue))
+        eventsManager.sendEvent(ReloadData)
       } catch (e: Throwable) {
         onError(e)
       } finally {
@@ -131,6 +138,7 @@ class ShowContextMenuViewModel @Inject constructor(
       try {
         droppedCase.moveToDropped(IdTrakt(showIdValue), false)
         loadShow(IdTrakt(showIdValue))
+        eventsManager.sendEvent(ReloadData)
       } catch (e: Throwable) {
         onError(e)
       } finally {
@@ -145,6 +153,7 @@ class ShowContextMenuViewModel @Inject constructor(
       try {
         droppedCase.removeFromDropped(IdTrakt(showIdValue))
         loadShow(IdTrakt(showIdValue))
+        eventsManager.sendEvent(ReloadData)
       } catch (e: Throwable) {
         onError(e)
       } finally {
@@ -157,6 +166,7 @@ class ShowContextMenuViewModel @Inject constructor(
     viewModelScope.launch {
       pinnedCase.addToTopPinned(IdTrakt(showIdValue))
       loadShow(IdTrakt(showIdValue))
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
@@ -164,6 +174,7 @@ class ShowContextMenuViewModel @Inject constructor(
     viewModelScope.launch {
       pinnedCase.removeFromTopPinned(IdTrakt(showIdValue))
       loadShow(IdTrakt(showIdValue))
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
@@ -171,6 +182,7 @@ class ShowContextMenuViewModel @Inject constructor(
     viewModelScope.launch {
       onHoldCase.addItem(IdTrakt(showIdValue))
       loadShow(IdTrakt(showIdValue))
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
@@ -178,6 +190,7 @@ class ShowContextMenuViewModel @Inject constructor(
     viewModelScope.launch {
       onHoldCase.removeItem(Show.EMPTY.copy(ids = Ids.EMPTY.copy(trakt = IdTrakt(showIdValue))))
       loadShow(IdTrakt(showIdValue))
+      eventsManager.sendEvent(ReloadData)
     }
   }
 

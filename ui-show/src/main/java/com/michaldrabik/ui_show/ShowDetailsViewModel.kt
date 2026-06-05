@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
+import com.michaldrabik.ui_base.events.EventsManager
+import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.utilities.events.Event
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
@@ -47,6 +49,7 @@ class ShowDetailsViewModel @Inject constructor(
   private val settingsRepository: SettingsRepository,
   private val seasonsCache: SeasonsCache,
   private val imagesProvider: ShowImagesProvider,
+  private val eventsManager: EventsManager,
 ) : ViewModel() {
 
   lateinit var show: Show
@@ -137,6 +140,7 @@ class ShowDetailsViewModel @Inject constructor(
       myShowsCase.addToMyShows(show, emptyList(), emptyList())
       followedState.value = followedState.value?.copy(isMyShows = true, isWatchlist = false, isDropped = false)
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToMyShows))
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
@@ -145,6 +149,7 @@ class ShowDetailsViewModel @Inject constructor(
       watchlistCase.addToWatchlist(show)
       followedState.value = followedState.value?.copy(isWatchlist = true, isMyShows = false, isDropped = false)
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToWatchlist))
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
@@ -153,6 +158,7 @@ class ShowDetailsViewModel @Inject constructor(
       droppedCase.addToDropped(show, false)
       followedState.value = followedState.value?.copy(isDropped = true, isMyShows = false, isWatchlist = false)
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToDropped))
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
@@ -176,6 +182,7 @@ class ShowDetailsViewModel @Inject constructor(
           messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textRemovedFromDropped))
         }
       }
+      eventsManager.sendEvent(ReloadData)
     }
   }
 
