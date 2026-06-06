@@ -5,7 +5,7 @@ import android.content.Context.MODE_PRIVATE
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-const val DATABASE_VERSION = 42
+const val DATABASE_VERSION = 43
 const val DATABASE_NAME = "SHOWLY2_DB_2"
 
 class Migrations(
@@ -778,6 +778,35 @@ class Migrations(
     }
   }
 
+  private val migration42 = object : Migration(41, 42) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+      // Version 42 was previously set but might not have had a specific migration logic in this file or was handled by Room.
+      // Keeping it for version continuity.
+    }
+  }
+
+  private val migration43 = object : Migration(42, 43) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+      with(database) {
+        val now = System.currentTimeMillis()
+        // Find shows that have watched episodes but are NOT in My Shows, Watchlist, or Archive (Dropped)
+        // and insert them into shows_my_shows.
+        execSQL(
+          """
+          INSERT INTO shows_my_shows (id_trakt, created_at, updated_at, last_watched_at)
+          SELECT DISTINCT id_show_trakt, $now, $now, MAX(last_watched_at)
+          FROM episodes
+          WHERE is_watched = 1
+          AND id_show_trakt NOT IN (SELECT id_trakt FROM shows_my_shows)
+          AND id_show_trakt NOT IN (SELECT id_trakt FROM shows_see_later)
+          AND id_show_trakt NOT IN (SELECT id_trakt FROM shows_archive)
+          GROUP BY id_show_trakt
+          """.trimIndent(),
+        )
+      }
+    }
+  }
+
   fun getAll() =
     listOf(
       migration2,
@@ -820,5 +849,7 @@ class Migrations(
       migration39,
       migration40,
       migration41,
+      migration42,
+      migration43,
     )
 }

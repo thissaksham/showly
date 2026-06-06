@@ -16,3 +16,4 @@ ktlint2.jar
 /app/firebase-service-key.json
 /app/gpp-services-key.json
 /app/release/
+.artifacts/
