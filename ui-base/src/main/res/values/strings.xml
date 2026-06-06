@@ -13,7 +13,7 @@
   <string name="textNew">New</string>
   <string name="textSelect">Select</string>
   <string name="textSubmit">Submit</string>
-  <string name="textHide">Drop</string>
+  <string name="textDrop">Drop</string>
   <string name="textRemove">Remove</string>
   <string name="textEmptyResults">There were no results…</string>
   <string name="textSearchFor">Search</string>

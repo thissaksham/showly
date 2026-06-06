@@ -125,7 +125,7 @@ class ShowContextMenuBottomSheet : ContextMenuBottomSheet() {
       if (!item.isInCollection()) {
         contextMenuItemMoveToMyButton.text = getString(R.string.textAddToMyShows)
         contextMenuItemMoveToWatchlistButton.text = getString(R.string.textAddedToWatchlist)
-        contextMenuItemMoveToDroppedButton.text = getString(R.string.textHide)
+        contextMenuItemMoveToDroppedButton.text = getString(R.string.textDrop)
       }
     }
   }

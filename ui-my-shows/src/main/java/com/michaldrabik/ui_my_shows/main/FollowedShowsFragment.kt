@@ -240,7 +240,7 @@ class FollowedShowsFragment :
       }
       clearFragmentResultListener(REQUEST_ITEM_MENU)
     }
-    val bundle = ContextMenuBottomSheet.createBundle(show.ids.trakt)
+    val bundle = ContextMenuBottomSheet.createBundle(show.ids.trakt, showPinButtons = true)
     navigateToSafe(R.id.actionFollowedShowsFragmentToItemMenu, bundle)
   }
 
