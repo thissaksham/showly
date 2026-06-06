@@ -55,10 +55,10 @@ class CollectionMovieFiltersView : FrameLayout {
       followedMoviesSortingChip.text = context.getText(item.sortOrder.displayString)
       followedMoviesUpcomingChip.isChecked = item.upcoming.isActive()
       followedMoviesUpcomingChip.text = when (item.upcoming) {
-        UpcomingFilter.OFF -> context.getString(R.string.textWatchlistIncoming)
+        UpcomingFilter.OFF -> context.getString(R.string.textHeaderAll)
         UpcomingFilter.UPCOMING -> context.getString(R.string.textWatchlistIncoming)
         UpcomingFilter.FINISHED -> context.getString(R.string.textMovieStatusReleased)
-        UpcomingFilter.ONGOING -> context.getString(R.string.textWatchlistIncoming) // Defaulting to something for movies
+        UpcomingFilter.ONGOING -> context.getString(R.string.textWatchlistIncoming)
       }
 
       followedMoviesGenresChip.isSelected = item.genres.isNotEmpty()

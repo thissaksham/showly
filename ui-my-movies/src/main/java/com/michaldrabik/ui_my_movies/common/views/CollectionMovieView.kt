@@ -77,7 +77,11 @@ class CollectionMovieView : MovieView<CollectionListItem.MovieItem> {
       bindRating(item)
 
       val releaseDate = item.movie.released
-      val isUpcoming = releaseDate?.let { it.toEpochDay() > nowUtc.toEpochDay() } ?: false
+      val isUpcoming = if (releaseDate != null) {
+        releaseDate.toEpochDay() > nowUtc.toEpochDay()
+      } else {
+        item.movie.year >= nowUtc.year || item.movie.year <= 0
+      }
 
       with(collectionMovieYear) {
         when {
@@ -97,8 +101,10 @@ class CollectionMovieView : MovieView<CollectionListItem.MovieItem> {
 
       with(collectionMovieReleaseDate) {
         visibleIf(isUpcoming)
-        releaseDate?.let {
-          text = item.fullDateFormat.format(it)?.capitalizeWords()
+        text = if (releaseDate != null) {
+          item.fullDateFormat.format(releaseDate)?.capitalizeWords()
+        } else {
+          context.getString(com.michaldrabik.ui_base.R.string.textTba)
         }
       }
 

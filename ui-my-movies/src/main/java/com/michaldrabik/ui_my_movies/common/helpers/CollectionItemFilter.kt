@@ -22,7 +22,7 @@ class CollectionItemFilter @Inject constructor() {
       UpcomingFilter.UPCOMING -> {
         val nowUtcDay = nowUtcDay()
         val isUpcomingDay = releasedAt != null && releasedAt.toEpochDay() > nowUtcDay.toEpochDay()
-        val isUpcomingYear = releasedAt == null && item.movie.year > nowUtcDay.year
+        val isUpcomingYear = releasedAt == null && (item.movie.year >= nowUtcDay.year || item.movie.year <= 0)
         isUpcomingDay || isUpcomingYear
       }
       UpcomingFilter.FINISHED -> {

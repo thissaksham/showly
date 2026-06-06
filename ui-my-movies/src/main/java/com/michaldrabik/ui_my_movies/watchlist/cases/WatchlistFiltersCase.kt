@@ -15,7 +15,7 @@ class WatchlistFiltersCase @Inject constructor(
     settingsRepository.filters.watchlistMoviesUpcoming = when (current) {
       UpcomingFilter.OFF -> UpcomingFilter.UPCOMING
       UpcomingFilter.UPCOMING -> UpcomingFilter.FINISHED
-      UpcomingFilter.FINISHED -> UpcomingFilter.ONGOING
+      UpcomingFilter.FINISHED -> UpcomingFilter.OFF
       UpcomingFilter.ONGOING -> UpcomingFilter.OFF
     }
   }

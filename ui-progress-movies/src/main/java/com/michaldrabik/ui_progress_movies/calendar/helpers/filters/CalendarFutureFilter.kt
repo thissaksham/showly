@@ -11,5 +11,5 @@ class CalendarFutureFilter @Inject constructor() : CalendarFilter {
   override fun filter(
     now: ZonedDateTime,
     movie: Movie,
-  ) = movie.released?.isAfter(now.toLocalDate()) == true || movie.released?.isEqual(now.toLocalDate()) == true
+  ) = movie.released == null || movie.released?.isAfter(now.toLocalDate()) == true || movie.released?.isEqual(now.toLocalDate()) == true
 }

@@ -6,5 +6,5 @@ import javax.inject.Singleton
 
 @Singleton
 class CalendarFutureSorter @Inject constructor() : CalendarSorter {
-  override fun sort() = compareBy<Movie> { it.released }.thenBy { it.year }
+  override fun sort() = compareBy<Movie, java.time.LocalDate?>(nullsLast()) { it.released }.thenBy { it.year }
 }
