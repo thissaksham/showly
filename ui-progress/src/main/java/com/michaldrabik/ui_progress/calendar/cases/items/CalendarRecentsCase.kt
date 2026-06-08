@@ -3,6 +3,7 @@ package com.michaldrabik.ui_progress.calendar.cases.items
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
 import com.michaldrabik.data_local.LocalDataSource
 import com.michaldrabik.data_local.database.model.Episode
+import com.michaldrabik.repository.OnHoldItemsRepository
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.mappers.Mappers
@@ -28,6 +29,7 @@ class CalendarRecentsCase @Inject constructor(
   imagesProvider: ShowImagesProvider,
   dateFormatProvider: DateFormatProvider,
   watchlistAppender: WatchlistAppender,
+  onHoldItemsRepository: OnHoldItemsRepository,
   override val filter: CalendarRecentsFilter,
   override val grouper: CalendarRecentsGrouper,
 ) : CalendarItemsCase(
@@ -41,6 +43,7 @@ class CalendarRecentsCase @Inject constructor(
     imagesProvider,
     dateFormatProvider,
     watchlistAppender,
+    onHoldItemsRepository,
   ) {
 
   override fun sortEpisodes() =

@@ -8,5 +8,7 @@ interface CalendarFilter {
     now: ZonedDateTime,
     episode: Episode,
     onlyPremieres: Boolean,
+    isWatchlist: Boolean,
+    isOnHold: Boolean,
   ): Boolean
 }

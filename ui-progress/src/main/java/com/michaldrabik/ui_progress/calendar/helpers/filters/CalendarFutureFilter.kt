@@ -15,9 +15,12 @@ class CalendarFutureFilter @Inject constructor() : CalendarFilter {
     now: ZonedDateTime,
     episode: Episode,
     onlyPremieres: Boolean,
+    isWatchlist: Boolean,
+    isOnHold: Boolean,
   ): Boolean {
     val dateDays = episode.firstAired?.toLocalZone()?.truncatedTo(DAYS)
-    val isPremiere = if (onlyPremieres) episode.episodeNumber == 1 else true
+    val forcePremiere = onlyPremieres || isWatchlist || isOnHold
+    val isPremiere = if (forcePremiere) episode.episodeNumber == 1 else true
 
     return episode.seasonNumber != 0 &&
       isPremiere &&

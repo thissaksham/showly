@@ -7,6 +7,7 @@ import com.michaldrabik.common.extensions.toLocalZone
 import com.michaldrabik.data_local.LocalDataSource
 import com.michaldrabik.data_local.database.model.Episode
 import com.michaldrabik.data_local.database.model.Season
+import com.michaldrabik.repository.OnHoldItemsRepository
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.mappers.Mappers
@@ -40,6 +41,7 @@ abstract class CalendarItemsCase(
   private val imagesProvider: ShowImagesProvider,
   private val dateFormatProvider: DateFormatProvider,
   private val watchlistAppender: WatchlistAppender,
+  private val onHoldItemsRepository: OnHoldItemsRepository,
 ) {
 
   abstract val filter: CalendarFilter
@@ -62,6 +64,7 @@ abstract class CalendarItemsCase(
       val dateFormat = dateFormatProvider.loadFullHourFormat()
       val spoilers = spoilersRepository.getAll()
       val premieresOnly = filtersRepository.calendarPremieresOnly
+      val onHoldShowsIds = onHoldItemsRepository.getAll().map { it.id }
 
       val (myShows, watchlistShows) = coroutineScope {
         val async1 = async { showsRepository.myShows.loadAll() }
@@ -99,7 +102,11 @@ abstract class CalendarItemsCase(
       )
 
       val elements = filteredEpisodes
-        .filter { filter.filter(now, it, premieresOnly) }
+        .filter { episode ->
+          val isWatchlist = episode.idShowTrakt in watchlistShowsIds
+          val isOnHold = episode.idShowTrakt in onHoldShowsIds
+          filter.filter(now, episode, premieresOnly, isWatchlist, isOnHold)
+        }
         .sortedWith(sortEpisodes())
         .map { episode ->
           async {
