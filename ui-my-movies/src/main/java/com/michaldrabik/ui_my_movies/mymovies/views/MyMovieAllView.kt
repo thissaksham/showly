@@ -96,6 +96,7 @@ class MyMovieAllView : MovieView<MyMoviesItem> {
       val isUnknownDate = item.movie.updatedAt == null || item.movie.updatedAt == 0L
       collectionMovieReleaseDate.visibleIf(!isUnknownDate)
       if (!isUnknownDate) {
+        collectionMovieReleaseDate.setCompoundDrawablesRelativeWithIntrinsicBounds(com.michaldrabik.ui_base.R.drawable.ic_check, 0, 0, 0)
         val date = com.michaldrabik.common.extensions.dateFromMillis(item.movie.updatedAt!!).toLocalZone()
         collectionMovieReleaseDate.text = item.dateFormat?.format(date)?.capitalizeWords()
       }

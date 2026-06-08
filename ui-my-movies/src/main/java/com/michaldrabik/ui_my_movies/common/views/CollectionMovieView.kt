@@ -101,6 +101,7 @@ class CollectionMovieView : MovieView<CollectionListItem.MovieItem> {
 
       with(collectionMovieReleaseDate) {
         visibleIf(isUpcoming)
+        setCompoundDrawablesRelativeWithIntrinsicBounds(com.michaldrabik.ui_base.R.drawable.ic_clock_small, 0, 0, 0)
         text = if (releaseDate != null) {
           item.fullDateFormat.format(releaseDate)?.capitalizeWords()
         } else {
