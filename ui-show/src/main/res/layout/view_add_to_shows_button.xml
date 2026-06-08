@@ -54,6 +54,7 @@
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_gravity="center"
     android:orientation="horizontal"
     >
 
@@ -75,6 +76,18 @@
       app:iconTint="?attr/colorAccent"
       app:rippleColor="?attr/colorAccent"
       app:strokeColor="?attr/colorAccent"
+      tools:visibility="visible"
+      />
+
+    <ImageButton
+      android:id="@+id/checkButton"
+      android:layout_width="48dp"
+      android:layout_height="48dp"
+      android:layout_marginStart="8dp"
+      android:background="?android:attr/selectableItemBackgroundBorderless"
+      android:visibility="gone"
+      app:srcCompat="@drawable/ic_check_big"
+      app:tint="?android:textColorPrimary"
       tools:visibility="visible"
       />
 

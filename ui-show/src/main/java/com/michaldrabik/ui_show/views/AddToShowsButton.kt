@@ -39,6 +39,9 @@ class AddToShowsButton : FrameLayout {
       addedToButton.onClick {
         if (!isAnimating) onRemoveClickListener?.invoke()
       }
+      checkButton.onClick {
+        if (!isAnimating) onAddMyShowsClickListener?.invoke()
+      }
     }
   }
 
@@ -56,6 +59,7 @@ class AddToShowsButton : FrameLayout {
     with(binding) {
       when (state) {
         State.ADD -> {
+          checkButton.fadeOut(duration, withHardware = true)
           addedToButton.fadeOut(duration, withHardware = true)
           addToMyShowsButton.fadeIn(duration, startDelay = startDelay, withHardware = true)
           watchlistButton.fadeIn(duration, startDelay = startDelay, withHardware = true) { isAnimating = false }
@@ -64,6 +68,7 @@ class AddToShowsButton : FrameLayout {
           val color = context.colorFromAttr(R.attr.colorAccent)
           val colorState = context.colorStateListFromAttr(R.attr.colorAccent)
 
+          checkButton.fadeOut(duration, withHardware = true)
           addToMyShowsButton.fadeOut(duration, withHardware = true)
           watchlistButton.fadeOut(duration, withHardware = true)
           addedToButton.run {
@@ -82,6 +87,7 @@ class AddToShowsButton : FrameLayout {
 
           addToMyShowsButton.fadeOut(duration, withHardware = true)
           watchlistButton.fadeOut(duration, withHardware = true)
+          checkButton.fadeIn(duration, startDelay = startDelay, withHardware = true)
           addedToButton.run {
             setIconResource(R.drawable.ic_bookmark_full)
             setText(R.string.textInWatchlist)
@@ -94,6 +100,7 @@ class AddToShowsButton : FrameLayout {
         }
         State.IN_DROPPED -> {
           val delay = if (addToMyShowsButton.isVisible) startDelay else 0
+          checkButton.fadeOut(duration, withHardware = true)
           addToMyShowsButton.fadeOut(duration, withHardware = true)
           watchlistButton.fadeOut(duration, withHardware = true)
           with(addedToButton) {
@@ -122,6 +129,8 @@ class AddToShowsButton : FrameLayout {
       watchlistButton.isClickable = enabled
       addedToButton.isEnabled = enabled
       addedToButton.isClickable = enabled
+      checkButton.isEnabled = enabled
+      checkButton.isClickable = enabled
     }
   }
 
