@@ -16,6 +16,7 @@ import com.michaldrabik.ui_model.ImageType
 import com.michaldrabik.ui_model.Movie
 import com.michaldrabik.ui_model.SortOrder
 import com.michaldrabik.ui_model.SortType
+import com.michaldrabik.ui_progress_movies.main.MovieCheckActionUiEvent
 import com.michaldrabik.ui_progress_movies.main.ProgressMoviesMainUiState
 import com.michaldrabik.ui_progress_movies.progress.cases.ProgressMoviesItemsCase
 import com.michaldrabik.ui_progress_movies.progress.cases.ProgressMoviesPinnedCase
@@ -63,7 +64,9 @@ class ProgressMoviesViewModel @Inject constructor(
   }
 
   fun onMovieChecked(movie: Movie) {
-    // No-op for now.
+    viewModelScope.launch {
+      eventChannel.send(MovieCheckActionUiEvent(movie, settingsRepository.progressDateSelectionType))
+    }
   }
 
   fun loadItems(force: Boolean = false) {
