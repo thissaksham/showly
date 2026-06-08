@@ -93,10 +93,9 @@ class MyMovieAllView : MovieView<MyMoviesItem> {
         collectionMovieRuntime.text = "${item.movie.runtime} ${context.getString(R.string.textMinutesShort)}"
       }
 
-      val isHistory = item.sortOrder == SortOrder.DATE_ADDED
       val isUnknownDate = item.movie.updatedAt == null || item.movie.updatedAt == 0L
-      collectionMovieReleaseDate.visibleIf(isHistory && !isUnknownDate)
-      if (isHistory && !isUnknownDate) {
+      collectionMovieReleaseDate.visibleIf(!isUnknownDate)
+      if (!isUnknownDate) {
         val date = com.michaldrabik.common.extensions.dateFromMillis(item.movie.updatedAt!!).toLocalZone()
         collectionMovieReleaseDate.text = item.dateFormat?.format(date)?.capitalizeWords()
       }

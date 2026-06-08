@@ -201,7 +201,7 @@
       android:textColor="?android:attr/textColorPrimary"
       android:textSize="13sp"
       android:visibility="gone"
-      app:drawableStartCompat="@drawable/ic_check"
+      app:drawableStartCompat="@drawable/ic_clock_small"
       app:drawableTint="?android:attr/textColorPrimary"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintStart_toEndOf="@id/collectionMovieImage"
