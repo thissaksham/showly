@@ -10,6 +10,7 @@ enum class MovieLink {
   METACRITIC,
   ROTTEN,
   JUST_WATCH,
+  MOCTALE,
   ;
 
   fun getUri(
@@ -34,6 +35,9 @@ enum class MovieLink {
     JUST_WATCH -> {
       "https://www.justwatch.com/${country.code}/${country.justWatchQuery}" +
         "?content_type=movie&q=${Uri.encode(id)}"
+    }
+    MOCTALE -> {
+      id
     }
   }
 }

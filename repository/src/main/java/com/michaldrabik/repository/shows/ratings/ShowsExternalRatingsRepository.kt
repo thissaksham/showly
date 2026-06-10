@@ -22,18 +22,30 @@ class ShowsExternalRatingsRepository @Inject constructor(
     val localRatings = localSource.showRatings.getById(show.traktId)
     localRatings?.let {
       if (nowUtcMillis() - it.updatedAt < ConfigVariant.RATINGS_CACHE_DURATION) {
-        return mappers.ratings.fromDatabase(it)
+        return mappers.ratings.fromDatabase(it).copy(moctaleUrl = show.generateMoctaleId())
       }
     }
 
     val remoteRatings = remoteSource.omdb
       .fetchOmdbData(show.ids.imdb.id)
       .let { mappers.ratings.fromNetwork(it) }
-      .copy(trakt = Ratings.Value(String.format(Locale.ENGLISH, "%.1f", show.rating), false))
+      .copy(
+        trakt = Ratings.Value(String.format(Locale.ENGLISH, "%.1f", show.rating), false),
+        moctaleUrl = show.generateMoctaleId()
+      )
 
     val dbRatings = mappers.ratings.toShowDatabase(show.ids.trakt, remoteRatings)
     localSource.showRatings.upsert(dbRatings)
 
     return remoteRatings
+  }
+
+  private fun Show.generateMoctaleId(): String {
+    val slug = title.lowercase()
+      .replace("'", "") // Remove apostrophes (e.g. Widow's -> widows)
+      .replace(Regex("[^a-z0-9]"), "-")
+      .replace(Regex("-+"), "-")
+      .trim('-')
+    return "https://www.moctale.in/content/$slug-$year"
   }
 }

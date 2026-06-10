@@ -2,7 +2,9 @@ package com.michaldrabik.ui_movie.sections.ratings
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.michaldrabik.ui_base.BaseFragment
 import com.michaldrabik.ui_base.common.AppCountry
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
@@ -11,6 +13,7 @@ import com.michaldrabik.ui_base.utilities.extensions.openImdbUrl
 import com.michaldrabik.ui_base.utilities.extensions.openWebUrl
 import com.michaldrabik.ui_base.utilities.viewBinding
 import com.michaldrabik.ui_model.IdImdb
+import com.michaldrabik.ui_navigation.java.NavigationArgs
 import com.michaldrabik.ui_movie.MovieDetailsViewModel
 import com.michaldrabik.ui_movie.R
 import com.michaldrabik.ui_movie.databinding.FragmentMovieDetailsRatingsBinding
@@ -57,6 +60,14 @@ class MovieDetailsRatingsFragment :
                 openWebUrl(url) ?: openMovieLink(MovieLink.ROTTEN, "${movie.title} ${movie.year}")
               } else {
                 openMovieLink(MovieLink.ROTTEN, "${movie.title} ${movie.year}")
+              }
+            }
+            movieDetailsRatings.onMoctaleClick = {
+              it.moctaleUrl?.let { url ->
+                findNavController().navigate(
+                  R.id.moctaleMeterDialog,
+                  bundleOf(NavigationArgs.ARG_URL to url)
+                )
               }
             }
           }

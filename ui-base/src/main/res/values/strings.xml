@@ -150,4 +150,9 @@
   <string name="errorNoInternetConnection">No Internet. Please check your connection.</string>
   <string name="errorCouldNotFindApp" translatable="false">Sorry, we could not find app on this device that could handle this link.</string>
 
+  <string name="textMoctale">Moctale</string>
+  <string name="textMoctaleMeter">Moctale Meter</string>
+  <string name="textMoctaleLoginPrompt">Login to Moctale to view the Meter</string>
+  <string name="textLogin">Login</string>
+
 </resources>

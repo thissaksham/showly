@@ -41,6 +41,7 @@ class MovieDetailsRatingsViewModel @Inject constructor(
         imdb = Ratings.Value(null, true),
         metascore = Ratings.Value(null, true),
         rottenTomatoes = Ratings.Value(null, true),
+        moctaleUrl = generateMoctaleId(movie)
       )
 
       try {
@@ -80,4 +81,13 @@ class MovieDetailsRatingsViewModel @Inject constructor(
     started = SharingStarted.WhileSubscribed(SUBSCRIBE_STOP_TIMEOUT),
     initialValue = MovieDetailsRatingsUiState(),
   )
+
+  private fun generateMoctaleId(movie: Movie): String {
+    val slug = movie.title.lowercase()
+      .replace("'", "") // Remove apostrophes (e.g. Widow's -> widows)
+      .replace(Regex("[^a-z0-9]"), "-")
+      .replace(Regex("-+"), "-")
+      .trim('-')
+    return "https://www.moctale.in/content/$slug-${movie.year}"
+  }
 }

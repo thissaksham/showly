@@ -36,6 +36,7 @@ swiperefreshlayout = "1.2.0"
 timber = "5.0.1"
 truth = "1.4.5"
 work-runtime-ktx = "2.11.2"
+jsoup = "1.18.3"
 
 googleAuth = "21.6.0"
 googleDrive = "v3-rev20241027-2.0.0"
@@ -95,6 +96,7 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 circleIndicator = { group = "me.relex", name = "circleindicator", version.ref = "circleindicator" }
 loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "logging-interceptor" }
 overscrollDecor = { group = "io.github.everythingme", name = "overscroll-decor-android", version.ref = "overscroll-decor" }
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 
 # Testing
 junit = { group = "org.junit.vintage", name = "junit-vintage-engine", version.ref = "junit" }

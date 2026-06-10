@@ -28,6 +28,7 @@ class RatingsStripView : LinearLayout {
   var onImdbClick: ((Ratings) -> Unit)? = null
   var onMetaClick: ((Ratings) -> Unit)? = null
   var onRottenClick: ((Ratings) -> Unit)? = null
+  var onMoctaleClick: ((Ratings) -> Unit)? = null
 
   private val colorPrimary by lazy { context.colorFromAttr(android.R.attr.textColorPrimary) }
   private val colorSecondary by lazy { context.colorFromAttr(android.R.attr.textColorSecondary) }
@@ -41,6 +42,7 @@ class RatingsStripView : LinearLayout {
   }
 
   fun bind(ratings: Ratings) {
+    if (this::ratings.isInitialized && this.ratings == ratings) return
     this.ratings = ratings
     with(binding) {
       bindValue(
@@ -83,6 +85,16 @@ class RatingsStripView : LinearLayout {
         isTapToReveal = ratings.isTapToReveal,
         callback = onRottenClick,
       )
+      bindValue(
+        ratingsValue = if (ratings.moctaleUrl != null) Ratings.Value("", false) else null,
+        layoutView = viewRatingsStripMoctale!!,
+        valueView = viewRatingsStripMoctaleValue!!,
+        progressView = viewRatingsStripMoctaleProgress!!,
+        linkView = viewRatingsStripMoctaleLinkIcon!!,
+        isHidden = false,
+        isTapToReveal = false,
+        callback = { onMoctaleClick?.invoke(it) },
+      )
     }
   }
 
@@ -110,19 +122,12 @@ class RatingsStripView : LinearLayout {
     }
 
     with(layoutView) {
-      if (isHidden && isTapToReveal && !rating.isNullOrBlank()) {
-        onClick {
-          valueView.tag?.let { valueView.text = it.toString() }
-          onClick {
-            if (!ratings.isAnyLoading()) {
-              callback?.invoke(ratings)
-            }
-          }
-        }
-      } else {
-        onClick {
-          if (!ratings.isAnyLoading()) {
-            callback?.invoke(ratings)
+      onClick {
+        if (!this@RatingsStripView.ratings.isAnyLoading()) {
+          if (isHidden && isTapToReveal && !rating.isNullOrBlank() && valueView.text == SPOILERS_RATINGS_HIDE_SYMBOL) {
+            valueView.tag?.let { valueView.text = it.toString() }
+          } else {
+            callback?.invoke(this@RatingsStripView.ratings)
           }
         }
       }

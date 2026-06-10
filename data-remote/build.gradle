@@ -57,6 +57,8 @@ android {
 }
 
 dependencies {
+  implementation project(':common')
+  implementation project(':ui-model')
   api libs.retrofit
   api libs.retrofit.moshi
   api libs.loggingInterceptor
@@ -64,6 +66,7 @@ dependencies {
   implementation libs.moshi
   implementation libs.coroutines
   implementation libs.timber
+  implementation libs.jsoup
 
   implementation libs.hilt.android
   ksp libs.hilt.compiler

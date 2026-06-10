@@ -11,6 +11,7 @@ enum class ShowLink {
   METACRITIC,
   ROTTEN,
   JUST_WATCH,
+  MOCTALE,
   ;
 
   fun getUri(
@@ -41,6 +42,9 @@ enum class ShowLink {
           id,
         )
       }"
+    }
+    MOCTALE -> {
+      id
     }
   }
 }

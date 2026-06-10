@@ -2,7 +2,9 @@ package com.michaldrabik.ui_show.sections.ratings
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.michaldrabik.ui_base.BaseFragment
 import com.michaldrabik.ui_base.common.AppCountry
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
@@ -11,6 +13,7 @@ import com.michaldrabik.ui_base.utilities.extensions.openImdbUrl
 import com.michaldrabik.ui_base.utilities.extensions.openWebUrl
 import com.michaldrabik.ui_base.utilities.viewBinding
 import com.michaldrabik.ui_model.IdImdb
+import com.michaldrabik.ui_navigation.java.NavigationArgs
 import com.michaldrabik.ui_show.R
 import com.michaldrabik.ui_show.ShowDetailsViewModel
 import com.michaldrabik.ui_show.databinding.FragmentShowDetailsRatingsBinding
@@ -55,6 +58,14 @@ class ShowDetailsRatingsFragment : BaseFragment<ShowDetailsRatingsViewModel>(R.l
                 openWebUrl(url) ?: openLink(ShowLink.ROTTEN, "${show.title} ${show.year}")
               } else {
                 openLink(ShowLink.ROTTEN, "${show.title} ${show.year}")
+              }
+            }
+            showDetailsRatings.onMoctaleClick = {
+              it.moctaleUrl?.let { url ->
+                findNavController().navigate(
+                  R.id.moctaleMeterDialog,
+                  bundleOf(NavigationArgs.ARG_URL to url)
+                )
               }
             }
           }

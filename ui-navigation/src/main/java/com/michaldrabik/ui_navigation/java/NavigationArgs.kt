@@ -11,6 +11,7 @@ object NavigationArgs {
   const val ARG_PERSON_ARGS = "ARG_PERSON_ARGS"
   const val ARG_OPTIONS = "ARG_OPTIONS"
   const val ARG_TITLE = "ARG_TITLE"
+  const val ARG_URL = "ARG_URL"
   const val ARG_ITEM = "ARG_ITEM"
   const val ARG_QUERY = "ARG_QUERY"
 

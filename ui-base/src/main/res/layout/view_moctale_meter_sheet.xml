@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet_secondary"
+    android:padding="@dimen/spaceNormal">
+
+    <ImageView
+        android:id="@+id/moctaleMeterExternalLink"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:padding="4dp"
+        android:src="@drawable/ic_open_browser"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?android:attr/textColorSecondary" />
+
+    <TextView
+        android:id="@+id/moctaleMeterTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="@string/textMoctale"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/moctaleMeterExternalLink"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/moctaleMeterExternalLink" />
+
+    <WebView
+        android:id="@+id/moctaleMeterWebView"
+        android:layout_width="match_parent"
+        android:layout_height="380dp"
+        android:layout_marginTop="@dimen/spaceSmall"
+        android:background="@android:color/transparent"
+        android:visibility="invisible"
+        app:layout_constraintTop_toBottomOf="@id/moctaleMeterExternalLink" />
+
+    <ProgressBar
+        android:id="@+id/moctaleMeterProgress"
+        style="@style/ProgressBar.Accent"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        app:layout_constraintBottom_toBottomOf="@id/moctaleMeterWebView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/moctaleMeterWebView" />
+
+    <TextView
+        android:id="@+id/moctaleMeterErrorText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="@dimen/spaceBig"
+        android:text="Content not found on Moctale"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/moctaleMeterWebView"
+        app:layout_constraintTop_toTopOf="@id/moctaleMeterWebView" />
+
+    <LinearLayout
+        android:id="@+id/moctaleMeterLoginPrompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingVertical="@dimen/spaceBig"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/moctaleMeterExternalLink">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/textMoctaleLoginPrompt"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/moctaleMeterLoginButton"
+            style="@style/RoundMaterialButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spaceNormal"
+            android:text="@string/textLogin" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

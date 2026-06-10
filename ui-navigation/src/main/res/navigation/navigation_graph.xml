@@ -1051,4 +1051,10 @@
     android:label="dialogDateSelection"
     />
 
+  <dialog
+    android:id="@+id/moctaleMeterDialog"
+    android:name="com.michaldrabik.ui_base.common.sheets.moctale.MoctaleMeterBottomSheet"
+    android:label="dialogMoctaleMeter"
+    />
+
 </navigation>

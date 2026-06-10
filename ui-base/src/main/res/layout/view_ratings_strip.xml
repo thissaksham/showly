@@ -245,4 +245,62 @@
 
   </LinearLayout>
 
+  <LinearLayout
+    android:id="@+id/viewRatingsStripMoctale"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:background="?android:attr/selectableItemBackgroundBorderless"
+    android:gravity="center"
+    android:orientation="vertical"
+    >
+
+    <FrameLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="@dimen/spaceMicro"
+      >
+
+      <TextView
+        android:id="@+id/viewRatingsStripMoctaleValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="20sp"
+        />
+
+      <ProgressBar
+        android:id="@+id/viewRatingsStripMoctaleProgress"
+        style="@style/ProgressBar.Dark"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_gravity="center"
+        />
+
+      <ImageView
+        android:id="@+id/viewRatingsStripMoctaleLinkIcon"
+        android:layout_width="32dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:visibility="visible"
+        app:srcCompat="@drawable/ic_moctale_logo"
+        />
+
+    </FrameLayout>
+
+    <TextView
+      android:id="@+id/viewRatingsStripMoctaleLabel"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:gravity="center"
+      android:lineSpacingExtra="2dp"
+      android:text="Moctale"
+      android:textColor="?android:attr/textColorSecondary"
+      android:textSize="12sp"
+      tools:ignore="HardcodedText"
+      />
+
+  </LinearLayout>
+
 </merge>
