@@ -1,8 +1,12 @@
 package com.michaldrabik.data_remote.tmdb.api
 
 import com.michaldrabik.data_remote.tmdb.TmdbRemoteDataSource
+import com.michaldrabik.data_remote.tmdb.model.TmdbDiscovery
 import com.michaldrabik.data_remote.tmdb.model.TmdbImages
+import com.michaldrabik.data_remote.tmdb.model.TmdbMovieDetails
 import com.michaldrabik.data_remote.tmdb.model.TmdbPerson
+import com.michaldrabik.data_remote.tmdb.model.TmdbProductionCompany
+import com.michaldrabik.data_remote.tmdb.model.TmdbShowDetails
 import com.michaldrabik.data_remote.tmdb.model.TmdbStreamingCountry
 import com.michaldrabik.data_remote.tmdb.model.TmdbTranslation
 
@@ -83,6 +87,16 @@ internal class TmdbApi(
     }
     return result.results[code]
   }
+
+  override suspend fun fetchMovieDetails(tmdbId: Long) = service.fetchMovieDetails(tmdbId)
+
+  override suspend fun fetchShowDetails(tmdbId: Long) = service.fetchShowDetails(tmdbId)
+
+  override suspend fun fetchCompanyDetails(companyId: Long) = service.fetchCompanyDetails(companyId)
+
+  override suspend fun discoverMoviesByCompany(companyId: Long) = service.discoverMoviesByCompany(companyId)
+
+  override suspend fun discoverShowsByCompany(companyId: Long) = service.discoverShowsByCompany(companyId)
 
   override suspend fun fetchPersonDetails(id: Long): TmdbPerson = service.fetchPersonDetails(id)
 

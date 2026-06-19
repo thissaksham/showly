@@ -23,6 +23,7 @@ import com.michaldrabik.ui_movie.sections.ratings.cases.MovieDetailsRatingCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsTranslationCase
 import com.michaldrabik.ui_movie.cases.MovieDetailsWatchlistCase
 import com.michaldrabik.ui_movie.helpers.MovieDetailsMeta
+import com.michaldrabik.ui_model.IdTmdb
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.ImageType
@@ -81,7 +82,12 @@ class MovieDetailsViewModel @Inject constructor(
     viewModelScope.launch {
       movieLoadingState.value = true
       try {
-        val result = mainCase.loadDetails(movieId)
+        val targetId = if (movieId.id < 0) {
+          mainCase.resolveTraktId(-movieId.id)
+        } else {
+          movieId
+        }
+        val result = mainCase.loadDetails(targetId)
         movie = result
         movieState.value = result
         loadBackgroundImage(result)

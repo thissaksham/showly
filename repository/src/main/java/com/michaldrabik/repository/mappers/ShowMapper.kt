@@ -1,7 +1,10 @@
 package com.michaldrabik.repository.mappers
 
 import com.michaldrabik.common.extensions.nowUtcMillis
+import com.michaldrabik.data_remote.tmdb.model.TmdbDiscoveryItem
 import com.michaldrabik.ui_model.AirTime
+import com.michaldrabik.ui_model.IdTmdb
+import com.michaldrabik.ui_model.Ids
 import com.michaldrabik.ui_model.Show
 import com.michaldrabik.ui_model.ShowStatus
 import javax.inject.Inject
@@ -65,6 +68,30 @@ class ShowMapper @Inject constructor(
       show.commentCount,
       show.genres,
       show.airedEpisodes,
+    )
+
+  fun fromTmdbDiscovery(item: TmdbDiscoveryItem) =
+    Show(
+      ids = Ids.EMPTY.copy(tmdb = IdTmdb(item.id)),
+      title = item.name ?: "",
+      year = item.first_air_date?.take(4)?.toIntOrNull() ?: -1,
+      overview = item.overview ?: "",
+      firstAired = if (item.first_air_date.isNullOrBlank()) "" else "${item.first_air_date}T00:00:00Z",
+      runtime = -1,
+      airTime = AirTime(day = "", time = "", timezone = ""),
+      certification = "",
+      network = "",
+      country = "",
+      trailer = "",
+      homepage = "",
+      status = ShowStatus.UNKNOWN,
+      rating = item.vote_average ?: 0.0f,
+      votes = item.vote_count ?: 0,
+      commentCount = 0,
+      genres = listOf(),
+      airedEpisodes = 0,
+      createdAt = 0,
+      updatedAt = 0,
     )
 
   fun fromDatabase(show: ShowDb) =

@@ -13,6 +13,8 @@ import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.data_remote.tmdb.model.TmdbPerson.Type
 import com.michaldrabik.repository.mappers.Mappers
 import com.michaldrabik.repository.settings.SettingsRepository
+import com.michaldrabik.ui_model.IdTmdb
+import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Ids
 import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.ImageType
@@ -38,6 +40,12 @@ class PeopleRepository @Inject constructor(
   }
 
   suspend fun loadDetails(person: Person): Person {
+    if (person.department == Department.PRODUCTION) {
+      val companyId = -person.ids.tmdb.id
+      val remoteCompany = remoteSource.tmdb.fetchCompanyDetails(companyId)
+      return mappers.person.fromCompany(remoteCompany)
+    }
+
     val local = localSource.people.getById(person.ids.tmdb.id)
     if (local?.detailsUpdatedAt != null) {
       return mappers.person.fromDatabase(local, person.characters)
@@ -64,27 +72,33 @@ class PeopleRepository @Inject constructor(
 
   suspend fun loadCredits(person: Person) =
     coroutineScope {
-      val idTmdb = person.ids.tmdb.id
-      var idTrakt: Long?
-
-      val localPerson = localSource.people.getById(idTmdb)
-      idTrakt = localPerson?.idTrakt
-      if (idTrakt == null) {
-        val ids = remoteSource.trakt.fetchPersonIds("tmdb", idTmdb.toString())
-        ids?.trakt?.let {
-          idTrakt = it
-          localSource.people.updateTraktId(it, idTmdb)
-        }
-      }
-      if (idTrakt == null) return@coroutineScope emptyList()
+      val idTrakt = if (person.department == Department.PRODUCTION) person.ids.tmdb.id else null
 
       // Return locally cached data if available
-      val timestamp = localSource.peopleCredits.getTimestampForPerson(idTrakt!!)
+      val personId = idTrakt ?: run {
+        val idTmdb = person.ids.tmdb.id
+        var idTraktLocal: Long?
+
+        val localPerson = localSource.people.getById(idTmdb)
+        idTraktLocal = localPerson?.idTrakt
+        if (idTraktLocal == null) {
+          val ids = remoteSource.trakt.fetchPersonIds("tmdb", idTmdb.toString())
+          ids?.trakt?.let {
+            idTraktLocal = it
+            localSource.people.updateTraktId(it, idTmdb)
+          }
+        }
+        idTraktLocal
+      }
+
+      if (personId == null) return@coroutineScope emptyList()
+
+      val timestamp = localSource.peopleCredits.getTimestampForPerson(personId)
       if (timestamp != null && nowUtcMillis() - timestamp < Config.PEOPLE_CREDITS_CACHE_DURATION) {
         val localCredits = mutableListOf<PersonCredit>()
 
-        val showsCreditsAsync = async { localSource.peopleCredits.getAllShowsForPerson(idTrakt!!) }
-        val moviesCreditsAsync = async { localSource.peopleCredits.getAllMoviesForPerson(idTrakt!!) }
+        val showsCreditsAsync = async { localSource.peopleCredits.getAllShowsForPerson(personId) }
+        val moviesCreditsAsync = async { localSource.peopleCredits.getAllMoviesForPerson(personId) }
         val shows = showsCreditsAsync.await()
         val movies = moviesCreditsAsync.await()
 
@@ -109,24 +123,57 @@ class PeopleRepository @Inject constructor(
       }
 
       // Return remote fetched data if available and cache it locally
-      val type = if (person.department == Department.ACTING) Type.CAST else Type.CREW
-      val showsCreditsAsync = async { remoteSource.trakt.fetchPersonShowsCredits(idTrakt!!, type) }
-      val moviesCreditsAsync = async { remoteSource.trakt.fetchPersonMoviesCredits(idTrakt!!, type) }
-      val remoteCredits = awaitAll(showsCreditsAsync, moviesCreditsAsync)
-        .flatten()
-        .map {
-          PersonCredit(
-            show = it.show?.let { show -> mappers.show.fromNetwork(show) },
-            movie = it.movie?.let { movie -> mappers.movie.fromNetwork(movie) },
-            image = Image.createUnknown(ImageType.POSTER),
-            translation = null,
+      val remoteCredits = if (person.department == Department.PRODUCTION) {
+        val companyId = -person.ids.tmdb.id
+        val moviesDiscovery = remoteSource.tmdb.discoverMoviesByCompany(companyId).results ?: emptyList()
+        val showsDiscovery = remoteSource.tmdb.discoverShowsByCompany(companyId).results ?: emptyList()
+
+        val credits = mutableListOf<PersonCredit>()
+
+        moviesDiscovery.forEach {
+          val movie = mappers.movie.fromTmdbDiscovery(it)
+          credits.add(
+            PersonCredit(
+              movie = movie.copy(ids = movie.ids.copy(trakt = IdTrakt(-it.id))),
+              show = null,
+              image = Image.createUnknown(ImageType.POSTER),
+              translation = null,
+            ),
           )
         }
+
+        showsDiscovery.forEach {
+          val show = mappers.show.fromTmdbDiscovery(it)
+          credits.add(
+            PersonCredit(
+              movie = null,
+              show = show.copy(ids = show.ids.copy(trakt = IdTrakt(-it.id))),
+              image = Image.createUnknown(ImageType.POSTER),
+              translation = null,
+            ),
+          )
+        }
+        credits
+      } else {
+        val type = if (person.department == Department.ACTING) Type.CAST else Type.CREW
+        val showsCreditsAsync = async { remoteSource.trakt.fetchPersonShowsCredits(personId, type) }
+        val moviesCreditsAsync = async { remoteSource.trakt.fetchPersonMoviesCredits(personId, type) }
+        awaitAll(showsCreditsAsync, moviesCreditsAsync)
+          .flatten()
+          .map {
+            PersonCredit(
+              show = it.show?.let { show -> mappers.show.fromNetwork(show) },
+              movie = it.movie?.let { movie -> mappers.movie.fromNetwork(movie) },
+              image = Image.createUnknown(ImageType.POSTER),
+              translation = null,
+            )
+          }
+      }
 
       val localCredits = remoteCredits.map {
         PersonCredits(
           id = 0,
-          idTraktPerson = idTrakt!!,
+          idTraktPerson = personId,
           idTraktShow = it.show?.traktId,
           idTraktMovie = it.movie?.traktId,
           type = if (it.show != null) Mode.SHOWS.type else Mode.MOVIES.type,
@@ -142,7 +189,7 @@ class PeopleRepository @Inject constructor(
         transactions.withTransaction {
           shows.upsert(remoteShows.map { mappers.show.toDatabase(it) })
           movies.upsert(remoteMovies.map { mappers.movie.toDatabase(it) })
-          peopleCredits.insertSingle(idTrakt!!, localCredits)
+          peopleCredits.insertSingle(personId, localCredits)
         }
       }
 
@@ -168,10 +215,11 @@ class PeopleRepository @Inject constructor(
     val crewFilter = arrayOf(
       Department.DIRECTING,
       Department.WRITING,
-      Department.SOUND,
+      Department.PRODUCTION,
     ).map { it.slug }
 
     val remoteTmdbPeople = remoteSource.tmdb.fetchShowPeople(showIds.tmdb.id)
+    val remoteShowDetails = remoteSource.tmdb.fetchShowDetails(showIds.tmdb.id)
 
     val remoteTmdbCrew = remoteTmdbPeople
       .getOrDefault(Type.CREW, emptyList())
@@ -196,9 +244,23 @@ class PeopleRepository @Inject constructor(
       ?.take(CREW_DISPLAY_LIMIT)
       ?.distinctBy { it.ids.tmdb } ?: emptyList()
 
-    val sound = remoteTmdbCrew[Department.SOUND]
-      ?.take(CREW_DISPLAY_LIMIT)
-      ?.distinctBy { it.ids.tmdb } ?: emptyList()
+    val production = remoteShowDetails.production_companies?.map {
+      Person(
+        ids = Ids.EMPTY.copy(tmdb = IdTmdb(-it.id.toLong())),
+        name = it.name,
+        department = Department.PRODUCTION,
+        bio = null,
+        bioTranslation = null,
+        characters = emptyList(),
+        jobs = emptyList(),
+        episodesCount = 0,
+        birthplace = null,
+        imagePath = it.logo_path,
+        homepage = null,
+        birthday = null,
+        deathday = null,
+      )
+    } ?: emptyList()
 
     val dbTmdbCast = actors.map {
       PersonShowMovie(
@@ -216,7 +278,7 @@ class PeopleRepository @Inject constructor(
       )
     }
 
-    val dbTmdbCrew = (directors + writers + sound).map {
+    val dbTmdbCrew = (directors + writers + production).map {
       PersonShowMovie(
         id = 0,
         idTmdbPerson = it.ids.tmdb.id,
@@ -232,7 +294,7 @@ class PeopleRepository @Inject constructor(
       )
     }
 
-    val dbTmdbPeople = (actors + directors + writers + sound)
+    val dbTmdbPeople = (actors + directors + writers + production)
       .map { mappers.person.toDatabase(it, null) }
 
     with(localSource) {
@@ -243,7 +305,7 @@ class PeopleRepository @Inject constructor(
     }
 
     val showActors = actors.map { it.copy(department = Department.ACTING) }
-    return (showActors + directors + writers + sound)
+    return (showActors + directors + writers + production)
       .groupBy { it.department }
   }
 
@@ -266,10 +328,11 @@ class PeopleRepository @Inject constructor(
     val crewFilter = arrayOf(
       Department.DIRECTING,
       Department.WRITING,
-      Department.SOUND,
+      Department.PRODUCTION,
     ).map { it.slug }
 
     val remoteTmdbPeople = remoteSource.tmdb.fetchMoviePeople(movieIds.tmdb.id)
+    val remoteMovieDetails = remoteSource.tmdb.fetchMovieDetails(movieIds.tmdb.id)
 
     val remoteTmdbCrew = remoteTmdbPeople
       .getOrDefault(Type.CREW, emptyList())
@@ -294,9 +357,23 @@ class PeopleRepository @Inject constructor(
       ?.take(CREW_DISPLAY_LIMIT)
       ?.distinctBy { it.ids.tmdb } ?: emptyList()
 
-    val sound = remoteTmdbCrew[Department.SOUND]
-      ?.take(CREW_DISPLAY_LIMIT)
-      ?.distinctBy { it.ids.tmdb } ?: emptyList()
+    val production = remoteMovieDetails.production_companies?.map {
+      Person(
+        ids = Ids.EMPTY.copy(tmdb = IdTmdb(-it.id.toLong())),
+        name = it.name,
+        department = Department.PRODUCTION,
+        bio = null,
+        bioTranslation = null,
+        characters = emptyList(),
+        jobs = emptyList(),
+        episodesCount = 0,
+        birthplace = null,
+        imagePath = it.logo_path,
+        homepage = null,
+        birthday = null,
+        deathday = null,
+      )
+    } ?: emptyList()
 
     val dbTmdbCast = actors.map {
       PersonShowMovie(
@@ -314,7 +391,7 @@ class PeopleRepository @Inject constructor(
       )
     }
 
-    val dbTmdbCrew = (directors + writers + sound).map {
+    val dbTmdbCrew = (directors + writers + production).map {
       PersonShowMovie(
         id = 0,
         idTmdbPerson = it.ids.tmdb.id,
@@ -330,7 +407,7 @@ class PeopleRepository @Inject constructor(
       )
     }
 
-    val dbTmdbPeople = (actors + directors + writers + sound)
+    val dbTmdbPeople = (actors + directors + writers + production)
       .map { mappers.person.toDatabase(it, null) }
 
     with(localSource) {
@@ -341,7 +418,7 @@ class PeopleRepository @Inject constructor(
     }
 
     val movieActors = actors.map { it.copy(department = Department.ACTING) }
-    return (movieActors + directors + writers + sound)
+    return (movieActors + directors + writers + production)
       .groupBy { it.department }
   }
 }

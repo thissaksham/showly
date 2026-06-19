@@ -1,6 +1,9 @@
 package com.michaldrabik.repository.mappers
 
 import com.michaldrabik.common.extensions.nowUtcMillis
+import com.michaldrabik.data_remote.tmdb.model.TmdbDiscoveryItem
+import com.michaldrabik.ui_model.IdTmdb
+import com.michaldrabik.ui_model.Ids
 import com.michaldrabik.ui_model.Movie
 import com.michaldrabik.ui_model.MovieStatus
 import java.time.LocalDate
@@ -50,6 +53,27 @@ class MovieMapper @Inject constructor(
       movie.commentCount,
       movie.genres,
       movie.language,
+    )
+
+  fun fromTmdbDiscovery(item: TmdbDiscoveryItem) =
+    Movie(
+      Ids.EMPTY.copy(tmdb = IdTmdb(item.id)),
+      item.title ?: "",
+      item.release_date?.take(4)?.toIntOrNull() ?: -1,
+      item.overview ?: "",
+      item.release_date?.let { if (it.isNotBlank()) LocalDate.parse(it) else null },
+      -1,
+      "",
+      "",
+      "",
+      "",
+      MovieStatus.UNKNOWN,
+      item.vote_average ?: -1F,
+      item.vote_count ?: -1,
+      -1,
+      emptyList(),
+      nowUtcMillis(),
+      nowUtcMillis(),
     )
 
   fun fromDatabase(movie: MovieDb) =

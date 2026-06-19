@@ -67,7 +67,9 @@ class PersonDetailsViewModel @Inject constructor(
         val details = loadDetailsCase.loadDetails(person)
         personDetailsItemsState.value = mutableListOf<PersonDetailsItem>().apply {
           add(PersonDetailsItem.MainInfo(details, dateFormat, false))
-          add(PersonDetailsItem.MainBio(details.bio, details.bioTranslation))
+          if (!details.bio.isNullOrBlank()) {
+            add(PersonDetailsItem.MainBio(details.bio, details.bioTranslation))
+          }
         }
         mainProgressJob?.cancelAndJoin()
 

@@ -1,12 +1,17 @@
 package com.michaldrabik.data_remote.tmdb.api
 
+import com.michaldrabik.data_remote.tmdb.model.TmdbDiscovery
 import com.michaldrabik.data_remote.tmdb.model.TmdbImages
+import com.michaldrabik.data_remote.tmdb.model.TmdbMovieDetails
 import com.michaldrabik.data_remote.tmdb.model.TmdbPeople
 import com.michaldrabik.data_remote.tmdb.model.TmdbPerson
+import com.michaldrabik.data_remote.tmdb.model.TmdbProductionCompany
+import com.michaldrabik.data_remote.tmdb.model.TmdbShowDetails
 import com.michaldrabik.data_remote.tmdb.model.TmdbStreamings
 import com.michaldrabik.data_remote.tmdb.model.TmdbTranslationResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface TmdbService {
 
@@ -61,4 +66,29 @@ interface TmdbService {
   suspend fun fetchShowWatchProviders(
     @Path("tmdbId") tmdbId: Long,
   ): TmdbStreamings
+
+  @GET("movie/{tmdbId}")
+  suspend fun fetchMovieDetails(
+    @Path("tmdbId") tmdbId: Long,
+  ): TmdbMovieDetails
+
+  @GET("tv/{tmdbId}")
+  suspend fun fetchShowDetails(
+    @Path("tmdbId") tmdbId: Long,
+  ): TmdbShowDetails
+
+  @GET("company/{companyId}")
+  suspend fun fetchCompanyDetails(
+    @Path("companyId") companyId: Long,
+  ): TmdbProductionCompany
+
+  @GET("discover/movie")
+  suspend fun discoverMoviesByCompany(
+    @Query("with_companies") companyId: Long,
+  ): TmdbDiscovery
+
+  @GET("discover/tv")
+  suspend fun discoverShowsByCompany(
+    @Query("with_companies") companyId: Long,
+  ): TmdbDiscovery
 }

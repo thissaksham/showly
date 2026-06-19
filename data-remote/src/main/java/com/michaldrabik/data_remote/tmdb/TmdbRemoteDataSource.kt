@@ -1,8 +1,12 @@
 package com.michaldrabik.data_remote.tmdb
 
 import com.michaldrabik.data_remote.tmdb.model.TmdbImage
+import com.michaldrabik.data_remote.tmdb.model.TmdbDiscovery
 import com.michaldrabik.data_remote.tmdb.model.TmdbImages
+import com.michaldrabik.data_remote.tmdb.model.TmdbMovieDetails
 import com.michaldrabik.data_remote.tmdb.model.TmdbPerson
+import com.michaldrabik.data_remote.tmdb.model.TmdbProductionCompany
+import com.michaldrabik.data_remote.tmdb.model.TmdbShowDetails
 import com.michaldrabik.data_remote.tmdb.model.TmdbStreamingCountry
 import com.michaldrabik.data_remote.tmdb.model.TmdbTranslation
 
@@ -34,6 +38,16 @@ interface TmdbRemoteDataSource {
     tmdbId: Long,
     countryCode: String,
   ): TmdbStreamingCountry?
+
+  suspend fun fetchMovieDetails(tmdbId: Long): TmdbMovieDetails
+
+  suspend fun fetchShowDetails(tmdbId: Long): TmdbShowDetails
+
+  suspend fun fetchCompanyDetails(companyId: Long): TmdbProductionCompany
+
+  suspend fun discoverMoviesByCompany(companyId: Long): TmdbDiscovery
+
+  suspend fun discoverShowsByCompany(companyId: Long): TmdbDiscovery
 
   suspend fun fetchPersonDetails(id: Long): TmdbPerson
 

@@ -2,6 +2,7 @@ package com.michaldrabik.repository.mappers
 
 import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.data_remote.tmdb.model.TmdbPerson
+import com.michaldrabik.data_remote.tmdb.model.TmdbProductionCompany
 import com.michaldrabik.ui_model.IdImdb
 import com.michaldrabik.ui_model.IdTmdb
 import com.michaldrabik.ui_model.IdTrakt
@@ -33,6 +34,25 @@ class PersonMapper @Inject constructor() {
       episodesCount = person.total_episode_count ?: 0,
       birthday = person.birthday?.let { if (it.isNotBlank()) LocalDate.parse(it) else null },
       deathday = person.deathday?.let { if (it.isNotBlank()) LocalDate.parse(it) else null },
+    )
+
+  fun fromCompany(company: TmdbProductionCompany) =
+    Person(
+      ids = Ids.EMPTY.copy(
+        tmdb = IdTmdb(-company.id.toLong()),
+      ),
+      name = company.name,
+      department = Person.Department.PRODUCTION,
+      bio = company.description,
+      bioTranslation = null,
+      birthplace = company.headquarters,
+      imagePath = company.logo_path,
+      homepage = company.homepage,
+      characters = emptyList(),
+      jobs = emptyList(),
+      episodesCount = 0,
+      birthday = null,
+      deathday = null,
     )
 
   fun fromDatabase(
@@ -111,6 +131,7 @@ class PersonMapper @Inject constructor() {
       "Acting", "Actors" -> Person.Department.ACTING
       "Directing" -> Person.Department.DIRECTING
       "Writing" -> Person.Department.WRITING
+      "Production" -> Person.Department.PRODUCTION
       "Sound" -> Person.Department.SOUND
       else -> Person.Department.UNKNOWN
     }

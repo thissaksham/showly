@@ -137,12 +137,12 @@
     />
 
   <TextView
-    android:id="@+id/showDetailsMusicLabel"
+    android:id="@+id/showDetailsProductionLabel"
     android:layout_width="wrap_content"
     android:layout_height="0dp"
     android:layout_marginStart="@dimen/spaceBig"
     android:layout_marginEnd="@dimen/spaceNormal"
-    android:text="@string/textMusic"
+    android:text="@string/textProduction"
     android:textColor="?android:attr/textColorSecondary"
     android:textSize="11sp"
     android:visibility="gone"
@@ -153,7 +153,7 @@
     />
 
   <TextView
-    android:id="@+id/showDetailsMusicValue"
+    android:id="@+id/showDetailsProductionValue"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginEnd="@dimen/spaceNormal"
@@ -162,10 +162,10 @@
     android:textSize="11sp"
     android:visibility="gone"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="@id/showDetailsMusicLabel"
-    app:layout_constraintTop_toBottomOf="@id/showDetailsMusicLabel"
+    app:layout_constraintStart_toStartOf="@id/showDetailsProductionLabel"
+    app:layout_constraintTop_toBottomOf="@id/showDetailsProductionLabel"
     tools:ignore="HardcodedText"
-    tools:text="Steven Spilberg"
+    tools:text="A24"
     tools:visibility="visible"
     />
 

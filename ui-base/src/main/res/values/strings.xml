@@ -62,6 +62,7 @@
   <string name="textDirector">Director</string>
   <string name="textWriting">Writing</string>
   <string name="textScreenplay">Screenplay</string>
+  <string name="textProduction">Production</string>
   <string name="textSound">Sound</string>
   <string name="textMusic">Music</string>
   <string name="textActing">Acting</string>

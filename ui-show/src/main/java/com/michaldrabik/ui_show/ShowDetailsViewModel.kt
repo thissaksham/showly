@@ -11,6 +11,7 @@ import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.SUBSCRIBE_STOP_TIMEOUT
 import com.michaldrabik.ui_base.utilities.extensions.combine
 import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
+import com.michaldrabik.ui_model.IdTmdb
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Image
 import com.michaldrabik.ui_model.ImageType
@@ -80,7 +81,12 @@ class ShowDetailsViewModel @Inject constructor(
     viewModelScope.launch {
       showLoadingState.value = true
       try {
-        val result = mainCase.loadDetails(showId)
+        val targetId = if (showId.id < 0) {
+          mainCase.resolveTraktId(-showId.id)
+        } else {
+          showId
+        }
+        val result = mainCase.loadDetails(targetId)
         show = result
         showState.value = result
         loadBackgroundImage(result)

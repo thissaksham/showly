@@ -32,6 +32,7 @@ class PeopleListHeaderView : FrameLayout {
         Person.Department.ACTING -> context.getString(R.string.textActing)
         Person.Department.DIRECTING -> context.getString(R.string.textDirecting)
         Person.Department.WRITING -> context.getString(R.string.textWriting)
+        Person.Department.PRODUCTION -> context.getString(R.string.textProduction)
         Person.Department.SOUND -> context.getString(R.string.textMusic)
         else -> "-"
       }

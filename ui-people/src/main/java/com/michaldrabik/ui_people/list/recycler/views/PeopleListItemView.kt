@@ -2,16 +2,20 @@ package com.michaldrabik.ui_people.list.recycler.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.MultiTransformation
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.FitCenter
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.michaldrabik.common.Config
+import com.michaldrabik.ui_base.utilities.extensions.OutlineTransformation
 import com.michaldrabik.ui_base.utilities.extensions.dimenToPx
 import com.michaldrabik.ui_base.utilities.extensions.fadeIn
 import com.michaldrabik.ui_base.utilities.extensions.gone
@@ -65,6 +69,7 @@ class PeopleListItemView : FrameLayout {
           Department.ACTING -> context.getString(R.string.textActing)
           Department.DIRECTING -> context.getString(R.string.textDirector)
           Department.WRITING -> context.getString(R.string.textWriting)
+          Department.PRODUCTION -> context.getString(R.string.textProduction)
           Department.SOUND -> context.getString(R.string.textMusic)
           Department.UNKNOWN -> "-"
         }
@@ -83,10 +88,28 @@ class PeopleListItemView : FrameLayout {
         viewPersonItemPlaceholder.visible()
         return
       }
+
+      if (item.person.department == Department.PRODUCTION) {
+        viewPersonItemImage.background = null
+        viewPersonItemImage.elevation = 0f
+        viewPersonItemImage.clipToOutline = true
+      } else {
+        viewPersonItemImage.setBackgroundResource(R.drawable.bg_media_view_elevation_sheet)
+        viewPersonItemImage.elevation = context.resources.getDimension(R.dimen.elevationSmall)
+        viewPersonItemImage.clipToOutline = false
+      }
+
+      val baseUrl = if (item.person.department == Department.PRODUCTION) Config.TMDB_IMAGE_BASE_LOGO_URL else Config.TMDB_IMAGE_BASE_PROFILE_THUMB_URL
       Glide
         .with(this@PeopleListItemView)
-        .load("${Config.TMDB_IMAGE_BASE_PROFILE_THUMB_URL}$imagePath")
-        .transform(centerCropTransformation, cornersTransformation)
+        .load("$baseUrl$imagePath")
+        .let {
+          if (item.person.department == Department.PRODUCTION) {
+            it.transform(MultiTransformation(FitCenter(), OutlineTransformation(5f)))
+          } else {
+            it.transform(centerCropTransformation, cornersTransformation)
+          }
+        }
         .transition(DrawableTransitionOptions.withCrossFade(Config.IMAGE_FADE_DURATION_MS))
         .withSuccessListener {
           viewPersonItemPlaceholder.gone()

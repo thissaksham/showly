@@ -36,6 +36,7 @@ data class Person(
     ACTING("Acting"),
     DIRECTING("Directing"),
     WRITING("Writing"),
+    PRODUCTION("Production"),
     SOUND("Sound"),
     UNKNOWN("-"),
   }

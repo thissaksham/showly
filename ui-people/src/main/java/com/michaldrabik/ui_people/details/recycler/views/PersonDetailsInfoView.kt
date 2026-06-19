@@ -1,17 +1,22 @@
 package com.michaldrabik.ui_people.details.recycler.views
 
 import android.content.Context
+import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.updateMargins
 import androidx.core.view.updatePadding
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.MultiTransformation
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.FitCenter
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.michaldrabik.common.Config
+import com.michaldrabik.ui_base.utilities.extensions.OutlineTransformation
 import com.michaldrabik.ui_base.utilities.extensions.capitalizeWords
 import com.michaldrabik.ui_base.utilities.extensions.dimenToPx
 import com.michaldrabik.ui_base.utilities.extensions.gone
@@ -71,6 +76,12 @@ class PersonDetailsInfoView : ConstraintLayout {
         viewPersonDetailsDeathdayValue.text = item.dateFormat?.format(date)?.capitalizeWords()
       }
       viewPersonDetailsProgress.visibleIf(item.isLoading)
+      val hasBio = !item.person.bio.isNullOrBlank()
+      viewPersonDetailsSeparator.visibleIf(hasBio)
+      (viewPersonDetailsSeparator.layoutParams as MarginLayoutParams).updateMargins(
+        top = if (hasBio) spaceNormal else 0,
+        bottom = if (hasBio) context.dimenToPx(R.dimen.spaceMedium) else 0
+      )
     }
     renderImage(item.person)
   }
@@ -88,10 +99,28 @@ class PersonDetailsInfoView : ConstraintLayout {
       viewPersonDetailsImage.visible()
       viewPersonDetailsPlaceholder.gone()
 
+      if (person.department == Person.Department.PRODUCTION) {
+        viewPersonDetailsImage.background = null
+        viewPersonDetailsImage.elevation = 0f
+        viewPersonDetailsImage.clipToOutline = true
+      } else {
+        viewPersonDetailsImage.setBackgroundResource(R.drawable.bg_person_image_elevation)
+        viewPersonDetailsImage.elevation = context.resources.getDimension(R.dimen.elevationNormal)
+        viewPersonDetailsImage.clipToOutline = false
+      }
+
+      val baseUrl = if (person.department == Person.Department.PRODUCTION) Config.TMDB_IMAGE_BASE_LOGO_URL else Config.TMDB_IMAGE_BASE_ACTOR_URL
+
       Glide
         .with(this@PersonDetailsInfoView)
-        .load("${Config.TMDB_IMAGE_BASE_ACTOR_URL}${person.imagePath}")
-        .transform(CenterCrop(), GranularRoundedCorners(topLeftCornerRadius, cornerRadius, cornerRadius, cornerRadius))
+        .load("$baseUrl${person.imagePath}")
+        .let {
+          if (person.department == Person.Department.PRODUCTION) {
+            it.transform(MultiTransformation(FitCenter(), OutlineTransformation(5f)))
+          } else {
+            it.transform(CenterCrop(), GranularRoundedCorners(topLeftCornerRadius, cornerRadius, cornerRadius, cornerRadius))
+          }
+        }
         .transition(DrawableTransitionOptions.withCrossFade(Config.IMAGE_FADE_DURATION_MS))
         .withFailListener {
           viewPersonDetailsImage.gone()

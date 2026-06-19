@@ -7,8 +7,10 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import com.michaldrabik.ui_base.utilities.extensions.copyToClipboard
+import com.michaldrabik.ui_base.utilities.extensions.gone
 import com.michaldrabik.ui_base.utilities.extensions.onLongClick
 import com.michaldrabik.ui_base.utilities.extensions.showInfoSnackbar
+import com.michaldrabik.ui_base.utilities.extensions.visible
 import com.michaldrabik.ui_people.R
 import com.michaldrabik.ui_people.databinding.ViewPersonDetailsBioBinding
 import com.michaldrabik.ui_people.details.recycler.PersonDetailsItem
@@ -33,11 +35,16 @@ class PersonDetailsBioView : FrameLayout {
   }
 
   fun bind(item: PersonDetailsItem.MainBio) {
+    if (item.biography.isNullOrBlank()) {
+      gone()
+      return
+    }
+    visible()
     with(binding) {
-      when {
-        item.biography.isNullOrBlank() -> personBioText.text = context.getString(R.string.textNoDescription)
-        !item.biographyTranslation.isNullOrBlank() -> personBioText.text = item.biographyTranslation
-        else -> personBioText.text = item.biography
+      if (!item.biographyTranslation.isNullOrBlank()) {
+        personBioText.text = item.biographyTranslation
+      } else {
+        personBioText.text = item.biography
       }
     }
   }

@@ -142,12 +142,12 @@ class ShowDetailsPeopleFragment : BaseFragment<ShowDetailsPeopleViewModel>(R.lay
 
     val directors = crew[Department.DIRECTING] ?: emptyList()
     val writers = crew[Department.WRITING] ?: emptyList()
-    val sound = crew[Department.SOUND] ?: emptyList()
+    val production = crew[Department.PRODUCTION] ?: emptyList()
 
     with(binding) {
       renderPeople(showDetailsDirectingLabel, showDetailsDirectingValue, directors, Department.DIRECTING)
       renderPeople(showDetailsWritingLabel, showDetailsWritingValue, writers, Department.WRITING)
-      renderPeople(showDetailsMusicLabel, showDetailsMusicValue, sound, Department.SOUND)
+      renderPeople(showDetailsProductionLabel, showDetailsProductionValue, production, Department.PRODUCTION)
     }
   }
 
