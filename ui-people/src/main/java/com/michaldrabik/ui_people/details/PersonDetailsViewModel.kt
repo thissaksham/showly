@@ -73,7 +73,7 @@ class PersonDetailsViewModel @Inject constructor(
         }
         mainProgressJob?.cancelAndJoin()
 
-        loadCredits(details, personArgs)
+        loadCredits(details, personArgs, isInitialLoad = false)
       } catch (error: Throwable) {
         messageChannel.send(MessageEvent.Error(R.string.errorGeneral))
         Timber.e(error)
@@ -88,10 +88,11 @@ class PersonDetailsViewModel @Inject constructor(
     person: Person,
     personArgs: PersonDetailsArgs? = null,
     filters: PersonDetailsFilters = PersonDetailsFilters(),
+    isInitialLoad: Boolean = true,
   ) {
     creditsJob?.cancel()
     creditsJob = viewModelScope.launch {
-      creditsProgressJob = launchDelayed(500) { setCreditsLoading(true) }
+      creditsProgressJob = if (isInitialLoad) launchDelayed(500) { setCreditsLoading(true) } else null
       try {
         val credits = loadCreditsCase.loadCredits(
           person = person,

@@ -94,9 +94,17 @@ internal class TmdbApi(
 
   override suspend fun fetchCompanyDetails(companyId: Long) = service.fetchCompanyDetails(companyId)
 
-  override suspend fun discoverMoviesByCompany(companyId: Long) = service.discoverMoviesByCompany(companyId)
+  override suspend fun discoverMoviesByCompany(
+    companyId: Long,
+    sortBy: String,
+    releasedAfter: String?,
+  ) = service.discoverMoviesByCompany(companyId, sortBy, releasedAfter)
 
-  override suspend fun discoverShowsByCompany(companyId: Long) = service.discoverShowsByCompany(companyId)
+  override suspend fun discoverShowsByCompany(
+    companyId: Long,
+    sortBy: String,
+    airedAfter: String?,
+  ) = service.discoverShowsByCompany(companyId, sortBy, airedAfter)
 
   override suspend fun fetchPersonDetails(id: Long): TmdbPerson = service.fetchPersonDetails(id)
 

@@ -19,6 +19,8 @@ interface MoviesLocalDataSource {
 
   suspend fun getByTmdbId(tmdbId: Long): Movie?
 
+  suspend fun getByTmdbIds(tmdbIds: List<Long>): List<Movie>
+
   suspend fun getBySlug(slug: String): Movie?
 
   suspend fun getById(imdbId: String): Movie?

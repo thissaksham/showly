@@ -19,6 +19,8 @@ interface ShowsLocalDataSource {
 
   suspend fun getByTmdbId(tmdbId: Long): Show?
 
+  suspend fun getByTmdbIds(tmdbIds: List<Long>): List<Show>
+
   suspend fun getBySlug(slug: String): Show?
 
   suspend fun getById(imdbId: String): Show?

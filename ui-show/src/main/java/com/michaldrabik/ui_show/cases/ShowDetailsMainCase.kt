@@ -2,7 +2,6 @@ package com.michaldrabik.ui_show.cases
 
 import com.michaldrabik.common.dispatchers.CoroutineDispatchers
 import com.michaldrabik.repository.shows.ShowsRepository
-import com.michaldrabik.ui_model.IdTmdb
 import com.michaldrabik.ui_model.IdTrakt
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.withContext
@@ -22,12 +21,7 @@ class ShowDetailsMainCase @Inject constructor(
 
   suspend fun resolveTraktId(tmdbId: Long) =
     withContext(dispatchers.IO) {
-      val local = showsRepository.detailsShow.find(IdTmdb(tmdbId))
-      if (local != null) {
-        IdTrakt(local.traktId)
-      } else {
-        IdTrakt(-1)
-      }
+      showsRepository.detailsShow.resolveTraktId(tmdbId) ?: IdTrakt(-1)
     }
 
   suspend fun removeMalformedShow(idTrakt: IdTrakt) =

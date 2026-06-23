@@ -58,6 +58,18 @@ class ShowDetailsRepository @Inject constructor(
     return null
   }
 
+  suspend fun resolveTraktId(tmdbId: Long): IdTrakt? {
+    val local = find(IdTmdb(tmdbId))
+    if (local != null && local.ids.trakt.id > 0) return local.ids.trakt
+
+    return try {
+      val results = remoteSource.trakt.fetchSearchId("tmdb", tmdbId.toString())
+      results.firstOrNull { it.show != null }?.show?.ids?.trakt?.let { IdTrakt(it) }
+    } catch (error: Throwable) {
+      null
+    }
+  }
+
   suspend fun delete(idTrakt: IdTrakt) {
     with(localSource) {
       transactions.withTransaction {

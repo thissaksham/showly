@@ -85,10 +85,14 @@ interface TmdbService {
   @GET("discover/movie")
   suspend fun discoverMoviesByCompany(
     @Query("with_companies") companyId: Long,
+    @Query("sort_by") sortBy: String,
+    @Query("primary_release_date.gte") releasedAfter: String?,
   ): TmdbDiscovery
 
   @GET("discover/tv")
   suspend fun discoverShowsByCompany(
     @Query("with_companies") companyId: Long,
+    @Query("sort_by") sortBy: String,
+    @Query("first_air_date.gte") airedAfter: String?,
   ): TmdbDiscovery
 }

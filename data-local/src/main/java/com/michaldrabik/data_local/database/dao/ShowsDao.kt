@@ -42,6 +42,9 @@ interface ShowsDao :
   @Query("SELECT * FROM shows WHERE id_tmdb == :tmdbId")
   override suspend fun getByTmdbId(tmdbId: Long): Show?
 
+  @Query("SELECT * FROM shows WHERE id_tmdb IN (:tmdbIds)")
+  override suspend fun getByTmdbIds(tmdbIds: List<Long>): List<Show>
+
   @Query("SELECT * FROM shows WHERE id_slug == :slug")
   override suspend fun getBySlug(slug: String): Show?
 

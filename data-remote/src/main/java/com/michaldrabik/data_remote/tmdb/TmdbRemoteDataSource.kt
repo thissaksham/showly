@@ -45,9 +45,17 @@ interface TmdbRemoteDataSource {
 
   suspend fun fetchCompanyDetails(companyId: Long): TmdbProductionCompany
 
-  suspend fun discoverMoviesByCompany(companyId: Long): TmdbDiscovery
+  suspend fun discoverMoviesByCompany(
+    companyId: Long,
+    sortBy: String = "popularity.desc",
+    releasedAfter: String? = null,
+  ): TmdbDiscovery
 
-  suspend fun discoverShowsByCompany(companyId: Long): TmdbDiscovery
+  suspend fun discoverShowsByCompany(
+    companyId: Long,
+    sortBy: String = "popularity.desc",
+    airedAfter: String? = null,
+  ): TmdbDiscovery
 
   suspend fun fetchPersonDetails(id: Long): TmdbPerson
 

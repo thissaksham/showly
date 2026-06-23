@@ -44,6 +44,9 @@ interface MoviesDao :
   @Query("SELECT * FROM movies WHERE id_tmdb == :tmdbId")
   override suspend fun getByTmdbId(tmdbId: Long): Movie?
 
+  @Query("SELECT * FROM movies WHERE id_tmdb IN (:tmdbIds)")
+  override suspend fun getByTmdbIds(tmdbIds: List<Long>): List<Movie>
+
   @Query("SELECT * FROM movies WHERE id_slug == :slug")
   override suspend fun getBySlug(slug: String): Movie?
 

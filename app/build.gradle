@@ -30,8 +30,6 @@ android {
     applicationId "com.thissaksham.showly2"
     minSdkVersion versions.minSdk
     targetSdkVersion versions.targetSdk
-    compileSdkVersion versions.compileSdk
-    compileSdkVersion versions.compileSdk
     versionCode versions.versionCode
     versionName versions.versionName
 
@@ -41,14 +39,16 @@ android {
 
   signingConfigs {
     def keystorePropertiesFile = rootProject.file("app/keystore.properties")
-    def keystoreProperties = new Properties()
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    if (keystorePropertiesFile.exists()) {
+      def keystoreProperties = new Properties()
+      keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
-    release {
-      storeFile file("keystore")
-      storePassword keystoreProperties['storePassword']
-      keyAlias keystoreProperties['keyAlias']
-      keyPassword keystoreProperties['keyPassword']
+      release {
+        storeFile file("keystore")
+        storePassword keystoreProperties['storePassword']
+        keyAlias keystoreProperties['keyAlias']
+        keyPassword keystoreProperties['keyPassword']
+      }
     }
   }
 
@@ -72,7 +72,9 @@ android {
     }
     release {
       minifyEnabled true
-      signingConfig signingConfigs.release
+      if (signingConfigs.findByName('release')) {
+        signingConfig signingConfigs.release
+      }
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
       manifestPlaceholders = [
           appIcon     : "@mipmap/ic_launcher",

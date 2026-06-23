@@ -128,6 +128,7 @@ class PersonDetailsBottomSheet : BaseBottomSheetFragment(R.layout.view_person_de
         viewModel.loadCredits(
           person = person,
           filters = filters,
+          isInitialLoad = false,
         )
       },
     )
