@@ -10,6 +10,7 @@ import com.michaldrabik.common.Config
 import com.michaldrabik.common.Config.SPOILERS_HIDE_SYMBOL
 import com.michaldrabik.common.Config.SPOILERS_REGEX
 import com.michaldrabik.common.extensions.toLocalZone
+import com.michaldrabik.common.extensions.toMillis
 import com.michaldrabik.ui_base.utilities.extensions.addRipple
 import com.michaldrabik.ui_base.utilities.extensions.capitalizeWords
 import com.michaldrabik.ui_base.utilities.extensions.gone
@@ -71,6 +72,14 @@ class EpisodeView : ConstraintLayout {
         episodeMyRating.text = String.format(ENGLISH, "%d", item.myRating.rating)
       }
 
+      val watchedAt = item.episode.lastWatchedAt
+      val showWatchedAt = item.isWatched && watchedAt != null && watchedAt.toMillis() != 0L
+      episodeWatchedAtIcon.visibleIf(showWatchedAt)
+      episodeWatchedAt.visibleIf(showWatchedAt)
+      if (showWatchedAt && watchedAt != null) {
+        episodeWatchedAt.text = item.watchedAtDateFormat?.format(watchedAt.toLocalZone())
+      }
+
       if (!hasAired) {
         val date = item.episode.firstAired?.toLocalZone()
         val displayDate = date?.let { item.dateFormat?.format(it)?.capitalizeWords() }
@@ -125,6 +134,8 @@ class EpisodeView : ConstraintLayout {
       episodeCheckbox.setOnCheckedChangeListener(null)
       episodeMyStarIcon.gone()
       episodeMyRating.gone()
+      episodeWatchedAtIcon.gone()
+      episodeWatchedAt.gone()
     }
   }
 }

@@ -31,6 +31,9 @@ class DateFormatProvider @Inject constructor(
     const val DAY_HOUR_5 = "dd MMM yyyy, h:mm a (EEEE)"
     const val DAY_HOUR_6 = "dd MMM yyyy, HH:mm (EEEE)"
 
+    const val DAY_HOUR_SHORT_12 = "dd MMM yyyy, h:mm a"
+    const val DAY_HOUR_SHORT_24 = "dd MMM yyyy, HH:mm"
+
     fun loadSettingsFormat(
       format: AppDateFormat,
       language: String,
@@ -82,6 +85,14 @@ class DateFormatProvider @Inject constructor(
       TRAKT_24 -> DAY_HOUR_4
       MISC_12 -> DAY_HOUR_5
       MISC_24 -> DAY_HOUR_6
+    }
+    return createDateFormat(pattern)
+  }
+
+  fun loadShortDayHourFormat(): DateTimeFormatter {
+    val pattern = when (valueOf(settingsRepository.dateFormat)) {
+      DEFAULT_12, TRAKT_12, MISC_12 -> DAY_HOUR_SHORT_12
+      DEFAULT_24, TRAKT_24, MISC_24 -> DAY_HOUR_SHORT_24
     }
     return createDateFormat(pattern)
   }

@@ -26,10 +26,15 @@ class EpisodesMarkWatchedCase @Inject constructor(
         async { episodesManager.getWatchedEpisodesIds(show) },
       )
 
+      val watchedDates = episodesManager.getWatchedEpisodesDates(show)
       val isSeasonWatched = watchedSeasonsIds.any { id -> id == season.id }
       val episodes = season.episodes.map { episodeItem ->
         val isEpisodeWatched = watchedEpisodesIds.any { id -> id == episodeItem.id }
-        episodeItem.copy(season = season.season, isWatched = isEpisodeWatched)
+        episodeItem.copy(
+          season = season.season,
+          isWatched = isEpisodeWatched,
+          episode = episodeItem.episode.copy(lastWatchedAt = watchedDates[episodeItem.id]),
+        )
       }
 
       season.copy(episodes = episodes, isWatched = isSeasonWatched)
@@ -47,11 +52,17 @@ class EpisodesMarkWatchedCase @Inject constructor(
         async { episodesManager.getWatchedEpisodesIds(show) },
       )
 
+      val watchedDates = episodesManager.getWatchedEpisodesDates(show)
+
       seasonsList?.forEach { item ->
         val isSeasonWatched = watchedSeasonsIds.any { id -> id == item.id }
         val episodes = item.episodes.map { episodeItem ->
           val isEpisodeWatched = watchedEpisodesIds.any { id -> id == episodeItem.id }
-          episodeItem.copy(season = item.season, isWatched = isEpisodeWatched)
+          episodeItem.copy(
+            season = item.season,
+            isWatched = isEpisodeWatched,
+            episode = episodeItem.episode.copy(lastWatchedAt = watchedDates[episodeItem.id]),
+          )
         }
         val updated = item.copy(episodes = episodes, isWatched = isSeasonWatched)
         items.add(updated)

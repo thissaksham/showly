@@ -41,6 +41,11 @@ class EpisodesManager @Inject constructor(
 
   suspend fun getWatchedEpisodesIds(show: Show) = episodesLocalSource.getAllWatchedIdsForShows(listOf(show.traktId))
 
+  suspend fun getWatchedEpisodesDates(show: Show): Map<Long, ZonedDateTime?> =
+    episodesLocalSource
+      .getAllWatchedForShows(listOf(show.traktId))
+      .associate { it.idTrakt to it.lastWatchedAt }
+
   suspend fun setSeasonWatched(
     seasonBundle: SeasonBundle,
     customDate: ZonedDateTime?,

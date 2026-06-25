@@ -88,6 +88,7 @@ class ShowDetailsLoadSeasonsCase @Inject constructor(
     show: Show,
   ) = coroutineScope {
     val format = dateFormatProvider.loadFullHourFormat()
+    val watchedFormat = dateFormatProvider.loadShortDayHourFormat()
     val seasonsRatings = ratingsRepository.shows.loadRatingsSeasons(remoteSeasons)
     val spoilers = settingsRepository.spoilers.getAll()
     remoteSeasons
@@ -109,6 +110,7 @@ class ShowDetailsLoadSeasonsCase @Inject constructor(
                 dateFormat = format,
                 isAnime = show.isAnime,
                 spoilers = spoilers,
+                watchedAtDateFormat = watchedFormat,
               )
             }
           }.awaitAll()

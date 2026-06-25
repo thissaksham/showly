@@ -16,10 +16,13 @@ class EpisodeListItemDiffCallback(
     oldItemPosition: Int,
     newItemPosition: Int,
   ): Boolean {
-    val (_, _, isWatched, translation, rating, _, isLocked, _, spoilers) = oldList[oldItemPosition]
-    val (_, _, isWatched2, translation2, rating2, _, isLocked2, _, spoilers2) = newList[newItemPosition]
+    val oldItem = oldList[oldItemPosition]
+    val newItem = newList[newItemPosition]
+    val (_, _, isWatched, translation, rating, _, isLocked, _, spoilers) = oldItem
+    val (_, _, isWatched2, translation2, rating2, _, isLocked2, _, spoilers2) = newItem
 
     return isWatched == isWatched2 &&
+      oldItem.episode.lastWatchedAt == newItem.episode.lastWatchedAt &&
       translation?.title == translation2?.title &&
       rating == rating2 &&
       isLocked == isLocked2 &&

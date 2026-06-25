@@ -3,6 +3,7 @@ package com.michaldrabik.ui_movie
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.michaldrabik.common.Mode
+import com.michaldrabik.common.extensions.dateFromMillis
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.MovieImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
@@ -95,7 +96,8 @@ class MovieDetailsViewModel @Inject constructor(
         loadListsCount(result)
         loadUserRating()
 
-        val isFollowed = myMoviesCase.getMyMovie(result) != null
+        val myMovie = myMoviesCase.getMyMovie(result)
+        val isFollowed = myMovie != null
         val isWatchlist = watchlistCase.isWatchlist(result)
         val isDropped = droppedCase.isDropped(result)
 
@@ -104,12 +106,12 @@ class MovieDetailsViewModel @Inject constructor(
           isWatchlist = isWatchlist,
           isDropped = isDropped,
           withAnimation = false,
-          watchedAt = null,
+          watchedAt = myMovie?.updatedAt?.let { dateFromMillis(it) },
         )
         metaState.value = MovieDetailsMeta(
           dateFormat = dateFormatProvider.loadShortDayFormat(),
           commentsDateFormat = dateFormatProvider.loadFullHourFormat(),
-          watchedAtDateFormat = dateFormatProvider.loadFullDayFormat(),
+          watchedAtDateFormat = dateFormatProvider.loadFullHourFormat(),
           isSignedIn = false,
         )
         spoilersState.value = settingsRepository.spoilers.getAll()
@@ -151,7 +153,12 @@ class MovieDetailsViewModel @Inject constructor(
   fun addToMyMovies(isCustomDateSelected: Boolean, customDate: ZonedDateTime?) {
     viewModelScope.launch {
       myMoviesCase.addToMyMovies(movie, customDate)
-      followedState.value = followedState.value?.copy(isMyMovie = true, isWatchlist = false, isDropped = false)
+      followedState.value = followedState.value?.copy(
+        isMyMovie = true,
+        isWatchlist = false,
+        isDropped = false,
+        watchedAt = customDate,
+      )
       messageChannel.emit(MessageEvent.Info(com.michaldrabik.ui_base.R.string.textAddedToMyMovies))
       eventsManager.sendEvent(ReloadData)
     }
