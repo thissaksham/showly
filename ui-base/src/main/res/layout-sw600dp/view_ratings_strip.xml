@@ -66,10 +66,11 @@
 
       <TextView
         android:id="@+id/viewRatingsStripTraktLabel"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:lineSpacingExtra="2dp"
+        android:minLines="2"
         android:text="Trakt.tv"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="13sp"
@@ -79,7 +80,7 @@
     </LinearLayout>
 
     <LinearLayout
-      android:id="@+id/viewRatingsStripMeta"
+      android:id="@+id/viewRatingsStripRotten"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginTop="@dimen/spaceSmall"
@@ -95,7 +96,7 @@
         >
 
         <TextView
-          android:id="@+id/viewRatingsStripMetaValue"
+          android:id="@+id/viewRatingsStripRottenValue"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:fontFamily="sans-serif-medium"
@@ -104,7 +105,7 @@
           />
 
         <ProgressBar
-          android:id="@+id/viewRatingsStripMetaProgress"
+          android:id="@+id/viewRatingsStripRottenProgress"
           style="@style/ProgressBar.Dark"
           android:layout_width="16dp"
           android:layout_height="16dp"
@@ -112,7 +113,7 @@
           />
 
         <ImageView
-          android:id="@+id/viewRatingsStripMetaLinkIcon"
+          android:id="@+id/viewRatingsStripRottenLinkIcon"
           android:layout_width="20dp"
           android:layout_height="20dp"
           android:layout_gravity="center"
@@ -124,10 +125,13 @@
       </FrameLayout>
 
       <TextView
-        android:id="@+id/viewRatingsStripMetaLabel"
-        android:layout_width="wrap_content"
+        android:id="@+id/viewRatingsRottenLabel"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Metascore"
+        android:gravity="center"
+        android:lineSpacingExtra="2dp"
+        android:minLines="2"
+        android:text="R. Tomatoes"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="13sp"
         tools:ignore="HardcodedText"
@@ -192,10 +196,11 @@
 
       <TextView
         android:id="@+id/viewRatingsStripImdbLabel"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:lineSpacingExtra="2dp"
+        android:minLines="2"
         android:text="IMDb"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="13sp"
@@ -205,7 +210,7 @@
     </LinearLayout>
 
     <LinearLayout
-      android:id="@+id/viewRatingsStripRotten"
+      android:id="@+id/viewRatingsStripMeta"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginTop="@dimen/spaceSmall"
@@ -221,7 +226,7 @@
         >
 
         <TextView
-          android:id="@+id/viewRatingsStripRottenValue"
+          android:id="@+id/viewRatingsStripMetaValue"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:fontFamily="sans-serif-medium"
@@ -230,7 +235,7 @@
           />
 
         <ProgressBar
-          android:id="@+id/viewRatingsStripRottenProgress"
+          android:id="@+id/viewRatingsStripMetaProgress"
           style="@style/ProgressBar.Dark"
           android:layout_width="16dp"
           android:layout_height="16dp"
@@ -238,7 +243,7 @@
           />
 
         <ImageView
-          android:id="@+id/viewRatingsStripRottenLinkIcon"
+          android:id="@+id/viewRatingsStripMetaLinkIcon"
           android:layout_width="20dp"
           android:layout_height="20dp"
           android:layout_gravity="center"
@@ -250,12 +255,13 @@
       </FrameLayout>
 
       <TextView
-        android:id="@+id/viewRatingsRottenLabel"
-        android:layout_width="wrap_content"
+        android:id="@+id/viewRatingsStripMetaLabel"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:lineSpacingExtra="2dp"
-        android:text="R. Tomatoes"
+        android:minLines="2"
+        android:text="Content Rating"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="13sp"
         tools:ignore="HardcodedText"

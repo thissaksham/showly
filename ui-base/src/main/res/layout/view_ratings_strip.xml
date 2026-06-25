@@ -58,10 +58,11 @@
 
     <TextView
       android:id="@+id/viewRatingsStripTraktLabel"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:gravity="center"
       android:lineSpacingExtra="2dp"
+      android:minLines="2"
       android:text="Trakt.tv"
       android:textColor="?android:attr/textColorSecondary"
       android:textSize="12sp"
@@ -117,68 +118,12 @@
 
     <TextView
       android:id="@+id/viewRatingsStripImdbLabel"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:gravity="center"
       android:lineSpacingExtra="2dp"
+      android:minLines="2"
       android:text="IMDb"
-      android:textColor="?android:attr/textColorSecondary"
-      android:textSize="12sp"
-      tools:ignore="HardcodedText"
-      />
-
-  </LinearLayout>
-
-  <LinearLayout
-    android:id="@+id/viewRatingsStripMeta"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:background="?android:attr/selectableItemBackgroundBorderless"
-    android:gravity="center"
-    android:orientation="vertical"
-    >
-
-    <FrameLayout
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="@dimen/spaceMicro"
-      >
-
-      <TextView
-        android:id="@+id/viewRatingsStripMetaValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-medium"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="20sp"
-        />
-
-      <ProgressBar
-        android:id="@+id/viewRatingsStripMetaProgress"
-        style="@style/ProgressBar.Dark"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_gravity="center"
-        />
-
-      <ImageView
-        android:id="@+id/viewRatingsStripMetaLinkIcon"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_link"
-        app:tint="?android:attr/textColorSecondary"
-        />
-
-    </FrameLayout>
-
-    <TextView
-      android:id="@+id/viewRatingsStripMetaLabel"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="Metascore"
       android:textColor="?android:attr/textColorSecondary"
       android:textSize="12sp"
       tools:ignore="HardcodedText"
@@ -233,11 +178,72 @@
 
     <TextView
       android:id="@+id/viewRatingsRottenLabel"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:gravity="center"
       android:lineSpacingExtra="2dp"
+      android:minLines="2"
       android:text="R. Tomatoes"
+      android:textColor="?android:attr/textColorSecondary"
+      android:textSize="12sp"
+      tools:ignore="HardcodedText"
+      />
+
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/viewRatingsStripMeta"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:background="?android:attr/selectableItemBackgroundBorderless"
+    android:gravity="center"
+    android:orientation="vertical"
+    >
+
+    <FrameLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="@dimen/spaceMicro"
+      >
+
+      <TextView
+        android:id="@+id/viewRatingsStripMetaValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="20sp"
+        />
+
+      <ProgressBar
+        android:id="@+id/viewRatingsStripMetaProgress"
+        style="@style/ProgressBar.Dark"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_gravity="center"
+        />
+
+      <ImageView
+        android:id="@+id/viewRatingsStripMetaLinkIcon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_link"
+        app:tint="?android:attr/textColorSecondary"
+        />
+
+    </FrameLayout>
+
+    <TextView
+      android:id="@+id/viewRatingsStripMetaLabel"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center"
+      android:lineSpacingExtra="2dp"
+      android:minLines="2"
+      android:text="Content Rating"
       android:textColor="?android:attr/textColorSecondary"
       android:textSize="12sp"
       tools:ignore="HardcodedText"
@@ -291,10 +297,11 @@
 
     <TextView
       android:id="@+id/viewRatingsStripMoctaleLabel"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:gravity="center"
       android:lineSpacingExtra="2dp"
+      android:minLines="2"
       android:text="Moctale"
       android:textColor="?android:attr/textColorSecondary"
       android:textSize="12sp"

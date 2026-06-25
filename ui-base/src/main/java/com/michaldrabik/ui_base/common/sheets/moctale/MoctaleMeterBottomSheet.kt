@@ -7,6 +7,7 @@ import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.michaldrabik.common.MoctaleCookieManager
 import com.michaldrabik.ui_base.BaseBottomSheetFragment
 import com.michaldrabik.ui_base.R
@@ -37,6 +38,9 @@ class MoctaleMeterBottomSheet : BaseBottomSheetFragment(R.layout.view_moctale_me
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+    // Disable the sheet's drag-to-dismiss so the WebView keeps its own vertical scrolling
+    // (otherwise scrolling up at the top of the page closes the popup).
+    (dialog as? BottomSheetDialog)?.behavior?.isDraggable = false
     setupView()
     loadMeter()
   }
@@ -209,30 +213,24 @@ class MoctaleMeterBottomSheet : BaseBottomSheetFragment(R.layout.view_moctale_me
           return "PENDING";
         }
 
-        var res = findMeterAndIsolate();
-        if (res !== "SUCCESS") {
-           setTimeout(findMeterAndIsolate, 500);
-           setTimeout(findMeterAndIsolate, 1500);
-        }
-        return res;
+        return findMeterAndIsolate();
       })();
     """.trimIndent()
 
-    binding.moctaleMeterWebView.evaluateJavascript(script) {
-      if (it.contains("SUCCESS")) {
-          showContent()
-      } else {
-          // If it's still pending, let's wait a bit and check one more time from Android side
-          binding.moctaleMeterWebView.postDelayed({
-             binding.moctaleMeterWebView.evaluateJavascript("(function(){ return document.body.innerHTML.includes('Moctale Meter') ? 'SUCCESS' : 'FAIL'; })();") { retryResult ->
-                if (retryResult.contains("SUCCESS")) {
-                   showContent()
-                } else {
-                   // Final fallback: just show the webview after 4 seconds regardless
-                   binding.moctaleMeterWebView.postDelayed({ showContent() }, 2000)
-                }
-             }
-          }, 1500)
+    pollForMeter(script, attempt = 0)
+  }
+
+  // Re-run the isolation script from the Android side until it succeeds. Never fall back to showing
+  // the raw page — if the meter can't be isolated in time, show the "not found" message instead.
+  private fun pollForMeter(script: String, attempt: Int) {
+    if (view == null) return
+    val webView = binding.moctaleMeterWebView
+    webView.evaluateJavascript(script) { result ->
+      if (view == null) return@evaluateJavascript
+      when {
+        result.contains("SUCCESS") -> showContent()
+        attempt < MAX_ISOLATE_ATTEMPTS -> webView.postDelayed({ pollForMeter(script, attempt + 1) }, ISOLATE_POLL_MS)
+        else -> showNotFoundError()
       }
     }
   }
@@ -259,5 +257,10 @@ class MoctaleMeterBottomSheet : BaseBottomSheetFragment(R.layout.view_moctale_me
     if (binding.moctaleMeterLoginPrompt.visibility == View.VISIBLE && moctaleCookieManager.isLoggedIn()) {
       loadMeter()
     }
+  }
+
+  companion object {
+    private const val MAX_ISOLATE_ATTEMPTS = 30
+    private const val ISOLATE_POLL_MS = 400L
   }
 }

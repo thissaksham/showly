@@ -73,7 +73,7 @@ class RatingsStripView : LinearLayout {
         linkView = viewRatingsStripMetaLinkIcon,
         isHidden = ratings.isHidden,
         isTapToReveal = ratings.isTapToReveal,
-        callback = onMetaClick,
+        callback = null,
       )
       bindValue(
         ratingsValue = ratings.rottenTomatoes,
@@ -85,19 +85,26 @@ class RatingsStripView : LinearLayout {
         isTapToReveal = ratings.isTapToReveal,
         callback = onRottenClick,
       )
-      bindValue(
-        ratingsValue = if (ratings.moctaleUrl != null) Ratings.Value("", false) else null,
-        layoutView = viewRatingsStripMoctale!!,
-        valueView = viewRatingsStripMoctaleValue!!,
-        progressView = viewRatingsStripMoctaleProgress!!,
-        linkView = viewRatingsStripMoctaleLinkIcon!!,
-        isHidden = false,
-        isTapToReveal = false,
-        callback = { onMoctaleClick?.invoke(it) },
-      )
+      // Moctale views only exist in the phone layout; on sw600dp they are absent (null binding).
+      val moctaleLayout = viewRatingsStripMoctale
+      val moctaleValue = viewRatingsStripMoctaleValue
+      val moctaleProgress = viewRatingsStripMoctaleProgress
+      val moctaleLink = viewRatingsStripMoctaleLinkIcon
+      if (moctaleLayout != null && moctaleValue != null && moctaleProgress != null && moctaleLink != null) {
+        bindValue(
+          ratingsValue = if (ratings.moctaleUrl != null) Ratings.Value("", false) else null,
+          layoutView = moctaleLayout,
+          valueView = moctaleValue,
+          progressView = moctaleProgress,
+          linkView = moctaleLink,
+          isHidden = false,
+          isTapToReveal = false,
+          callback = { onMoctaleClick?.invoke(it) },
+        )
+      }
     }
   }
-
+ 
   private fun bindValue(
     ratingsValue: Ratings.Value?,
     layoutView: View,
@@ -120,10 +127,11 @@ class RatingsStripView : LinearLayout {
       }
       setTextColor(if (rating != null) colorPrimary else colorSecondary)
     }
-
+ 
     with(layoutView) {
       onClick {
-        if (!this@RatingsStripView.ratings.isAnyLoading()) {
+        // Gate each item on its own load state only — a still-loading sibling must not block it.
+        if (!isLoading) {
           if (isHidden && isTapToReveal && !rating.isNullOrBlank() && valueView.text == SPOILERS_RATINGS_HIDE_SYMBOL) {
             valueView.tag?.let { valueView.text = it.toString() }
           } else {
@@ -132,9 +140,9 @@ class RatingsStripView : LinearLayout {
         }
       }
     }
-
+ 
     progressView.visibleIf(isLoading)
-    linkView.visibleIf(!isLoading && rating.isNullOrBlank())
+    linkView.visibleIf(!isLoading && rating.isNullOrBlank() && layoutView != binding.viewRatingsStripMeta)
   }
 
   fun isBound() = this::ratings.isInitialized && !this.ratings.isAnyLoading()

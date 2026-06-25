@@ -39,7 +39,7 @@ class ShowDetailsRatingsViewModel @Inject constructor(
       val traktRatings = Ratings(
         trakt = Ratings.Value(String.format(Locale.ENGLISH, "%.1f", show.rating), false),
         imdb = Ratings.Value(null, true),
-        metascore = Ratings.Value(null, true),
+        metascore = null,
         rottenTomatoes = Ratings.Value(null, true),
         moctaleUrl = generateMoctaleId(show)
       )
@@ -50,7 +50,14 @@ class ShowDetailsRatingsViewModel @Inject constructor(
         val ratings = ratingsCase.loadExternalRatings(show)
         ratingsState.value = ratingsSpoilersCase.hideSpoilerRatings(show, ratings)
       } catch (error: Throwable) {
-        ratingsState.value = ratingsSpoilersCase.hideSpoilerRatings(show, traktRatings)
+        // External (OMDB) ratings failed — settle them as empty so the strip stops spinning and
+        // stays interactive. Otherwise the whole bar (incl. Moctale) is gated by isAnyLoading().
+        val failedRatings = traktRatings.copy(
+          imdb = Ratings.Value(null, false),
+          metascore = Ratings.Value(null, false),
+          rottenTomatoes = Ratings.Value(null, false),
+        )
+        ratingsState.value = ratingsSpoilersCase.hideSpoilerRatings(show, failedRatings)
         rethrowCancellation(error)
       }
     }
