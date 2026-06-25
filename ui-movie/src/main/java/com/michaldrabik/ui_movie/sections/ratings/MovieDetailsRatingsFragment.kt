@@ -53,7 +53,14 @@ class MovieDetailsRatingsFragment :
           movie?.let {
             movieDetailsRatings.onTraktClick = { openMovieLink(MovieLink.TRAKT, movie.traktId.toString()) }
             movieDetailsRatings.onImdbClick = { openMovieLink(MovieLink.IMDB, movie.ids.imdb.id) }
-            movieDetailsRatings.onMetaClick = { openMovieLink(MovieLink.METACRITIC, movie.title) }
+            movieDetailsRatings.onMetaClick = {
+              it.parentalGuideUrl?.let { url ->
+                findNavController().navigate(
+                  R.id.contentRatingDialog,
+                  bundleOf(NavigationArgs.ARG_URL to url, "title" to movie.title)
+                )
+              }
+            }
             movieDetailsRatings.onRottenClick = {
               val url = it.rottenTomatoesUrl
               if (!url.isNullOrBlank()) {

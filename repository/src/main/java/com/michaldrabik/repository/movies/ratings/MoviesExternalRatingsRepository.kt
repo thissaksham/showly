@@ -22,7 +22,10 @@ class MoviesExternalRatingsRepository @Inject constructor(
     val localRatings = localSource.movieRatings.getById(movie.traktId)
     localRatings?.let {
       if (nowUtcMillis() - it.updatedAt < ConfigVariant.RATINGS_CACHE_DURATION) {
-        return mappers.ratings.fromDatabase(it).copy(moctaleUrl = movie.generateMoctaleId())
+        return mappers.ratings.fromDatabase(it).copy(
+          moctaleUrl = movie.generateMoctaleId(),
+          parentalGuideUrl = movie.generateParentalGuideUrl()
+        )
       }
     }
 
@@ -31,7 +34,8 @@ class MoviesExternalRatingsRepository @Inject constructor(
       .let { mappers.ratings.fromNetwork(it) }
       .copy(
         trakt = Ratings.Value(String.format(Locale.ENGLISH, "%.1f", movie.rating), false),
-        moctaleUrl = movie.generateMoctaleId()
+        moctaleUrl = movie.generateMoctaleId(),
+        parentalGuideUrl = movie.generateParentalGuideUrl()
       )
 
     val dbRatings = mappers.ratings.toMovieDatabase(movie.ids.trakt, remoteRatings)
@@ -47,5 +51,10 @@ class MoviesExternalRatingsRepository @Inject constructor(
       .replace(Regex("-+"), "-")
       .trim('-')
     return "https://www.moctale.in/content/$slug-$year"
+  }
+
+  private fun Movie.generateParentalGuideUrl(): String? {
+    val imdbId = ids.imdb.id
+    return if (imdbId.isNotBlank()) "https://www.imdb.com/title/$imdbId/parentalguide/" else null
   }
 }

@@ -51,7 +51,14 @@ class ShowDetailsRatingsFragment : BaseFragment<ShowDetailsRatingsViewModel>(R.l
           show?.let {
             showDetailsRatings.onTraktClick = { openLink(ShowLink.TRAKT, show.traktId.toString()) }
             showDetailsRatings.onImdbClick = { openLink(ShowLink.IMDB, show.ids.imdb.id) }
-            showDetailsRatings.onMetaClick = { openLink(ShowLink.METACRITIC, show.title) }
+            showDetailsRatings.onMetaClick = {
+              it.parentalGuideUrl?.let { url ->
+                findNavController().navigate(
+                  R.id.contentRatingDialog,
+                  bundleOf(NavigationArgs.ARG_URL to url, "title" to show.title)
+                )
+              }
+            }
             showDetailsRatings.onRottenClick = {
               val url = it.rottenTomatoesUrl
               if (!url.isNullOrBlank()) {

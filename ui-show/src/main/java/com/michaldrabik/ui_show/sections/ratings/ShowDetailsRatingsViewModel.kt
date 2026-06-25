@@ -39,9 +39,10 @@ class ShowDetailsRatingsViewModel @Inject constructor(
       val traktRatings = Ratings(
         trakt = Ratings.Value(String.format(Locale.ENGLISH, "%.1f", show.rating), false),
         imdb = Ratings.Value(null, true),
-        metascore = null,
+        metascore = Ratings.Value(null, true),
         rottenTomatoes = Ratings.Value(null, true),
-        moctaleUrl = generateMoctaleId(show)
+        moctaleUrl = generateMoctaleId(show),
+        parentalGuideUrl = "https://www.imdb.com/title/${show.ids.imdb.id}/parentalguide/"
       )
 
       try {

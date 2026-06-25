@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:background="@drawable/bg_bottom_sheet_secondary"
+  android:padding="@dimen/spaceNormal">
+
+  <ImageView
+    android:id="@+id/contentRatingExternalLink"
+    android:layout_width="32dp"
+    android:layout_height="32dp"
+    android:src="@drawable/ic_open_browser"
+    android:tint="?android:attr/textColorSecondary"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/contentRatingTitle"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:fontFamily="sans-serif-medium"
+    android:textSize="18sp"
+    android:text="Content Rating"
+    app:layout_constraintBottom_toBottomOf="@id/contentRatingExternalLink"
+    app:layout_constraintEnd_toStartOf="@id/contentRatingExternalLink"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@id/contentRatingExternalLink"
+    tools:ignore="HardcodedText" />
+
+  <WebView
+    android:id="@+id/contentRatingWebView"
+    android:layout_width="match_parent"
+    android:layout_height="340dp"
+    android:layout_marginTop="@dimen/spaceSmall"
+    android:background="@android:color/transparent"
+    android:visibility="invisible"
+    app:layout_constraintTop_toBottomOf="@id/contentRatingTitle" />
+
+  <ProgressBar
+    android:id="@+id/contentRatingProgress"
+    style="@style/ProgressBar.Accent"
+    android:layout_width="32dp"
+    android:layout_height="32dp"
+    app:layout_constraintBottom_toBottomOf="@id/contentRatingWebView"
+    app:layout_constraintEnd_toEndOf="@id/contentRatingWebView"
+    app:layout_constraintStart_toStartOf="@id/contentRatingWebView"
+    app:layout_constraintTop_toTopOf="@id/contentRatingWebView" />
+
+  <TextView
+    android:id="@+id/contentRatingErrorText"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:padding="@dimen/spaceBig"
+    android:text="Content rating not found for this title."
+    android:textColor="?android:attr/textColorSecondary"
+    android:textSize="16sp"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="@id/contentRatingWebView"
+    app:layout_constraintTop_toTopOf="@id/contentRatingWebView"
+    tools:ignore="HardcodedText" />
+
+  <com.google.android.material.button.MaterialButton
+    android:id="@+id/contentRatingRetryButton"
+    style="@style/RoundMaterialButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/spaceSmall"
+    android:text="Retry"
+    android:visibility="gone"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/contentRatingErrorText"
+    tools:ignore="HardcodedText" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

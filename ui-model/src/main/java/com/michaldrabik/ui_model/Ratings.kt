@@ -7,6 +7,7 @@ data class Ratings(
   val rottenTomatoes: Value? = null,
   val rottenTomatoesUrl: String? = null,
   val moctaleUrl: String? = null,
+  val parentalGuideUrl: String? = null,
   val isHidden: Boolean = false,
   val isTapToReveal: Boolean = false,
 ) {

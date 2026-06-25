@@ -1057,4 +1057,11 @@
     android:label="dialogMoctaleMeter"
     />
 
+  <dialog
+    android:id="@+id/contentRatingDialog"
+    android:name="com.michaldrabik.ui_base.common.sheets.contentrating.ContentRatingBottomSheet"
+    android:label="dialogContentRating"
+    />
+
 </navigation>
+

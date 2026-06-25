@@ -73,7 +73,7 @@ class RatingsStripView : LinearLayout {
         linkView = viewRatingsStripMetaLinkIcon,
         isHidden = ratings.isHidden,
         isTapToReveal = ratings.isTapToReveal,
-        callback = null,
+        callback = onMetaClick,
       )
       bindValue(
         ratingsValue = ratings.rottenTomatoes,
@@ -142,7 +142,7 @@ class RatingsStripView : LinearLayout {
     }
  
     progressView.visibleIf(isLoading)
-    linkView.visibleIf(!isLoading && rating.isNullOrBlank() && layoutView != binding.viewRatingsStripMeta)
+    linkView.visibleIf(!isLoading && rating.isNullOrBlank())
   }
 
   fun isBound() = this::ratings.isInitialized && !this.ratings.isAnyLoading()
