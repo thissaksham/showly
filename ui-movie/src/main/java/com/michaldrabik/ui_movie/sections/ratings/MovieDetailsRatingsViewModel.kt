@@ -42,7 +42,9 @@ class MovieDetailsRatingsViewModel @Inject constructor(
         metascore = Ratings.Value(null, true),
         rottenTomatoes = Ratings.Value(null, true),
         moctaleUrl = generateMoctaleId(movie),
-        parentalGuideUrl = "https://www.imdb.com/title/${movie.ids.imdb.id}/parentalguide/"
+        parentalGuideUrl = movie.ids.imdb.id
+          .takeIf { it.isNotBlank() }
+          ?.let { "https://www.imdb.com/title/$it/parentalguide/" }
       )
 
       try {
