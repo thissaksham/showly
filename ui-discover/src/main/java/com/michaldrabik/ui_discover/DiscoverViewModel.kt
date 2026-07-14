@@ -146,12 +146,12 @@ internal class DiscoverViewModel @Inject constructor(
     }
   }
 
-  private suspend fun onError(error: Throwable) {
-    if (error !is CancellationException) {
-      messageChannel.send(MessageEvent.Error(R.string.errorCouldNotLoadDiscover))
-      Timber.e(error)
+  private fun onError(error: Throwable) {
+    rethrowCancellation(error) {
+      viewModelScope.launch {
+        messageChannel.send(MessageEvent.Error(R.string.errorCouldNotLoadDiscover))
+      }
     }
-    rethrowCancellation(error)
   }
 
   override fun onCleared() {

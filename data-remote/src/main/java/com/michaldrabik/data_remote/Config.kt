@@ -2,7 +2,7 @@ package com.michaldrabik.data_remote
 
 object Config {
   const val TRAKT_VERSION = "2"
-  const val TRAKT_BASE_URL = "https://apiz.trakt.tv/"
+  const val TRAKT_BASE_URL = "https://api.trakt.tv/"
   const val TRAKT_CLIENT_ID = BuildConfig.TRAKT_CLIENT_ID
 
   const val TRAKT_DISCOVER_LIMIT = 280
@@ -25,6 +25,6 @@ object Config {
     androidVersion: Int,
   ): String {
     // "Showly/3.55.1 (com.michaldrabik.showly; build:1254; Android)"
-    return "Showly/$buildVersion (com.thissaksham.showly; build:$buildCode; Android $androidVersion)"
+    return "Showly/$buildVersion (com.thissaksham.showly2; build:$buildCode; Android $androidVersion)"
   }
 }

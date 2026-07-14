@@ -77,15 +77,23 @@ class DiscoverShowsRepository @Inject constructor(
         }
 
       val trendingShowsAsync = async {
-        remoteSource.trakt
-          .fetchTrendingShows(genresQuery, networksQuery, limit)
-          .map { mappers.show.fromNetwork(it) }
+        try {
+          remoteSource.trakt
+            .fetchTrendingShows(genresQuery, networksQuery, limit)
+            .map { mappers.show.fromNetwork(it) }
+        } catch (e: Throwable) {
+          emptyList()
+        }
       }
 
       val anticipatedShowsAsync = async {
-        remoteSource.trakt
-          .fetchAnticipatedShows(genresQuery, networksQuery, TRAKT_ANTICIPATED_LIMIT)
-          .map { mappers.show.fromNetwork(it) }
+        try {
+          remoteSource.trakt
+            .fetchAnticipatedShows(genresQuery, networksQuery, TRAKT_ANTICIPATED_LIMIT)
+            .map { mappers.show.fromNetwork(it) }
+        } catch (e: Throwable) {
+          emptyList()
+        }
       }
 
       val trendingShows = trendingShowsAsync.await()

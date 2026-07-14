@@ -73,15 +73,23 @@ class DiscoverMoviesRepository @Inject constructor(
         }
 
       val trendingMoviesAsync = async {
-        remoteSource.trakt
-          .fetchTrendingMovies(genresQuery, limit)
-          .map { mappers.movie.fromNetwork(it) }
+        try {
+          remoteSource.trakt
+            .fetchTrendingMovies(genresQuery, limit)
+            .map { mappers.movie.fromNetwork(it) }
+        } catch (e: Throwable) {
+          emptyList()
+        }
       }
 
       val anticipatedMoviesAsync = async {
-        remoteSource.trakt
-          .fetchAnticipatedMovies(genresQuery, TRAKT_ANTICIPATED_LIMIT)
-          .map { mappers.movie.fromNetwork(it) }
+        try {
+          remoteSource.trakt
+            .fetchAnticipatedMovies(genresQuery, TRAKT_ANTICIPATED_LIMIT)
+            .map { mappers.movie.fromNetwork(it) }
+        } catch (e: Throwable) {
+          emptyList()
+        }
       }
 
       val trendingMovies = trendingMoviesAsync.await()

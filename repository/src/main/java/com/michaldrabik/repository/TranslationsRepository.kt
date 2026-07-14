@@ -151,9 +151,13 @@ class TranslationsRepository @Inject constructor(
 
     if (onlyLocal) return null
 
-    val remoteTranslations = remoteSource.trakt
-      .fetchSeasonTranslations(showId.id, episode.season, language)
-      .map { mappers.translation.fromNetwork(it) }
+    val remoteTranslations = try {
+      remoteSource.trakt
+        .fetchSeasonTranslations(showId.id, episode.season, language)
+        .map { mappers.translation.fromNetwork(it) }
+    } catch (error: Throwable) {
+      emptyList()
+    }
 
     remoteTranslations
       .forEach { item ->
@@ -205,9 +209,13 @@ class TranslationsRepository @Inject constructor(
       }
     }
 
-    val remoteTranslation = remoteSource.trakt
-      .fetchSeasonTranslations(showId.id, season.number, language)
-      .map { mappers.translation.fromNetwork(it) }
+    val remoteTranslation = try {
+      remoteSource.trakt
+        .fetchSeasonTranslations(showId.id, season.number, language)
+        .map { mappers.translation.fromNetwork(it) }
+    } catch (error: Throwable) {
+      emptyList()
+    }
 
     remoteTranslation
       .forEach { item ->
