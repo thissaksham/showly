@@ -12,7 +12,7 @@ I am happy to announce that starting Jan 2025, Showly is available on iOS!
 
 Check AppStore link below to jump straight into action.
 
-# Showly+
+# Showly++
 
 <img src="https://github.com/user-attachments/assets/b31c6ce6-7257-4c90-a13b-b12603e105a9" align="left" width="180" hspace="0" vspace="80" />
 
