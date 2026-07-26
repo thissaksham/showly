@@ -14,9 +14,9 @@ class ShowDetailsMainCase @Inject constructor(
   private val showsRepository: ShowsRepository,
 ) {
 
-  suspend fun loadDetails(idTrakt: IdTrakt) =
+  suspend fun loadDetails(idTrakt: IdTrakt, force: Boolean = false) =
     withContext(dispatchers.IO) {
-      showsRepository.detailsShow.load(idTrakt)
+      showsRepository.detailsShow.load(idTrakt, force)
     }
 
   suspend fun resolveTraktId(tmdbId: Long) =

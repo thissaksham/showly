@@ -164,6 +164,7 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
           openWebUrl(movie.trailer) ?: showSnack(MessageEvent.Info(R.string.errorCouldNotFindApp))
         }
       }
+      movieDetailsSwipeRefresh.setOnRefreshListener { viewModel.refresh() }
     }
   }
 
@@ -193,7 +194,8 @@ class MovieDetailsFragment : BaseFragment<MovieDetailsViewModel>(R.layout.fragme
         }
         movieLoading?.let {
           movieDetailsMainLayout.fadeIf(!it, hardware = true)
-          movieDetailsMainProgress.visibleIf(it)
+          movieDetailsMainProgress.visibleIf(it && movie == null)
+          movieDetailsSwipeRefresh.isRefreshing = it
         }
         followedState?.let {
           when {

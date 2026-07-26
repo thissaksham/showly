@@ -79,7 +79,7 @@ class MovieDetailsViewModel @Inject constructor(
   private val eventChannel = MutableSharedFlow<Event<*>>()
   val eventFlow: SharedFlow<Event<*>> = eventChannel
 
-  fun loadDetails(movieId: IdTrakt) {
+  fun loadDetails(movieId: IdTrakt, force: Boolean = false) {
     viewModelScope.launch {
       movieLoadingState.value = true
       try {
@@ -88,7 +88,7 @@ class MovieDetailsViewModel @Inject constructor(
         } else {
           movieId
         }
-        val result = mainCase.loadDetails(targetId)
+        val result = mainCase.loadDetails(targetId, force)
         movie = result
         movieState.value = result
         loadBackgroundImage(result)
@@ -208,6 +208,10 @@ class MovieDetailsViewModel @Inject constructor(
 
   fun removeMalformedMovie(movieId: IdTrakt) {
     // Removed.
+  }
+
+  fun refresh() {
+    loadDetails(movie.ids.trakt, force = true)
   }
 
   val uiState = combine(

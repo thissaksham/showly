@@ -77,7 +77,7 @@ class ShowDetailsViewModel @Inject constructor(
   private val eventChannel = MutableSharedFlow<Event<*>>()
   val eventFlow: SharedFlow<Event<*>> = eventChannel
 
-  fun loadDetails(showId: IdTrakt) {
+  fun loadDetails(showId: IdTrakt, force: Boolean = false) {
     viewModelScope.launch {
       showLoadingState.value = true
       try {
@@ -86,7 +86,7 @@ class ShowDetailsViewModel @Inject constructor(
         } else {
           showId
         }
-        val result = mainCase.loadDetails(targetId)
+        val result = mainCase.loadDetails(targetId, force)
         show = result
         showState.value = result
         loadBackgroundImage(result)
@@ -203,6 +203,10 @@ class ShowDetailsViewModel @Inject constructor(
   }
 
   fun checkSeasonsLoaded(): Boolean = seasonsCache.hasSeasons(show.ids.trakt)
+
+  fun refresh() {
+    loadDetails(show.ids.trakt, force = true)
+  }
 
   val uiState = combine(
     showState,

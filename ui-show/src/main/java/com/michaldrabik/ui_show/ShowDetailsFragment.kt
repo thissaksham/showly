@@ -153,6 +153,7 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
           openWebUrl(show.trailer) ?: showSnack(MessageEvent.Info(R.string.errorCouldNotFindApp))
         }
       }
+      showDetailsSwipeRefresh.setOnRefreshListener { viewModel.refresh() }
     }
   }
 
@@ -188,7 +189,8 @@ class ShowDetailsFragment : BaseFragment<ShowDetailsViewModel>(R.layout.fragment
         }
         showLoading?.let {
           showDetailsMainLayout.fadeIf(!it, hardware = true)
-          showDetailsMainProgress.visibleIf(it)
+          showDetailsMainProgress.visibleIf(it && show == null)
+          showDetailsSwipeRefresh.isRefreshing = it
         }
         followedState?.let {
           when {

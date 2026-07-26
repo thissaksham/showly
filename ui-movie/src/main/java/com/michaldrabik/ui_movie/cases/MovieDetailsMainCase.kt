@@ -14,9 +14,9 @@ class MovieDetailsMainCase @Inject constructor(
   private val moviesRepository: MoviesRepository,
 ) {
 
-  suspend fun loadDetails(idTrakt: IdTrakt) =
+  suspend fun loadDetails(idTrakt: IdTrakt, force: Boolean = false) =
     withContext(dispatchers.IO) {
-      moviesRepository.movieDetails.load(idTrakt)
+      moviesRepository.movieDetails.load(idTrakt, force)
     }
 
   suspend fun resolveTraktId(tmdbId: Long) =

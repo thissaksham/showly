@@ -9,16 +9,22 @@
   tools:layout_marginTop="-0dp"
   >
 
-  <androidx.core.widget.NestedScrollView
-    android:id="@+id/movieDetailsMainLayout"
+  <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    android:id="@+id/movieDetailsSwipeRefresh"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clipToPadding="false"
-    android:overScrollMode="never"
-    android:scrollbars="none"
-    android:visibility="gone"
-    tools:visibility="visible"
+    android:layout_height="match_parent"
     >
+
+    <androidx.core.widget.NestedScrollView
+      android:id="@+id/movieDetailsMainLayout"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:clipToPadding="false"
+      android:overScrollMode="never"
+      android:scrollbars="none"
+      android:visibility="gone"
+      tools:visibility="visible"
+      >
 
     <androidx.constraintlayout.widget.ConstraintLayout
       android:id="@+id/movieDetailsMainContent"
@@ -356,7 +362,9 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-  </androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
+
+  </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
   <ProgressBar
     android:id="@+id/movieDetailsMainProgress"
