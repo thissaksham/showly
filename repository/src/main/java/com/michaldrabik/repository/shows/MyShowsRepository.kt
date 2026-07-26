@@ -28,6 +28,8 @@ class MyShowsRepository @Inject constructor(
       .getAll()
       .map { mappers.show.fromDatabase(it) }
 
+  suspend fun loadAllSyncInfo() = myShowsLocalSource.getAllSyncInfo()
+
   suspend fun loadAll(ids: List<IdTrakt>) =
     myShowsLocalSource
       .getAll(ids.map { it.id })

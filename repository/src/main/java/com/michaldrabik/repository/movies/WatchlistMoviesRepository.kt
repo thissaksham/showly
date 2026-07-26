@@ -19,6 +19,8 @@ class WatchlistMoviesRepository @Inject constructor(
       .getAll()
       .map { mappers.movie.fromDatabase(it) }
 
+  suspend fun loadAllSyncInfo() = localSource.watchlistMovies.getAllSyncInfo()
+
   suspend fun loadAllIds() = localSource.watchlistMovies.getAllTraktIds()
 
   suspend fun load(id: IdTrakt) =

@@ -2,10 +2,13 @@ package com.michaldrabik.data_local.sources
 
 import com.michaldrabik.data_local.database.model.MyShow
 import com.michaldrabik.data_local.database.model.Show
+import com.michaldrabik.data_local.database.model.SyncShowInfo
 
 interface MyShowsLocalDataSource {
 
   suspend fun getAll(): List<Show>
+
+  suspend fun getAllSyncInfo(): List<SyncShowInfo>
 
   suspend fun getAll(ids: List<Long>): List<Show>
 

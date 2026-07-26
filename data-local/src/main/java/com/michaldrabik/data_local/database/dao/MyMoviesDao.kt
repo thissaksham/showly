@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.michaldrabik.data_local.database.model.Movie
 import com.michaldrabik.data_local.database.model.MyMovie
+import com.michaldrabik.data_local.database.model.SyncMovieInfo
 import com.michaldrabik.data_local.sources.MyMoviesLocalDataSource
 
 @Dao
@@ -37,6 +38,9 @@ interface MyMoviesDao : MyMoviesLocalDataSource {
       "INNER JOIN movies_my_movies USING(id_trakt)",
   )
   override suspend fun getAll(): List<Movie>
+
+  @Query("SELECT movies.id_trakt, movies.status, movies.title FROM movies INNER JOIN movies_my_movies USING(id_trakt)")
+  override suspend fun getAllSyncInfo(): List<SyncMovieInfo>
 
   @Query(
     "SELECT " +

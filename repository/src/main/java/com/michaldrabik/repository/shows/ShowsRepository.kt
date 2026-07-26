@@ -24,4 +24,12 @@ class ShowsRepository @Inject constructor(
       val (my, watchlist, hidden) = awaitAll(async1, async2, async3)
       (my + watchlist + hidden).distinctBy { it.traktId }
     }
+
+  suspend fun loadCollectionSyncInfo() =
+    coroutineScope {
+      val async1 = async { myShows.loadAllSyncInfo() }
+      val async2 = async { watchlistShows.loadAllSyncInfo() }
+      val (my, watchlist) = awaitAll(async1, async2)
+      (my + watchlist).distinctBy { it.idTrakt }
+    }
 }

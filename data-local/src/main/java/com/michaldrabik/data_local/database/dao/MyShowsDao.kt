@@ -8,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.michaldrabik.data_local.database.model.MyShow
 import com.michaldrabik.data_local.database.model.Show
+import com.michaldrabik.data_local.database.model.SyncShowInfo
 import com.michaldrabik.data_local.sources.MyShowsLocalDataSource
 
 @Dao
@@ -46,6 +47,9 @@ interface MyShowsDao : MyShowsLocalDataSource {
       "INNER JOIN shows_my_shows USING(id_trakt)",
   )
   override suspend fun getAll(): List<Show>
+
+  @Query("SELECT shows.id_trakt, shows.status, shows.title FROM shows INNER JOIN shows_my_shows USING(id_trakt)")
+  override suspend fun getAllSyncInfo(): List<SyncShowInfo>
 
   @Query(
     "SELECT " +

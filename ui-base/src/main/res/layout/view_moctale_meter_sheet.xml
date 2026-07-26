@@ -49,18 +49,35 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/moctaleMeterWebView" />
 
-    <TextView
-        android:id="@+id/moctaleMeterErrorText"
+    <LinearLayout
+        android:id="@+id/moctaleMeterErrorContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="@dimen/spaceBig"
-        android:text="Content not found on Moctale"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="16sp"
+        android:orientation="vertical"
+        android:paddingVertical="@dimen/spaceBig"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/moctaleMeterWebView"
-        app:layout_constraintTop_toTopOf="@id/moctaleMeterWebView" />
+        app:layout_constraintTop_toTopOf="@id/moctaleMeterWebView">
+
+        <TextView
+            android:id="@+id/moctaleMeterErrorText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Content not found on Moctale"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="16sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/moctaleMeterRetryLoginButton"
+            style="@style/RoundMaterialButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spaceNormal"
+            android:text="@string/textLogin" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/moctaleMeterLoginPrompt"

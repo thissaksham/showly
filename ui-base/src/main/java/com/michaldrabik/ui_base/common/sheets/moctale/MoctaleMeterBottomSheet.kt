@@ -48,13 +48,10 @@ class MoctaleMeterBottomSheet : BaseBottomSheetFragment(R.layout.view_moctale_me
   @SuppressLint("SetJavaScriptEnabled")
   private fun setupView() {
     binding.moctaleMeterExternalLink.onClick { openWebUrl(url) }
-    binding.moctaleMeterLoginButton.onClick {
-      try {
-        val intent = android.content.Intent(requireContext(), Class.forName("com.michaldrabik.showly2.ui.moctale.MoctaleLoginActivity"))
-        loginLauncher.launch(intent)
-      } catch (e: Exception) {
-        android.util.Log.e("MoctaleMeter", "Failed to launch login activity", e)
-      }
+    binding.moctaleMeterLoginButton.onClick { launchLogin() }
+    binding.moctaleMeterRetryLoginButton.onClick {
+      moctaleCookieManager.clearCookies()
+      launchLogin()
     }
 
     with(binding.moctaleMeterWebView) {
@@ -72,7 +69,13 @@ class MoctaleMeterBottomSheet : BaseBottomSheetFragment(R.layout.view_moctale_me
           super.onPageStarted(view, url, favicon)
           // Ensure it stays hidden and transparent during load
           view?.visibility = View.INVISIBLE
-          binding.moctaleMeterErrorText.visibleIf(false)
+          binding.moctaleMeterErrorContainer.visibleIf(false)
+
+          // If we are redirected to login/account page, it means session is invalid
+          if (url != null && (url.contains("login") || url.contains("account"))) {
+            showLoginPrompt()
+            view?.stopLoading()
+          }
         }
 
         override fun onPageFinished(view: WebView?, url: String?) {
@@ -243,12 +246,23 @@ class MoctaleMeterBottomSheet : BaseBottomSheetFragment(R.layout.view_moctale_me
   private fun showNotFoundError() {
     binding.moctaleMeterProgress.visibleIf(false)
     binding.moctaleMeterWebView.visibleIf(false)
-    binding.moctaleMeterErrorText.visibleIf(true)
+    binding.moctaleMeterErrorContainer.visibleIf(true)
   }
 
   private fun showLoginPrompt() {
     binding.moctaleMeterWebView.visibleIf(false, gone = false)
+    binding.moctaleMeterProgress.visibleIf(false)
     binding.moctaleMeterLoginPrompt.visibleIf(true)
+    binding.moctaleMeterErrorContainer.visibleIf(false)
+  }
+
+  private fun launchLogin() {
+    try {
+      val intent = android.content.Intent(requireContext(), Class.forName("com.michaldrabik.showly2.ui.moctale.MoctaleLoginActivity"))
+      loginLauncher.launch(intent)
+    } catch (e: Exception) {
+      android.util.Log.e("MoctaleMeter", "Failed to launch login activity", e)
+    }
   }
 
   override fun onResume() {

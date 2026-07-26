@@ -7,6 +7,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.michaldrabik.data_local.database.model.Show
+import com.michaldrabik.data_local.database.model.SyncShowInfo
 import com.michaldrabik.data_local.database.model.WatchlistShow
 import com.michaldrabik.data_local.sources.WatchlistShowsLocalDataSource
 
@@ -46,6 +47,9 @@ interface WatchlistShowsDao : WatchlistShowsLocalDataSource {
       "INNER JOIN shows_see_later USING(id_trakt)",
   )
   override suspend fun getAll(): List<Show>
+
+  @Query("SELECT shows.id_trakt, shows.status, shows.title FROM shows INNER JOIN shows_see_later USING(id_trakt)")
+  override suspend fun getAllSyncInfo(): List<SyncShowInfo>
 
   @Query("SELECT shows.id_trakt FROM shows INNER JOIN shows_see_later USING(id_trakt)")
   override suspend fun getAllTraktIds(): List<Long>

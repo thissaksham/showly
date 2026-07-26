@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.michaldrabik.data_local.database.model.Movie
+import com.michaldrabik.data_local.database.model.SyncMovieInfo
 import com.michaldrabik.data_local.database.model.WatchlistMovie
 import com.michaldrabik.data_local.sources.WatchlistMoviesLocalDataSource
 
@@ -37,6 +38,9 @@ interface WatchlistMoviesDao : WatchlistMoviesLocalDataSource {
       "INNER JOIN movies_see_later USING(id_trakt)",
   )
   override suspend fun getAll(): List<Movie>
+
+  @Query("SELECT movies.id_trakt, movies.status, movies.title FROM movies INNER JOIN movies_see_later USING(id_trakt)")
+  override suspend fun getAllSyncInfo(): List<SyncMovieInfo>
 
   @Query("SELECT movies.id_trakt FROM movies INNER JOIN movies_see_later USING(id_trakt)")
   override suspend fun getAllTraktIds(): List<Long>

@@ -34,3 +34,9 @@ data class Show(
   @ColumnInfo(name = "created_at", defaultValue = "-1") val createdAt: Long,
   @ColumnInfo(name = "updated_at", defaultValue = "-1") val updatedAt: Long,
 )
+
+data class SyncShowInfo(
+  @ColumnInfo(name = "id_trakt") val idTrakt: Long,
+  @ColumnInfo(name = "status") val status: String,
+  @ColumnInfo(name = "title") val title: String,
+)

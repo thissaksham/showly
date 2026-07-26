@@ -26,6 +26,8 @@ class MyMoviesRepository @Inject constructor(
       .getAll()
       .map { mappers.movie.fromDatabase(it) }
 
+  suspend fun loadAllSyncInfo() = localSource.myMovies.getAllSyncInfo()
+
   suspend fun loadAll(ids: List<IdTrakt>) =
     localSource.myMovies
       .getAll(ids.map { it.id })

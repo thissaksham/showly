@@ -1,11 +1,14 @@
 package com.michaldrabik.data_local.sources
 
 import com.michaldrabik.data_local.database.model.Show
+import com.michaldrabik.data_local.database.model.SyncShowInfo
 import com.michaldrabik.data_local.database.model.WatchlistShow
 
 interface WatchlistShowsLocalDataSource {
 
   suspend fun getAll(): List<Show>
+
+  suspend fun getAllSyncInfo(): List<SyncShowInfo>
 
   suspend fun getAllTraktIds(): List<Long>
 

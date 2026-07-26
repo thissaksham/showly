@@ -38,9 +38,9 @@ class MoviesSyncRunner @Inject constructor(
       return 0
     }
 
-    val movies = moviesRepository.loadCollection()
-
-    val moviesToSync = movies.filter { it.status in arrayOf(PLANNED, IN_PRODUCTION, POST_PRODUCTION, RUMORED, RELEASED) }
+    val moviesToSync = moviesRepository.loadCollectionSyncInfo()
+      .filter { it.status in arrayOf(PLANNED.name, IN_PRODUCTION.name, POST_PRODUCTION.name, RUMORED.name, RELEASED.name) }
+    
     if (moviesToSync.isEmpty()) {
       Timber.i("Nothing to process. Exiting...")
       return 0
@@ -50,20 +50,21 @@ class MoviesSyncRunner @Inject constructor(
     var syncCount = 0
     val syncLog = localSource.moviesSyncLog.getAll()
     moviesToSync.forEach { movie ->
-      val cooldown = if (movie.status == RELEASED) MOVIE_STATIC_SYNC_COOLDOWN else MOVIE_SYNC_COOLDOWN
-      val lastSync = syncLog.find { it.idTrakt == movie.ids.trakt.id }?.syncedAt ?: 0
+      val traktId = com.michaldrabik.ui_model.IdTrakt(movie.idTrakt)
+      val cooldown = if (movie.status == RELEASED.name) MOVIE_STATIC_SYNC_COOLDOWN else MOVIE_SYNC_COOLDOWN
+      val lastSync = syncLog.find { it.idTrakt == movie.idTrakt }?.syncedAt ?: 0
       if (nowUtcMillis() - lastSync < cooldown) {
         Timber.i("${movie.title} is on cooldown. No need to sync.")
         return@forEach
       }
 
       try {
-        Timber.i("Syncing ${movie.title}(${movie.ids.trakt}) details...")
-        moviesRepository.movieDetails.load(movie.ids.trakt, force = true)
+        Timber.i("Syncing ${movie.title}(${movie.idTrakt}) details...")
+        moviesRepository.movieDetails.load(traktId, force = true)
         syncCount++
-        Timber.i("${movie.title}(${movie.ids.trakt}) movie synced.")
+        Timber.i("${movie.title}(${movie.idTrakt}) movie synced.")
       } catch (t: Throwable) {
-        Timber.e("${movie.title}(${movie.ids.trakt}) movie sync error. Skipping... \n$t")
+        Timber.e("${movie.title}(${movie.idTrakt}) movie sync error. Skipping... \n$t")
       } finally {
         delay(DELAY_MS)
       }
