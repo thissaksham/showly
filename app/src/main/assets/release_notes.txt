@@ -1,2 +1,4 @@
-* Updated internal data endpoints
-* Keep app awake if Trakt sync is running in the foreground
+* Added 'Login' button to Moctale Meter error state to allow recovery from expired sessions.
+* Implemented automatic redirect detection in WebView to identify invalid sessions instantly.
+* Optimized Shows and Movies sync runners by introducing light models (SyncShowInfo/SyncMovieInfo).
+* Updated DAOs to fetch only essential columns during sync, resolving CursorWindow memory errors.
