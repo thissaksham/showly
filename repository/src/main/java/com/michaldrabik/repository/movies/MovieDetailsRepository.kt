@@ -6,6 +6,7 @@ import com.michaldrabik.data_local.LocalDataSource
 import com.michaldrabik.data_local.database.model.MoviesSyncLog
 import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.repository.mappers.Mappers
+import com.michaldrabik.repository.utilities.LocalIdResolver
 import com.michaldrabik.ui_model.IdImdb
 import com.michaldrabik.ui_model.IdSlug
 import com.michaldrabik.ui_model.IdTmdb
@@ -25,13 +26,26 @@ class MovieDetailsRepository @Inject constructor(
   ): Movie {
     val local = localSource.movies.getById(idTrakt.id)
     if (force || local == null || nowUtcMillis() - local.updatedAt > Config.MOVIE_DETAILS_CACHE_DURATION) {
-      val remote = remoteSource.trakt.fetchMovie(idTrakt.id)
-      val movie = mappers.movie.fromNetwork(remote)
-      localSource.movies.upsert(listOf(mappers.movie.toDatabase(movie)))
-      localSource.moviesSyncLog.upsert(MoviesSyncLog(movie.traktId, nowUtcMillis()))
-      return movie
+      // Details come from TMDB now. The stored row carries the TMDB id; a row minted
+      // after the migration encodes it in the (negative) local id instead.
+      val tmdbId = local
+        ?.idTmdb
+        ?.takeIf { it > 0 }
+        ?: LocalIdResolver.tmdbIdOf(idTrakt.id)
+
+      if (tmdbId != null) {
+        val remote = remoteSource.tmdb.fetchMovieDetails(tmdbId)
+        val movie = mappers.movie.fromTmdb(remote, localId = idTrakt.id)
+        localSource.movies.upsert(listOf(mappers.movie.toDatabase(movie)))
+        localSource.moviesSyncLog.upsert(MoviesSyncLog(movie.traktId, nowUtcMillis()))
+        return movie
+      }
+      // No TMDB id to fetch with. Fall through to whatever is cached rather than
+      // failing the screen outright.
     }
-    return mappers.movie.fromDatabase(local)
+    return local
+      ?.let { mappers.movie.fromDatabase(it) }
+      ?: error("Movie ${idTrakt.id} is not cached and has no TMDB id to fetch with.")
   }
 
   suspend fun find(idImdb: IdImdb): Movie? {
@@ -58,16 +72,18 @@ class MovieDetailsRepository @Inject constructor(
     return null
   }
 
+  /**
+   * Resolves a TMDB id to the local id. A movie already in the library keeps the id
+   * its watch history is attached to; anything else gets a freshly minted one.
+   *
+   * This used to fall back to Trakt's id-search endpoint. That is gone, and returning
+   * null here left callers holding IdTrakt() (-1), which then loaded the wrong movie.
+   */
   suspend fun resolveTraktId(tmdbId: Long): IdTrakt? {
+    if (tmdbId <= 0) return null
     val local = find(IdTmdb(tmdbId))
     if (local != null && local.ids.trakt.id > 0) return local.ids.trakt
-
-    return try {
-      val results = remoteSource.trakt.fetchSearchId("tmdb", tmdbId.toString())
-      results.firstOrNull { it.movie != null }?.movie?.ids?.trakt?.let { IdTrakt(it) }
-    } catch (error: Throwable) {
-      null
-    }
+    return IdTrakt(LocalIdResolver.newId(tmdbId))
   }
 
   suspend fun delete(idTrakt: IdTrakt) = localSource.movies.deleteById(idTrakt.id)

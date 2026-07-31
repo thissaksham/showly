@@ -7,13 +7,13 @@ import com.michaldrabik.common.extensions.nowUtcDay
 import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.common.extensions.toMillis
 import com.michaldrabik.data_local.LocalDataSource
-import com.michaldrabik.data_local.database.model.PersonCredits
 import com.michaldrabik.data_local.database.model.PersonShowMovie
 import com.michaldrabik.data_local.utilities.TransactionsProvider
 import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.data_remote.tmdb.model.TmdbPerson.Type
 import com.michaldrabik.repository.mappers.Mappers
 import com.michaldrabik.repository.settings.SettingsRepository
+import com.michaldrabik.repository.utilities.LocalIdResolver
 import com.michaldrabik.ui_model.IdTmdb
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Ids
@@ -23,7 +23,6 @@ import com.michaldrabik.ui_model.Person
 import com.michaldrabik.ui_model.Person.Department
 import com.michaldrabik.ui_model.PersonCredit
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -44,12 +43,15 @@ class PeopleRepository @Inject constructor(
   // In-memory cache of production-house credits, keyed by TMDB company id. Avoids re-fetching
   // TMDB on every Movies/Shows/Collection filter toggle (filters are applied downstream, so the
   // underlying credits list is identical across toggles). Reuses the people-credits TTL.
-  private data class CachedCompanyCredits(
+  private data class CachedCredits(
     val timestampMs: Long,
     val credits: List<PersonCredit>,
   )
 
-  private val companyCreditsCache = ConcurrentHashMap<Long, CachedCompanyCredits>()
+  private val companyCreditsCache = ConcurrentHashMap<Long, CachedCredits>()
+
+  // Person credits are display-only too, for the same reason, so they cache the same way.
+  private val personCreditsCache = ConcurrentHashMap<Long, CachedCredits>()
 
   suspend fun loadDetails(person: Person): Person {
     if (person.department == Department.PRODUCTION) {
@@ -84,99 +86,75 @@ class PeopleRepository @Inject constructor(
 
   suspend fun loadCredits(person: Person) =
     coroutineScope {
-      // Production "houses" are companies, not people, and have no Trakt credits path.
+      // Production "houses" are companies, not people, and take the discover path.
       if (person.department == Department.PRODUCTION) {
-        return@coroutineScope loadCompanyCredits(person)
+        loadCompanyCredits(person)
+      } else {
+        loadPersonCredits(person)
       }
-
-      // Return locally cached data if available
-      val personId = run {
-        val idTmdb = person.ids.tmdb.id
-        var idTraktLocal: Long?
-
-        val localPerson = localSource.people.getById(idTmdb)
-        idTraktLocal = localPerson?.idTrakt
-        if (idTraktLocal == null) {
-          val ids = remoteSource.trakt.fetchPersonIds("tmdb", idTmdb.toString())
-          ids?.trakt?.let {
-            idTraktLocal = it
-            localSource.people.updateTraktId(it, idTmdb)
-          }
-        }
-        idTraktLocal
-      }
-
-      if (personId == null) return@coroutineScope emptyList()
-
-      val timestamp = localSource.peopleCredits.getTimestampForPerson(personId)
-      if (timestamp != null && (nowUtcMillis() - timestamp < Config.PEOPLE_CREDITS_CACHE_DURATION)) {
-        val localCredits = mutableListOf<PersonCredit>()
-
-        val showsCreditsAsync = async { localSource.peopleCredits.getAllShowsForPerson(personId) }
-        val moviesCreditsAsync = async { localSource.peopleCredits.getAllMoviesForPerson(personId) }
-        val shows = showsCreditsAsync.await()
-        val movies = moviesCreditsAsync.await()
-
-        shows.mapTo(localCredits) {
-          PersonCredit(
-            show = mappers.show.fromDatabase(it),
-            movie = null,
-            image = Image.createUnknown(ImageType.POSTER),
-            translation = null,
-          )
-        }
-        movies.mapTo(localCredits) {
-          PersonCredit(
-            movie = mappers.movie.fromDatabase(it),
-            show = null,
-            image = Image.createUnknown(ImageType.POSTER),
-            translation = null,
-          )
-        }
-
-        return@coroutineScope localCredits
-      }
-
-      // Return remote fetched data if available and cache it locally
-      val type = if (person.department == Department.ACTING) Type.CAST else Type.CREW
-      val showsCreditsAsync = async { remoteSource.trakt.fetchPersonShowsCredits(personId, type) }
-      val moviesCreditsAsync = async { remoteSource.trakt.fetchPersonMoviesCredits(personId, type) }
-      val remoteCredits = awaitAll(showsCreditsAsync, moviesCreditsAsync)
-        .flatten()
-        .map {
-          PersonCredit(
-            show = it.show?.let { show -> mappers.show.fromNetwork(show) },
-            movie = it.movie?.let { movie -> mappers.movie.fromNetwork(movie) },
-            image = Image.createUnknown(ImageType.POSTER),
-            translation = null,
-          )
-        }
-
-      val localCredits = remoteCredits.map {
-        PersonCredits(
-          id = 0,
-          idTraktPerson = personId,
-          idTraktShow = it.show?.traktId,
-          idTraktMovie = it.movie?.traktId,
-          type = if (it.show != null) Mode.SHOWS.type else Mode.MOVIES.type,
-          createdAt = nowUtc(),
-          updatedAt = nowUtc(),
-        )
-      }
-
-      with(localSource) {
-        val remoteShows = remoteCredits.filter { it.show != null }.map { it.show!! }
-        val remoteMovies = remoteCredits.filter { it.movie != null }.map { it.movie!! }
-
-        transactions.withTransaction {
-          shows.upsert(remoteShows.map { mappers.show.toDatabase(it) })
-          movies.upsert(remoteMovies.map { mappers.movie.toDatabase(it) })
-          peopleCredits.insertSingle(personId, localCredits)
-        }
-      }
-
-      return@coroutineScope remoteCredits
     }
+
+  /**
+   * Everything a person worked on, from TMDB's combined credits.
+   *
+   * This used to translate the TMDB person id to a Trakt one first and fetch credits
+   * from there. That lookup is gone, and it failed silently - an empty list, not an
+   * error - so every person's filmography came up blank.
+   *
+   * Results are resolved against the local DB by TMDB id, so collected titles keep
+   * the id their watch history hangs off. Like company credits they are display-only
+   * and deliberately NOT persisted: these rows carry only summary fields, and writing
+   * them would make the details screen serve a half-empty cached show for days.
+   */
+  private suspend fun loadPersonCredits(person: Person): List<PersonCredit> {
+    val tmdbId = person.ids.tmdb.id
+    if (tmdbId <= 0) return emptyList()
+
+    personCreditsCache[tmdbId]
+      ?.takeIf { nowUtcMillis() - it.timestampMs < Config.PEOPLE_CREDITS_CACHE_DURATION }
+      ?.let { return it.credits }
+
+    val type = if (person.department == Department.ACTING) Type.CAST else Type.CREW
+    val items = remoteSource.tmdb.fetchPersonCredits(tmdbId, type)
+
+    // Pair each item with its id up front: an item without one cannot be resolved
+    // to a local row, and carrying the nullable id further just spreads the check.
+    val showItems = items.mapNotNull { item -> item.id?.takeIf { item.isShow }?.let { it to item } }.distinctBy { it.first }
+    val movieItems = items.mapNotNull { item -> item.id?.takeIf { item.isMovie }?.let { it to item } }.distinctBy { it.first }
+
+    val localShows = localSource.shows
+      .getByTmdbIds(showItems.map { it.first })
+      .associateBy { it.idTmdb }
+    val localMovies = localSource.movies
+      .getByTmdbIds(movieItems.map { it.first })
+      .associateBy { it.idTmdb }
+
+    val showCredits = showItems.map { (id, item) ->
+      PersonCredit(
+        show = localShows[id]
+          ?.let { mappers.show.fromDatabase(it) }
+          ?: mappers.show.fromTmdbSearch(item, LocalIdResolver.newId(id)),
+        movie = null,
+        image = Image.createUnknown(ImageType.POSTER),
+        translation = null,
+      )
+    }
+
+    val movieCredits = movieItems.map { (id, item) ->
+      PersonCredit(
+        show = null,
+        movie = localMovies[id]
+          ?.let { mappers.movie.fromDatabase(it) }
+          ?: mappers.movie.fromTmdbSearch(item, LocalIdResolver.newId(id)),
+        image = Image.createUnknown(ImageType.POSTER),
+        translation = null,
+      )
+    }
+
+    val credits = showCredits + movieCredits
+    personCreditsCache[tmdbId] = CachedCredits(nowUtcMillis(), credits)
+    return credits
+  }
 
   /**
    * Production "houses" are companies, not people: Trakt exposes no studio -> titles lookup, so
@@ -226,7 +204,7 @@ class PeopleRepository @Inject constructor(
         } else {
           mappers.movie
             .fromTmdbDiscovery(item)
-            .copy(ids = Ids.EMPTY.copy(tmdb = IdTmdb(item.id), trakt = IdTrakt(-item.id)))
+            .copy(ids = Ids.EMPTY.copy(tmdb = IdTmdb(item.id), trakt = IdTrakt(LocalIdResolver.newId(item.id))))
         }
         PersonCredit(
           movie = movie,
@@ -243,7 +221,7 @@ class PeopleRepository @Inject constructor(
         } else {
           mappers.show
             .fromTmdbDiscovery(item)
-            .copy(ids = Ids.EMPTY.copy(tmdb = IdTmdb(item.id), trakt = IdTrakt(-item.id)))
+            .copy(ids = Ids.EMPTY.copy(tmdb = IdTmdb(item.id), trakt = IdTrakt(LocalIdResolver.newId(item.id))))
         }
         PersonCredit(
           movie = null,
@@ -256,7 +234,7 @@ class PeopleRepository @Inject constructor(
       movieCredits + showCredits
     }
 
-    companyCreditsCache[companyId] = CachedCompanyCredits(nowUtcMillis(), credits)
+    companyCreditsCache[companyId] = CachedCredits(nowUtcMillis(), credits)
     return credits
   }
 

@@ -49,7 +49,9 @@ class ShowDetailsRatingsFragment : BaseFragment<ShowDetailsRatingsViewModel>(R.l
           }
           showDetailsRatings.bind(ratings)
           show?.let {
-            showDetailsRatings.onTraktClick = { openLink(ShowLink.TRAKT, show.traktId.toString()) }
+            // The score in that slot is TMDB's, so the link goes there too - a Trakt
+            // link would carry a local id that means nothing on their site.
+            showDetailsRatings.onTraktClick = { openLink(ShowLink.TMDB, show.ids.tmdb.id.toString()) }
             showDetailsRatings.onImdbClick = { openLink(ShowLink.IMDB, show.ids.imdb.id) }
             showDetailsRatings.onMetaClick = {
               it.parentalGuideUrl?.let { url ->

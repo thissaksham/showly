@@ -51,7 +51,9 @@ class MovieDetailsRatingsFragment :
           }
           movieDetailsRatings.bind(ratings)
           movie?.let {
-            movieDetailsRatings.onTraktClick = { openMovieLink(MovieLink.TRAKT, movie.traktId.toString()) }
+            // The score in that slot is TMDB's, so the link goes there too - a Trakt
+            // link would carry a local id that means nothing on their site.
+            movieDetailsRatings.onTraktClick = { openMovieLink(MovieLink.TMDB, movie.ids.tmdb.id.toString()) }
             movieDetailsRatings.onImdbClick = { openMovieLink(MovieLink.IMDB, movie.ids.imdb.id) }
             movieDetailsRatings.onMetaClick = {
               it.parentalGuideUrl?.let { url ->

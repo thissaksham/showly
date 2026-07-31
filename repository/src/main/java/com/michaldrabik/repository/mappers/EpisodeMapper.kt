@@ -1,6 +1,7 @@
 package com.michaldrabik.repository.mappers
 
 import com.michaldrabik.common.extensions.toZonedDateTime
+import com.michaldrabik.data_remote.tmdb.model.TmdbEpisode
 import com.michaldrabik.ui_model.Episode
 import com.michaldrabik.ui_model.IdImdb
 import com.michaldrabik.ui_model.IdTmdb
@@ -32,6 +33,33 @@ class EpisodeMapper @Inject constructor(
       numberAbs = episode.number_abs,
       lastWatchedAt = episode.last_watched_at.toZonedDateTime(),
     )
+
+  /**
+   * [localId] is resolved by the caller: an episode already in the database keeps
+   * the id its watched flag is attached to.
+   *
+   * TMDB reports an air date but no air time, so everything lands at 00:00 UTC.
+   */
+  fun fromTmdb(
+    episode: TmdbEpisode,
+    localId: Long,
+  ) = Episode(
+    season = episode.season_number ?: -1,
+    number = episode.episode_number ?: -1,
+    title = episode.name ?: "",
+    ids = Ids.EMPTY.copy(
+      trakt = IdTrakt(localId),
+      tmdb = IdTmdb(episode.id ?: -1),
+    ),
+    overview = episode.overview ?: "",
+    rating = episode.vote_average ?: 0F,
+    votes = episode.vote_count ?: 0,
+    commentCount = 0,
+    firstAired = episode.air_date?.takeIf { it.isNotBlank() }?.let { "${it}T00:00:00Z" }.toZonedDateTime(),
+    runtime = episode.runtime ?: -1,
+    numberAbs = null,
+    lastWatchedAt = null,
+  )
 
   fun toNetwork(episode: Episode) =
     EpisodeNetwork(

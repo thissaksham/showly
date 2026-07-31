@@ -7,6 +7,7 @@ import com.michaldrabik.data_local.LocalDataSource
 import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.repository.EpisodesManager
 import com.michaldrabik.repository.mappers.Mappers
+import com.michaldrabik.repository.shows.ShowSeasonsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
 import com.michaldrabik.ui_model.ShowStatus.CANCELED
 import com.michaldrabik.ui_model.ShowStatus.ENDED
@@ -26,6 +27,7 @@ class ShowsSyncRunner @Inject constructor(
   private val mappers: Mappers,
   private val episodesManager: EpisodesManager,
   private val showsRepository: ShowsRepository,
+  private val showSeasonsRepository: ShowSeasonsRepository,
 ) {
 
   companion object {
@@ -67,10 +69,9 @@ class ShowsSyncRunner @Inject constructor(
       try {
         Timber.i("Syncing ${show.title}(${show.idTrakt}) episodes...")
 
-        val remoteSeasons = remoteSource.trakt
-          .fetchSeasons(show.idTrakt)
-          .map { mappers.season.fromNetwork(it) }
-        
+        val remoteSeasons = showSeasonsRepository.loadRemote(show.idTrakt)
+
+
         val fullShow = showsRepository.detailsShow.load(traktId)
         episodesManager.invalidateSeasons(fullShow, remoteSeasons)
         syncCount++

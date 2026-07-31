@@ -9,6 +9,7 @@ import com.michaldrabik.repository.RatingsRepository
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.mappers.Mappers
 import com.michaldrabik.repository.settings.SettingsRepository
+import com.michaldrabik.repository.shows.ShowSeasonsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
 import com.michaldrabik.ui_base.dates.DateFormatProvider
 import com.michaldrabik.ui_base.network.NetworkStatusProvider
@@ -32,6 +33,7 @@ class ShowDetailsLoadSeasonsCase @Inject constructor(
   private val localSource: LocalDataSource,
   private val mappers: Mappers,
   private val showsRepository: ShowsRepository,
+  private val showSeasonsRepository: ShowSeasonsRepository,
   private val settingsRepository: SettingsRepository,
   private val ratingsRepository: RatingsRepository,
   private val translationsRepository: TranslationsRepository,
@@ -48,9 +50,8 @@ class ShowDetailsLoadSeasonsCase @Inject constructor(
           loadLocalSeasons(show, showSpecialSeasons)
         }
 
-        val remoteSeasons = remoteSource.trakt
-          .fetchSeasons(show.traktId)
-          .map { mappers.season.fromNetwork(it) }
+        val remoteSeasons = showSeasonsRepository
+          .loadRemote(show.traktId)
           .filter { it.episodes.isNotEmpty() }
           .filter { if (!showSpecialSeasons) !it.isSpecial() else true }
 

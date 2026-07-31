@@ -18,6 +18,7 @@ import com.michaldrabik.repository.EpisodesManager
 import com.michaldrabik.repository.OnHoldItemsRepository
 import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.repository.mappers.Mappers
+import com.michaldrabik.repository.shows.ShowSeasonsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
 import com.michaldrabik.repository.shows.ratings.ShowsRatingsRepository
 import com.michaldrabik.ui_backup.features.import_.model.BackupImportStatus.Importing
@@ -37,6 +38,7 @@ internal class BackupImportShowsRunner @Inject constructor(
   private val localSource: LocalDataSource,
   private val remoteSource: RemoteDataSource,
   private val showsRepository: ShowsRepository,
+  private val showSeasonsRepository: ShowSeasonsRepository,
   private val pinnedItemsRepository: PinnedItemsRepository,
   private val onHoldItemsRepository: OnHoldItemsRepository,
   private val ratingsRepository: ShowsRatingsRepository,
@@ -337,7 +339,7 @@ internal class BackupImportShowsRunner @Inject constructor(
     backupShows: BackupShows,
   ): Pair<List<Season>, List<Episode>> =
     coroutineScope {
-      val remoteSeasons = remoteSource.trakt.fetchSeasons(showId)
+      val remoteSeasons = showSeasonsRepository.loadRemote(showId)
 
       val localEpisodesAsync = async { localSource.episodes.getAllWatchedIdsForShows(listOf(showId)) }
       val localSeasonsAsync = async { localSource.seasons.getAllWatchedIdsForShows(listOf(showId)) }
@@ -348,8 +350,7 @@ internal class BackupImportShowsRunner @Inject constructor(
       val backupEpisodes = backupShows.progressEpisodes.filter { it.showTraktId == showId }
 
       val seasons = remoteSeasons
-        .filterNot { localSeasonsIds.contains(it.ids?.trakt) }
-        .map { mappers.season.fromNetwork(it) }
+        .filterNot { localSeasonsIds.contains(it.ids.trakt.id) }
         .map { remoteSeason ->
           val isWatchedNumber = backupSeason
             .any { it.seasonNumber == remoteSeason.number }
@@ -366,8 +367,8 @@ internal class BackupImportShowsRunner @Inject constructor(
 
       val episodes = remoteSeasons.flatMap { season ->
         season.episodes
-          ?.filterNot { localEpisodesIds.contains(it.ids?.trakt) }
-          ?.map { episode ->
+          .filterNot { localEpisodesIds.contains(it.ids.trakt.id) }
+          .map { episode ->
             val importEpisode = backupEpisodes
               .find {
                 it.seasonNumber == episode.season &&
@@ -381,13 +382,13 @@ internal class BackupImportShowsRunner @Inject constructor(
 
             mappers.episode.toDatabase(
               showId = IdTrakt(showId),
-              season = mappers.season.fromNetwork(season),
-              episode = mappers.episode.fromNetwork(episode),
+              season = season,
+              episode = episode,
               isWatched = importEpisode != null,
               lastExportedAt = exportedAt,
               lastWatchedAt = watchedAt,
             )
-          } ?: emptyList()
+          }
       }
 
       Pair(seasons, episodes)

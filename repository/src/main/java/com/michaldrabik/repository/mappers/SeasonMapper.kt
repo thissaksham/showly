@@ -1,6 +1,8 @@
 package com.michaldrabik.repository.mappers
 
 import com.michaldrabik.data_local.database.model.Episode
+import com.michaldrabik.data_remote.tmdb.model.TmdbSeasonDetails
+import com.michaldrabik.ui_model.IdTmdb
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Ids
 import com.michaldrabik.ui_model.Season
@@ -26,6 +28,32 @@ class SeasonMapper @Inject constructor(
       season.rating ?: -1F,
       season.episodes?.map { episodeMapper.fromNetwork(it) } ?: emptyList(),
     )
+
+  /**
+   * [localId] and [episodes] are resolved by the caller so that a season already in
+   * the database keeps the id its watched episodes hang off.
+   */
+  fun fromTmdb(
+    season: TmdbSeasonDetails,
+    localId: Long,
+    episodes: List<com.michaldrabik.ui_model.Episode>,
+  ): Season {
+    val now = ZonedDateTime.now()
+    return Season(
+      Ids.EMPTY.copy(
+        trakt = IdTrakt(localId),
+        tmdb = IdTmdb(season.id ?: -1),
+      ),
+      season.season_number ?: -1,
+      episodes.size,
+      episodes.count { it.firstAired?.isBefore(now) == true },
+      season.name ?: "",
+      season.air_date?.takeIf { it.isNotBlank() }?.let { ZonedDateTime.parse("${it}T00:00:00Z") },
+      season.overview ?: "",
+      season.vote_average ?: -1F,
+      episodes,
+    )
+  }
 
   fun toNetwork(season: Season) =
     SeasonNetwork(

@@ -9,7 +9,6 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.michaldrabik.common.Config
 import com.michaldrabik.common.extensions.UNKNOWN_DATE
 import com.michaldrabik.common.extensions.nowUtc
 import com.michaldrabik.ui_base.BaseFragment
@@ -177,25 +176,9 @@ class ShowDetailsEpisodesFragment :
 
   private fun renderSeasonRating(season: SeasonListItem) {
     with(binding) {
-      val seasonRating = season.season.rating
-      episodesStarIcon.visibleIf(seasonRating > 0F)
-      episodesSeasonRating.visibleIf(seasonRating > 0F)
-
-      val seasonRatingString = String.format(Locale.ENGLISH, "%.1f", seasonRating)
-      if (!season.isWatched && season.isRatingHidden) {
-        episodesSeasonRating.tag = seasonRatingString
-        episodesSeasonRating.text = Config.SPOILERS_RATINGS_HIDE_SYMBOL
-        if (season.isRatingTapToReveal) {
-          with(episodesSeasonRating) {
-            onClick {
-              tag?.let { text = it.toString() }
-              isClickable = false
-            }
-          }
-        }
-      } else {
-        episodesSeasonRating.text = seasonRatingString
-      }
+      // Per-season community score removed by request. Your own rating stays.
+      episodesStarIcon.visibleIf(false)
+      episodesSeasonRating.visibleIf(false)
 
       val ratingState = season.userRating
       episodesSeasonRateButton.visibleIf(ratingState.userRating == null)

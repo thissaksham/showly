@@ -6,6 +6,7 @@ import com.michaldrabik.data_local.LocalDataSource
 import com.michaldrabik.data_local.utilities.TransactionsProvider
 import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.repository.mappers.Mappers
+import com.michaldrabik.repository.utilities.LocalIdResolver
 import com.michaldrabik.ui_model.IdImdb
 import com.michaldrabik.ui_model.IdSlug
 import com.michaldrabik.ui_model.IdTmdb
@@ -26,12 +27,25 @@ class ShowDetailsRepository @Inject constructor(
   ): Show {
     val localShow = localSource.shows.getById(idTrakt.id)
     if (force || localShow == null || nowUtcMillis() - localShow.updatedAt > Config.SHOW_DETAILS_CACHE_DURATION) {
-      val remoteShow = remoteSource.trakt.fetchShow(idTrakt.id)
-      val show = mappers.show.fromNetwork(remoteShow)
-      localSource.shows.upsert(listOf(mappers.show.toDatabase(show)))
-      return show
+      // Details come from TMDB now. The stored row carries the TMDB id; a row minted
+      // after the migration encodes it in the (negative) local id instead.
+      val tmdbId = localShow
+        ?.idTmdb
+        ?.takeIf { it > 0 }
+        ?: LocalIdResolver.tmdbIdOf(idTrakt.id)
+
+      if (tmdbId != null) {
+        val remoteShow = remoteSource.tmdb.fetchShowDetails(tmdbId)
+        val show = mappers.show.fromTmdb(remoteShow, localId = idTrakt.id)
+        localSource.shows.upsert(listOf(mappers.show.toDatabase(show)))
+        return show
+      }
+      // No TMDB id to fetch with. Fall through to whatever is cached rather than
+      // failing the screen outright.
     }
-    return mappers.show.fromDatabase(localShow)
+    return localShow
+      ?.let { mappers.show.fromDatabase(it) }
+      ?: error("Show ${idTrakt.id} is not cached and has no TMDB id to fetch with.")
   }
 
   suspend fun find(idImdb: IdImdb): Show? {
@@ -58,16 +72,18 @@ class ShowDetailsRepository @Inject constructor(
     return null
   }
 
+  /**
+   * Resolves a TMDB id to the local id. An item already in the library keeps the id
+   * its watch history is attached to; anything else gets a freshly minted one.
+   *
+   * This used to fall back to Trakt's id-search endpoint. That is gone, and returning
+   * null here left callers holding IdTrakt() (-1), which then loaded the wrong show.
+   */
   suspend fun resolveTraktId(tmdbId: Long): IdTrakt? {
+    if (tmdbId <= 0) return null
     val local = find(IdTmdb(tmdbId))
     if (local != null && local.ids.trakt.id > 0) return local.ids.trakt
-
-    return try {
-      val results = remoteSource.trakt.fetchSearchId("tmdb", tmdbId.toString())
-      results.firstOrNull { it.show != null }?.show?.ids?.trakt?.let { IdTrakt(it) }
-    } catch (error: Throwable) {
-      null
-    }
+    return IdTrakt(LocalIdResolver.newId(tmdbId))
   }
 
   suspend fun delete(idTrakt: IdTrakt) {

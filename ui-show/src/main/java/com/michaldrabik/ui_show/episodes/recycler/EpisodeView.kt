@@ -49,22 +49,9 @@ class EpisodeView : ConstraintLayout {
       episodeCheckbox.isChecked = item.isWatched
       episodeCheckbox.isEnabled = hasAired || !isLocked
 
-      val rating = String.format(ENGLISH, "%.1f", item.episode.rating)
-      episodeRating.visibleIf(item.episode.rating != 0F)
-      if (!item.isWatched && item.spoilers.isEpisodeRatingHidden) {
-        episodeRating.tag = rating
-        episodeRating.text = Config.SPOILERS_RATINGS_HIDE_SYMBOL
-        if (item.spoilers.isTapToReveal) {
-          with(episodeRating) {
-            onClick {
-              tag?.let { text = it.toString() }
-              isClickable = false
-            }
-          }
-        }
-      } else {
-        episodeRating.text = rating
-      }
+      // Per-episode community score removed by request. Your own rating stays.
+      episodeRating.visibleIf(false)
+      episodeStarIcon.visibleIf(false)
 
       item.myRating?.let {
         episodeMyStarIcon.visible()

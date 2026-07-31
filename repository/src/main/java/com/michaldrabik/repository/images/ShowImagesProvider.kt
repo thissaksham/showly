@@ -106,17 +106,13 @@ class ShowImagesProvider @Inject constructor(
           typeImages = listOf(TmdbImage(path, 0F, 0, "en"))
           source = AWS
         } else {
-          // If requested fanart is unavailable try backing up to an episode image
-          val seasons = remoteSource.trakt.fetchSeasons(show.traktId)
-          if (seasons.isNotEmpty()) {
-            val episode = seasons[0].episodes?.firstOrNull()
-            episode?.let { ep ->
-              runCatching {
-                val backupImage = remoteSource.tmdb.fetchEpisodeImage(tmdbId.id, ep.season, ep.number)
-                backupImage?.let {
-                  typeImages = listOf(TmdbImage(it.file_path, 0F, 0, "en"))
-                }
-              }
+          // If requested fanart is unavailable try backing up to an episode image.
+          // The pilot is the one episode every show is guaranteed to have, and it
+          // costs no extra request to guess it.
+          runCatching {
+            val backupImage = remoteSource.tmdb.fetchEpisodeImage(tmdbId.id, 1, 1)
+            backupImage?.let {
+              typeImages = listOf(TmdbImage(it.file_path, 0F, 0, "en"))
             }
           }
         }

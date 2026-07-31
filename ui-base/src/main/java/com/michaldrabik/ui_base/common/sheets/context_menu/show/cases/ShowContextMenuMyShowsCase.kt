@@ -8,6 +8,7 @@ import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.repository.mappers.Mappers
 import com.michaldrabik.repository.settings.SettingsRepository
+import com.michaldrabik.repository.shows.ShowSeasonsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
 import com.michaldrabik.ui_base.notifications.AnnouncementManager
 import com.michaldrabik.ui_model.IdTrakt
@@ -27,6 +28,7 @@ class ShowContextMenuMyShowsCase @Inject constructor(
   private val remoteSource: RemoteDataSource,
   private val mappers: Mappers,
   private val showsRepository: ShowsRepository,
+  private val showSeasonsRepository: ShowSeasonsRepository,
   private val pinnedItemsRepository: PinnedItemsRepository,
   private val settingsRepository: SettingsRepository,
   private val announcementManager: AnnouncementManager,
@@ -36,9 +38,8 @@ class ShowContextMenuMyShowsCase @Inject constructor(
     withContext(dispatchers.IO) {
       val show = Show.EMPTY.copy(ids = Ids.EMPTY.copy(traktId))
 
-      val seasons = remoteSource.trakt
-        .fetchSeasons(traktId.id)
-        .map { mappers.season.fromNetwork(it) }
+      val seasons = showSeasonsRepository
+        .loadRemote(traktId.id)
         .filter { it.episodes.isNotEmpty() }
         .filter { if (!showSpecials()) !it.isSpecial() else true }
 

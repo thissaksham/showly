@@ -7,6 +7,7 @@ import com.michaldrabik.common.extensions.dateFromMillis
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.MovieImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
+import com.michaldrabik.repository.utilities.LocalIdResolver
 import com.michaldrabik.ui_base.dates.DateFormatProvider
 import com.michaldrabik.ui_base.events.EventsManager
 import com.michaldrabik.ui_base.events.ReloadData
@@ -83,11 +84,12 @@ class MovieDetailsViewModel @Inject constructor(
     viewModelScope.launch {
       movieLoadingState.value = true
       try {
-        val targetId = if (movieId.id < 0) {
-          mainCase.resolveTraktId(-movieId.id)
-        } else {
-          movieId
-        }
+        // A negative id carries a TMDB id. Decode it the same way it was minted -
+        // plain negation is off by one and lands on a different movie.
+        val targetId = LocalIdResolver
+          .tmdbIdOf(movieId.id)
+          ?.let { mainCase.resolveTraktId(it) }
+          ?: movieId
         val result = mainCase.loadDetails(targetId, force)
         movie = result
         movieState.value = result

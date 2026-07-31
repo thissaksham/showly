@@ -9,10 +9,13 @@ import com.michaldrabik.data_local.sources.MovieCollectionsItemsLocalDataSource
 import com.michaldrabik.data_local.sources.MovieCollectionsLocalDataSource
 import com.michaldrabik.data_local.sources.MoviesLocalDataSource
 import com.michaldrabik.data_local.utilities.TransactionsProvider
-import com.michaldrabik.data_remote.trakt.TraktRemoteDataSource
+import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.repository.mappers.CollectionMapper
 import com.michaldrabik.repository.mappers.MovieMapper
+import com.michaldrabik.repository.utilities.LocalIdResolver
+import com.michaldrabik.ui_model.IdTmdb
 import com.michaldrabik.ui_model.IdTrakt
+import com.michaldrabik.ui_model.Ids
 import com.michaldrabik.ui_model.Movie
 import com.michaldrabik.ui_model.MovieCollection
 import kotlinx.coroutines.withContext
@@ -23,7 +26,7 @@ import javax.inject.Singleton
 @Singleton
 class MovieCollectionsRepository @Inject constructor(
   private val dispatchers: CoroutineDispatchers,
-  private val remoteSource: TraktRemoteDataSource,
+  private val remoteSource: RemoteDataSource,
   private val moviesLocalSource: MoviesLocalDataSource,
   private val movieCollectionsLocalSource: MovieCollectionsLocalDataSource,
   private val movieCollectionsItemsLocalSource: MovieCollectionsItemsLocalDataSource,
@@ -52,8 +55,23 @@ class MovieCollectionsRepository @Inject constructor(
         }
       }
 
-      val remoteCollections = remoteSource.fetchMovieCollections(movieId.id)
-      val collections = remoteCollections.map { collectionMapper.fromNetwork(it) }
+      // TMDB puts a movie in at most one collection, and the stub on the movie
+      // endpoint carries no member count - which must be real, since -1 is the
+      // app's "no collection" marker. The collection endpoint supplies it.
+      val tmdbId = resolveTmdbId(movieId.id)
+      val stub = tmdbId?.let { remoteSource.tmdb.fetchMovieCollection(it) }
+      val collections = stub
+        ?.id
+        ?.let { collectionTmdbId ->
+          val full = runCatching { remoteSource.tmdb.fetchCollection(collectionTmdbId) }.getOrNull()
+          listOf(
+            collectionMapper.fromTmdb(
+              input = full ?: stub,
+              localId = LocalIdResolver.newId(collectionTmdbId),
+              itemCount = full?.parts?.size ?: 0,
+            ),
+          )
+        }.orEmpty()
 
       updateLocalCollections(collections, movieId, now)
 
@@ -75,8 +93,30 @@ class MovieCollectionsRepository @Inject constructor(
         }
       }
 
-      val remoteItems = remoteSource.fetchMovieCollectionItems(collectionId.id)
-      val items = remoteItems.map { movieMapper.fromNetwork(it) }
+      val collectionTmdbId = LocalIdResolver.tmdbIdOf(collectionId.id)
+        ?: return@withContext localItems.map { movieMapper.fromDatabase(it) }
+
+      val parts = remoteSource.tmdb
+        .fetchCollection(collectionTmdbId)
+        .parts
+        .orEmpty()
+        .sortedBy { it.release_date.orEmpty() }
+
+      // A movie already in the database keeps the id its watch history hangs off.
+      val localMovies = moviesLocalSource
+        .getByTmdbIds(parts.map { it.id })
+        .associateBy { it.idTmdb }
+
+      val items = parts.map { part ->
+        localMovies[part.id]
+          ?.let { movieMapper.fromDatabase(it) }
+          ?: movieMapper.fromTmdbDiscovery(part).copy(
+            ids = Ids.EMPTY.copy(
+              tmdb = IdTmdb(part.id),
+              trakt = IdTrakt(LocalIdResolver.newId(part.id)),
+            ),
+          )
+      }
 
       transactions.withTransaction {
         val entities = items.mapIndexed { index, movie ->
@@ -103,6 +143,13 @@ class MovieCollectionsRepository @Inject constructor(
 
       return@withContext items
     }
+
+  private suspend fun resolveTmdbId(movieLocalId: Long): Long? =
+    moviesLocalSource
+      .getById(movieLocalId)
+      ?.idTmdb
+      ?.takeIf { it > 0 }
+      ?: LocalIdResolver.tmdbIdOf(movieLocalId)
 
   private suspend fun updateLocalCollections(
     collections: List<MovieCollection>,

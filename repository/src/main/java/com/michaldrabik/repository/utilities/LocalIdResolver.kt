@@ -35,13 +35,18 @@ class LocalIdResolver @Inject constructor(
      */
     fun newId(tmdbId: Long): Long {
       require(tmdbId > 0) { "TMDB id must be positive, was $tmdbId" }
-      return -tmdbId
+      // Offset by one so no minted id can ever be -1, which the app uses
+      // everywhere as the "no id" sentinel (IdTrakt() defaults to it).
+      return -(tmdbId + 1)
     }
 
     /**
-     * Recovers the TMDB id from a local id, or null when the id predates the
-     * migration - those rows carry their TMDB id in the `id_tmdb` column instead.
+     * Recovers the TMDB id from a local id, or null when there is nothing to
+     * recover: pre-migration rows carry their TMDB id in the `id_tmdb` column,
+     * and -1 means "unknown" rather than a real item.
      */
-    fun tmdbIdOf(localId: Long): Long? = if (localId < 0) -localId else null
+    fun tmdbIdOf(localId: Long): Long? = if (localId < UNKNOWN_ID) -localId - 1 else null
+
+    private const val UNKNOWN_ID = -1L
   }
 }

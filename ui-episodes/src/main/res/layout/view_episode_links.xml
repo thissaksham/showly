@@ -42,19 +42,7 @@
     app:layout_constraintTop_toTopOf="parent"
     />
 
-  <com.michaldrabik.ui_base.common.sheets.links.views.LinkItemView
-    android:id="@+id/viewEpisodeLinksTrakt"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/spaceNormal"
-    android:layout_marginTop="@dimen/spaceMedium"
-    android:layout_marginEnd="@dimen/spaceSmall"
-    app:layout_constraintEnd_toStartOf="@id/viewEpisodeLinksGuideline"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/viewEpisodeLinksTitle"
-    custom:icon="@drawable/ic_trakt"
-    custom:text="Trakt.tv"
-    />
+  <!-- Trakt.tv link removed: it was built from ids.trakt, which now holds a local id. -->
 
   <com.michaldrabik.ui_base.common.sheets.links.views.LinkItemView
     android:id="@+id/viewEpisodeLinksImdb"
@@ -65,7 +53,7 @@
     android:layout_marginEnd="@dimen/spaceSmall"
     app:layout_constraintEnd_toStartOf="@id/viewEpisodeLinksGuideline"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/viewEpisodeLinksTrakt"
+    app:layout_constraintTop_toBottomOf="@id/viewEpisodeLinksTitle"
     custom:icon="@drawable/ic_imdb"
     custom:text="IMDb"
     />

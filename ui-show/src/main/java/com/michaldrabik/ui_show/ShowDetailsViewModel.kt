@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.michaldrabik.repository.images.ShowImagesProvider
 import com.michaldrabik.repository.settings.SettingsRepository
+import com.michaldrabik.repository.utilities.LocalIdResolver
 import com.michaldrabik.ui_base.events.EventsManager
 import com.michaldrabik.ui_base.events.ReloadData
 import com.michaldrabik.ui_base.utilities.events.Event
@@ -81,11 +82,12 @@ class ShowDetailsViewModel @Inject constructor(
     viewModelScope.launch {
       showLoadingState.value = true
       try {
-        val targetId = if (showId.id < 0) {
-          mainCase.resolveTraktId(-showId.id)
-        } else {
-          showId
-        }
+        // A negative id carries a TMDB id. Decode it the same way it was minted -
+        // plain negation is off by one and lands on a different show.
+        val targetId = LocalIdResolver
+          .tmdbIdOf(showId.id)
+          ?.let { mainCase.resolveTraktId(it) }
+          ?: showId
         val result = mainCase.loadDetails(targetId, force)
         show = result
         showState.value = result

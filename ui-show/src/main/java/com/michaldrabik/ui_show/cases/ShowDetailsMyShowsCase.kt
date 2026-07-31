@@ -8,6 +8,7 @@ import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.repository.mappers.Mappers
 import com.michaldrabik.repository.settings.SettingsRepository
+import com.michaldrabik.repository.shows.ShowSeasonsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
 import com.michaldrabik.ui_base.notifications.AnnouncementManager
 import com.michaldrabik.ui_model.Episode
@@ -29,6 +30,7 @@ class ShowDetailsMyShowsCase @Inject constructor(
   private val mappers: Mappers,
   private val transactions: TransactionsProvider,
   private val showsRepository: ShowsRepository,
+  private val showSeasonsRepository: ShowSeasonsRepository,
   private val pinnedItemsRepository: PinnedItemsRepository,
   private val settingsRepository: SettingsRepository,
   private val announcementManager: AnnouncementManager,
@@ -56,9 +58,8 @@ class ShowDetailsMyShowsCase @Inject constructor(
     val showSpecials = settingsRepository.load().specialSeasonsEnabled
 
     val (finalSeasons, finalEpisodes) = if (seasons.isEmpty()) {
-      val remoteSeasons = remoteSource.trakt
-        .fetchSeasons(show.traktId)
-        .map { mappers.season.fromNetwork(it) }
+      val remoteSeasons = showSeasonsRepository
+        .loadRemote(show.traktId)
         .filter { it.episodes.isNotEmpty() }
         .filter { if (!showSpecials) !it.isSpecial() else true }
       Pair(remoteSeasons, remoteSeasons.flatMap { it.episodes })

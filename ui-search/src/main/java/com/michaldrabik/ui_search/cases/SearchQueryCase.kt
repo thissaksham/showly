@@ -10,6 +10,7 @@ import com.michaldrabik.repository.mappers.Mappers
 import com.michaldrabik.repository.movies.MoviesRepository
 import com.michaldrabik.repository.settings.SettingsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
+import com.michaldrabik.repository.utilities.LocalIdResolver
 import com.michaldrabik.ui_model.ImageType
 import com.michaldrabik.ui_model.Movie
 import com.michaldrabik.ui_model.SearchResult
@@ -34,6 +35,7 @@ class SearchQueryCase @Inject constructor(
   private val translationsRepository: TranslationsRepository,
   private val showsImagesProvider: ShowImagesProvider,
   private val moviesImagesProvider: MovieImagesProvider,
+  private val localIdResolver: LocalIdResolver,
 ) {
 
   suspend fun searchByQuery(query: String): List<SearchListItem> =
@@ -45,16 +47,28 @@ class SearchQueryCase @Inject constructor(
       val watchlistMoviesIds = moviesRepository.watchlistMovies.loadAllIds()
       val spoilers = settingsRepository.spoilers.getAll()
 
-      remoteSource.trakt
-        .fetchSearch(query, withMovies)
+      remoteSource.tmdb
+        .search(query)
+        .filter { withMovies || it.isShow }
         .mapIndexed { index, item ->
           val order = index + 1
           async {
-            val result = SearchResult(
-              order = order,
-              show = item.show?.let { s -> mappers.show.fromNetwork(s) } ?: Show.EMPTY,
-              movie = item.movie?.let { m -> mappers.movie.fromNetwork(m) } ?: Movie.EMPTY,
-            )
+            // Resolve to the local id first: a show already in the library must keep
+            // the id its watch history is attached to.
+            val tmdbId = item.id ?: 0L
+            val result = if (item.isShow) {
+              SearchResult(
+                order = order,
+                show = mappers.show.fromTmdbSearch(item, localIdResolver.showId(tmdbId)),
+                movie = Movie.EMPTY,
+              )
+            } else {
+              SearchResult(
+                order = order,
+                show = Show.EMPTY,
+                movie = mappers.movie.fromTmdbSearch(item, localIdResolver.movieId(tmdbId)),
+              )
+            }
 
             val isFollowed =
               if (result.isShow) {

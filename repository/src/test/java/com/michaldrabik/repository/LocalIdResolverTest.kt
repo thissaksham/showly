@@ -46,7 +46,7 @@ class LocalIdResolverTest : BaseMockTest() {
     runBlocking {
       coEvery { showsDao.getByTmdbId(66008) } returns null
 
-      assertThat(SUT.showId(66008)).isEqualTo(-66008)
+      assertThat(SUT.showId(66008)).isEqualTo(-66009)
     }
   }
 
@@ -65,7 +65,7 @@ class LocalIdResolverTest : BaseMockTest() {
     runBlocking {
       coEvery { moviesDao.getByTmdbId(82825) } returns null
 
-      assertThat(SUT.movieId(82825)).isEqualTo(-82825)
+      assertThat(SUT.movieId(82825)).isEqualTo(-82826)
     }
   }
 
@@ -89,9 +89,23 @@ class LocalIdResolverTest : BaseMockTest() {
 
   @Test
   fun `Should recover the TMDB id only from a minted id`() {
-    assertThat(LocalIdResolver.tmdbIdOf(-66008)).isEqualTo(66008)
+    assertThat(LocalIdResolver.tmdbIdOf(-66009)).isEqualTo(66008)
     // Pre-migration rows carry their TMDB id in the id_tmdb column, not in the key.
     assertThat(LocalIdResolver.tmdbIdOf(106499)).isNull()
+  }
+
+  @Test
+  fun `Should not mistake the unknown-id sentinel for a minted id`() {
+    // IdTrakt() defaults to -1. Reading that as a TMDB id fetched tv/1 - a random
+    // unrelated show - and displayed it in place of the one the user tapped.
+    assertThat(LocalIdResolver.tmdbIdOf(-1)).isNull()
+  }
+
+  @Test
+  fun `Should never mint the unknown-id sentinel`() {
+    // TMDB id 1 is a real show. Negating it plainly would produce -1.
+    assertThat(LocalIdResolver.newId(1)).isNotEqualTo(-1L)
+    assertThat(LocalIdResolver.tmdbIdOf(LocalIdResolver.newId(1))).isEqualTo(1L)
   }
 
   private fun show(

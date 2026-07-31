@@ -2,7 +2,6 @@ package com.michaldrabik.ui_episodes.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.michaldrabik.repository.CommentsRepository
 import com.michaldrabik.repository.RatingsRepository
 import com.michaldrabik.repository.TranslationsRepository
 import com.michaldrabik.repository.images.EpisodeImagesProvider
@@ -16,7 +15,6 @@ import com.michaldrabik.ui_episodes.details.cases.EpisodeDetailsSeasonCase
 import com.michaldrabik.ui_episodes.details.cases.EpisodeDetailsWatchedCase
 import com.michaldrabik.ui_base.viewmodel.ChannelsDelegate
 import com.michaldrabik.ui_base.viewmodel.DefaultChannelsDelegate
-import com.michaldrabik.ui_model.Comment
 import com.michaldrabik.ui_model.Episode
 import com.michaldrabik.ui_model.IdTmdb
 import com.michaldrabik.ui_model.IdTrakt
@@ -42,7 +40,6 @@ class EpisodeDetailsViewModel @Inject constructor(
   private val dateFormatProvider: DateFormatProvider,
   private val ratingsRepository: RatingsRepository,
   private val translationsRepository: TranslationsRepository,
-  private val commentsRepository: CommentsRepository,
   private val settingsRepository: SettingsRepository,
 ) : ViewModel(),
   ChannelsDelegate by DefaultChannelsDelegate() {
@@ -50,20 +47,16 @@ class EpisodeDetailsViewModel @Inject constructor(
   private val imageState = MutableStateFlow<Image?>(null)
   private val imageLoadingState = MutableStateFlow(false)
   private val episodesState = MutableStateFlow<List<Episode>?>(null)
-  private val commentsState = MutableStateFlow<List<Comment>?>(null)
-  private val commentsLoadingState = MutableStateFlow(false)
   private val signedInState = MutableStateFlow(false)
   private val ratingState = MutableStateFlow<RatingState?>(null)
   private val translationState = MutableStateFlow<Translation?>(null)
   private val lastWatchedAtState = MutableStateFlow<ZonedDateTime?>(null)
   private val dateFormatState = MutableStateFlow<DateTimeFormatter?>(null)
-  private val commentsDateFormatState = MutableStateFlow<DateTimeFormatter?>(null)
   private val spoilersState = MutableStateFlow<SpoilersSettings?>(null)
 
   init {
     viewModelScope.launch {
       dateFormatState.value = dateFormatProvider.loadFullDayFormat()
-      commentsDateFormatState.value = dateFormatProvider.loadFullHourFormat()
       spoilersState.value = spoilersSettings.getAll()
     }
   }
@@ -99,19 +92,6 @@ class EpisodeDetailsViewModel @Inject constructor(
     }
   }
 
-  fun loadComments(showId: IdTrakt, seasonNumber: Int, episodeNumber: Int) {
-    viewModelScope.launch {
-      commentsLoadingState.value = true
-      try {
-        commentsState.value = commentsRepository.loadEpisodeComments(showId, seasonNumber, episodeNumber)
-      } catch (e: Throwable) {
-        rethrowCancellation(e)
-      } finally {
-        commentsLoadingState.value = false
-      }
-    }
-  }
-
   fun loadRatings(episode: Episode) {
     viewModelScope.launch {
       val rating = ratingsRepository.shows.loadRating(episode)
@@ -122,58 +102,26 @@ class EpisodeDetailsViewModel @Inject constructor(
     }
   }
 
-  fun loadCommentReplies(comment: Comment) {
-    if (comment.replies <= 0) return
-    viewModelScope.launch {
-      try {
-        val replies = commentsRepository.loadReplies(comment.id)
-        val currentComments = commentsState.value?.toMutableList() ?: mutableListOf()
-        val index = currentComments.indexOfFirst { it.id == comment.id }
-        if (index != -1) {
-          currentComments.addAll(index + 1, replies)
-          currentComments[index] = currentComments[index].copy(replies = 0)
-          commentsState.value = currentComments
-        }
-      } catch (e: Throwable) {
-        rethrowCancellation(e)
-      }
-    }
-  }
-
-  fun addNewComment(comment: Comment) {
-    // Removed.
-  }
-
-  fun deleteComment(comment: Comment) {
-    // Removed.
-  }
-
   val uiState = combine(
     imageState,
     imageLoadingState,
     episodesState,
-    commentsState,
-    commentsLoadingState,
     signedInState,
     ratingState,
     translationState,
     lastWatchedAtState,
     dateFormatState,
-    commentsDateFormatState,
     spoilersState,
-  ) { image, isImageLoading, episodes, comments, isCommentsLoading, isSignedIn, rating, translation, lastWatchedAt, dateFormat, commentsDateFormat, spoilers ->
+  ) { image, isImageLoading, episodes, isSignedIn, rating, translation, lastWatchedAt, dateFormat, spoilers ->
     EpisodeDetailsUiState(
       image = image,
       isImageLoading = isImageLoading,
       episodes = episodes,
-      comments = comments,
-      isCommentsLoading = isCommentsLoading,
       isSignedIn = isSignedIn,
       rating = rating,
       translation = translation,
       lastWatchedAt = lastWatchedAt,
       dateFormat = dateFormat,
-      commentsDateFormat = commentsDateFormat,
       spoilers = spoilers,
     )
   }.stateIn(
