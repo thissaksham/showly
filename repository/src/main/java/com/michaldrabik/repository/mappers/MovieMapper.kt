@@ -16,39 +16,16 @@ import com.michaldrabik.ui_model.MovieStatus
 import java.time.LocalDate
 import javax.inject.Inject
 import com.michaldrabik.data_local.database.model.Movie as MovieDb
-import com.michaldrabik.data_remote.trakt.model.Movie as MovieNetwork
 
 class MovieMapper @Inject constructor(
   private val idsMapper: IdsMapper,
 ) {
 
-  fun fromNetwork(movie: MovieNetwork) =
-    Movie(
-      idsMapper.fromNetwork(movie.ids),
-      movie.title ?: "",
-      movie.year ?: -1,
-      movie.overview ?: "",
-      movie.released?.let { if (it.isNotBlank()) LocalDate.parse(it) else null },
-      movie.runtime ?: -1,
-      movie.country ?: "",
-      movie.trailer ?: "",
-      movie.homepage ?: "",
-      movie.language ?: "",
-      MovieStatus.fromKey(movie.status),
-      movie.rating ?: -1F,
-      movie.votes ?: -1,
-      movie.comment_count ?: -1,
-      movie.genres ?: emptyList(),
-      nowUtcMillis(),
-      nowUtcMillis(),
-    )
-
   /**
    * Maps full movie details from TMDB.
    *
    * [localId] comes from LocalIdResolver: an existing row keeps the id it already
-   * has, so watch history stays attached. Trailer needs an extra TMDB call
-   * (`videos`) and is left blank for now.
+   * has, so watch history stays attached.
    */
   fun fromTmdb(
     details: TmdbMovieDetails,
@@ -117,25 +94,6 @@ class MovieMapper @Inject constructor(
    */
   private fun String?.toLocalDateOrNull() =
     if (isNullOrBlank()) null else runCatching { LocalDate.parse(this) }.getOrNull()
-
-  fun toNetwork(movie: Movie) =
-    MovieNetwork(
-      idsMapper.toNetwork(movie.ids),
-      movie.title,
-      movie.year,
-      movie.overview,
-      movie.released?.toString(),
-      movie.runtime,
-      movie.country,
-      movie.trailer,
-      movie.homepage,
-      movie.status.key,
-      movie.rating,
-      movie.votes,
-      movie.commentCount,
-      movie.genres,
-      movie.language,
-    )
 
   fun fromTmdbDiscovery(item: TmdbDiscoveryItem) =
     Movie(

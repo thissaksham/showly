@@ -16,8 +16,6 @@ import com.michaldrabik.ui_model.Show
 import com.michaldrabik.ui_model.ShowStatus
 import javax.inject.Inject
 import com.michaldrabik.data_local.database.model.Show as ShowDb
-import com.michaldrabik.data_remote.trakt.model.AirTime as AirTimeNetwork
-import com.michaldrabik.data_remote.trakt.model.Show as ShowNetwork
 
 class ShowMapper @Inject constructor(
   private val idsMapper: IdsMapper,
@@ -29,66 +27,12 @@ class ShowMapper @Inject constructor(
    */
   private fun String?.toIsoInstant() = if (isNullOrBlank()) "" else "${this}T00:00:00Z"
 
-  fun fromNetwork(show: ShowNetwork) =
-    Show(
-      idsMapper.fromNetwork(show.ids),
-      show.title ?: "",
-      show.year ?: -1,
-      show.overview ?: "",
-      show.first_aired ?: "",
-      show.runtime ?: -1,
-      AirTime(
-        show.airs?.day ?: "",
-        show.airs?.time ?: "",
-        show.airs?.timezone ?: "",
-      ),
-      show.certification ?: "",
-      show.network ?: "",
-      show.country ?: "",
-      show.trailer ?: "",
-      show.homepage ?: "",
-      ShowStatus.fromKey(show.status),
-      show.rating ?: -1F,
-      show.votes ?: -1,
-      show.comment_count ?: -1,
-      show.genres ?: emptyList(),
-      show.aired_episodes ?: -1,
-      nowUtcMillis(),
-      nowUtcMillis(),
-    )
-
-  fun toNetwork(show: Show) =
-    ShowNetwork(
-      idsMapper.toNetwork(show.ids),
-      show.title,
-      show.year,
-      show.overview,
-      show.firstAired,
-      show.runtime,
-      AirTimeNetwork(
-        show.airTime.day,
-        show.airTime.time,
-        show.airTime.timezone,
-      ),
-      show.certification,
-      show.network,
-      show.country,
-      show.trailer,
-      show.homepage,
-      show.status.key,
-      show.rating,
-      show.votes,
-      show.commentCount,
-      show.genres,
-      show.airedEpisodes,
-    )
-
   /**
    * Maps full show details from TMDB.
    *
    * [localId] comes from LocalIdResolver: an existing row keeps the id it already
-   * has, so watch history stays attached. Certification and trailer need extra
-   * TMDB calls (`content_ratings`, `videos`) and are left blank for now.
+   * has, so watch history stays attached. Certification needs an extra TMDB call
+   * (`content_ratings`) and is left blank for now.
    */
   fun fromTmdb(
     details: TmdbShowDetails,

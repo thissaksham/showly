@@ -10,29 +10,8 @@ import com.michaldrabik.ui_model.IdTvdb
 import com.michaldrabik.ui_model.Ids
 import javax.inject.Inject
 import com.michaldrabik.data_local.database.model.Show as ShowDb
-import com.michaldrabik.data_remote.trakt.model.Ids as IdsNetwork
 
 class IdsMapper @Inject constructor() {
-
-  fun fromNetwork(ids: IdsNetwork?) =
-    Ids(
-      IdTrakt(ids?.trakt ?: -1),
-      IdSlug(ids?.slug ?: ""),
-      IdTvdb(ids?.tvdb ?: -1),
-      IdImdb(ids?.imdb ?: ""),
-      IdTmdb(ids?.tmdb ?: -1),
-      IdTvRage(ids?.tvrage ?: -1),
-    )
-
-  fun toNetwork(ids: Ids?) =
-    IdsNetwork(
-      trakt = ids?.trakt?.id,
-      slug = ids?.slug?.id,
-      tvdb = ids?.tvdb?.id,
-      imdb = ids?.imdb?.id,
-      tmdb = ids?.tmdb?.id,
-      tvrage = ids?.tvrage?.id,
-    )
 
   fun fromDatabase(show: ShowDb?) =
     Ids(

@@ -3,7 +3,6 @@ package com.michaldrabik.data_remote.di.module
 import com.michaldrabik.data_remote.Config.AWS_BASE_URL
 import com.michaldrabik.data_remote.Config.OMDB_BASE_URL
 import com.michaldrabik.data_remote.Config.TMDB_BASE_URL
-import com.michaldrabik.data_remote.Config.TRAKT_BASE_URL
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -19,20 +18,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RetrofitModule {
-
-  @Provides
-  @Singleton
-  @Named("retrofitTrakt")
-  fun providesTraktRetrofit(
-    @Named("okHttpTrakt") okHttpClient: OkHttpClient,
-    moshi: Moshi,
-  ): Retrofit =
-    Retrofit
-      .Builder()
-      .client(okHttpClient)
-      .addConverterFactory(MoshiConverterFactory.create(moshi))
-      .baseUrl(TRAKT_BASE_URL)
-      .build()
 
   @Provides
   @Singleton

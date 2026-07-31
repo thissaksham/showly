@@ -7,17 +7,8 @@ import com.michaldrabik.ui_model.MovieCollection
 import java.time.ZonedDateTime
 import javax.inject.Inject
 import com.michaldrabik.data_local.database.model.MovieCollection as MovieCollectionEntity
-import com.michaldrabik.data_remote.trakt.model.MovieCollection as MovieCollectionNetwork
 
 class CollectionMapper @Inject constructor() {
-
-  fun fromNetwork(input: MovieCollectionNetwork): MovieCollection =
-    MovieCollection(
-      id = IdTrakt(input.ids.trakt!!),
-      name = input.name,
-      description = input.description,
-      itemCount = input.item_count,
-    )
 
   /**
    * [localId] is minted from the TMDB collection id, so it cannot collide with the

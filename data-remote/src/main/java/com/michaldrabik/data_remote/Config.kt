@@ -1,21 +1,11 @@
 package com.michaldrabik.data_remote
 
 object Config {
-  const val TRAKT_VERSION = "2"
-  const val TRAKT_BASE_URL = "https://api.trakt.tv/"
-  const val TRAKT_CLIENT_ID = BuildConfig.TRAKT_CLIENT_ID
-
-  const val TRAKT_DISCOVER_LIMIT = 280
-  const val TRAKT_ANTICIPATED_LIMIT = 30
-  const val TRAKT_RELATED_SHOWS_LIMIT = 30
-  const val TRAKT_RELATED_MOVIES_LIMIT = 30
-  const val TRAKT_SEARCH_LIMIT = 50
-
   const val TMDB_BASE_URL = "https://api.themoviedb.org/3/"
   const val TMDB_API_KEY = BuildConfig.TMDB_API_KEY
 
   // TMDB returns a fixed 20 items per page, so a feed's size is set by how many pages
-  // it asks for. These land near the old Trakt limits above; pages are fetched in parallel.
+  // it asks for. Pages are fetched in parallel.
   const val TMDB_PAGE_SIZE = 20
   const val TMDB_DISCOVER_PAGES = 12
   const val TMDB_ANTICIPATED_PAGES = 2
@@ -24,13 +14,4 @@ object Config {
   const val OMDB_API_KEY = BuildConfig.OMDB_API_KEY
 
   const val AWS_BASE_URL = "https://showly2.s3.eu-west-2.amazonaws.com/"
-
-  fun traktUserAgent(
-    buildVersion: String,
-    buildCode: Int,
-    androidVersion: Int,
-  ): String {
-    // "Showly/3.55.1 (com.michaldrabik.showly; build:1254; Android)"
-    return "Showly/$buildVersion (com.thissaksham.showly2; build:$buildCode; Android $androidVersion)"
-  }
 }

@@ -37,7 +37,7 @@ abstract class BaseMockTest {
 
   protected val testDispatchers = UnconfinedCoroutineDispatchers()
   private val idsMapper = IdsMapper()
-  private val episodeMappers = EpisodeMapper(idsMapper)
+  private val episodeMappers = EpisodeMapper()
 
   @SpyK var mappers = Mappers(
     idsMapper,
@@ -45,10 +45,10 @@ abstract class BaseMockTest {
     ShowMapper(idsMapper),
     MovieMapper(idsMapper),
     episodeMappers,
-    SeasonMapper(idsMapper, episodeMappers),
+    SeasonMapper(episodeMappers),
     PersonMapper(),
     SettingsMapper(),
-    TranslationMapper(idsMapper),
+    TranslationMapper(),
     CustomListMapper(),
     RatingsMapper(),
     UserRatingsMapper(),

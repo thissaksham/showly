@@ -3,8 +3,6 @@ package com.michaldrabik.data_remote.di.module
 import com.michaldrabik.data_remote.BuildConfig
 import com.michaldrabik.data_remote.omdb.OmdbInterceptor
 import com.michaldrabik.data_remote.tmdb.TmdbInterceptor
-import com.michaldrabik.data_remote.trakt.interceptors.TraktHeadersInterceptor
-import com.michaldrabik.data_remote.trakt.interceptors.TraktRetryInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,20 +23,6 @@ object OkHttpModule {
   @Singleton
   @Named("okHttpBase")
   fun providesBaseOkHttp(): OkHttpClient = createBaseOkHttpClient().build()
-
-  @Provides
-  @Singleton
-  @Named("okHttpTrakt")
-  fun providesTraktOkHttp(
-    httpLoggingInterceptor: HttpLoggingInterceptor,
-    traktHeadersInterceptor: TraktHeadersInterceptor,
-    traktRetryInterceptor: TraktRetryInterceptor,
-  ): OkHttpClient =
-    createBaseOkHttpClient()
-      .addInterceptor(traktHeadersInterceptor)
-      .addInterceptor(traktRetryInterceptor)
-      .addInterceptor(httpLoggingInterceptor)
-      .build()
 
   @Provides
   @Singleton

@@ -12,27 +12,8 @@ import com.michaldrabik.ui_model.Season
 import java.time.ZonedDateTime
 import javax.inject.Inject
 import com.michaldrabik.data_local.database.model.Episode as EpisodeDb
-import com.michaldrabik.data_remote.trakt.model.Episode as EpisodeNetwork
 
-class EpisodeMapper @Inject constructor(
-  private val idsMapper: IdsMapper,
-) {
-
-  fun fromNetwork(episode: EpisodeNetwork) =
-    Episode(
-      season = episode.season ?: -1,
-      number = episode.number ?: -1,
-      title = episode.title ?: "",
-      ids = idsMapper.fromNetwork(episode.ids),
-      overview = episode.overview ?: "",
-      rating = episode.rating ?: 0F,
-      votes = episode.votes ?: 0,
-      commentCount = episode.comment_count ?: 0,
-      firstAired = episode.first_aired.toZonedDateTime(),
-      runtime = episode.runtime ?: -1,
-      numberAbs = episode.number_abs,
-      lastWatchedAt = episode.last_watched_at.toZonedDateTime(),
-    )
+class EpisodeMapper @Inject constructor() {
 
   /**
    * [localId] is resolved by the caller: an episode already in the database keeps
@@ -60,22 +41,6 @@ class EpisodeMapper @Inject constructor(
     numberAbs = null,
     lastWatchedAt = null,
   )
-
-  fun toNetwork(episode: Episode) =
-    EpisodeNetwork(
-      ids = idsMapper.toNetwork(episode.ids),
-      season = episode.season,
-      number = episode.number,
-      number_abs = episode.numberAbs,
-      title = episode.title,
-      overview = episode.overview,
-      rating = episode.rating,
-      votes = episode.votes,
-      comment_count = episode.commentCount,
-      first_aired = episode.firstAired.toString(),
-      runtime = episode.runtime,
-      last_watched_at = episode.lastWatchedAt.toString(),
-    )
 
   fun toDatabase(
     episode: Episode,
