@@ -133,17 +133,19 @@
         android:textColor="@color/colorWhite"
         />
 
-      <com.google.android.material.button.MaterialButton
-        android:id="@+id/settingsBackupCloudDisconnect"
-        style="@style/RoundTextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spaceSmall"
-        android:text="@string/textSettingsCloudBackupDisconnect"
-        android:textColor="@color/colorWhite"
-        />
-
     </LinearLayout>
+
+    <!-- Own row: three buttons do not fit across a phone, and the third was
+         pushed off screen while the row grew to fit the wrapped text. -->
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/settingsBackupCloudDisconnect"
+      style="@style/RoundTextButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/textSettingsCloudBackupDisconnect"
+      android:textColor="@color/colorWhite"
+      android:visibility="gone"
+      />
 
     <ProgressBar
       android:id="@+id/settingsBackupCloudProgress"

@@ -83,6 +83,7 @@ class SettingsBackupFragment : BaseFragment<SettingsBackupViewModel>(R.layout.fr
     with(binding) {
       settingsBackupCloudConnect.visibleIf(!isConnected)
       settingsBackupCloudActions.visibleIf(isConnected)
+      settingsBackupCloudDisconnect.visibleIf(isConnected)
     }
   }
 
