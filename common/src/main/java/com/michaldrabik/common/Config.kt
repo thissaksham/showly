@@ -16,7 +16,6 @@ object Config {
   const val AWS_IMAGE_BASE_URL = "https://showly2.s3.eu-west-2.amazonaws.com/images/"
 
   const val PLAYSTORE_URL = "https://play.google.com/store/apps/details?id=com.thissaksham.showly2"
-  const val TRAKT_URL = "https://www.trakt.tv/"
   const val JUST_WATCH_URL = "https://www.justwatch.com/"
   const val TMDB_URL = "https://www.themoviedb.org/"
 

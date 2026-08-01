@@ -40,7 +40,6 @@ class SettingsMiscFragment : BaseFragment<SettingsMiscViewModel>(R.layout.fragme
     with(binding) {
       settingsDeleteCache.onClick { viewModel.deleteImagesCache(requireAppContext()) }
 
-      settingsTraktIcon.onClick { openWebLink(Config.TRAKT_URL) }
       settingsTmdbIcon.onClick { openWebLink(Config.TMDB_URL) }
       settingsJustWatchIcon.onClick { openWebLink(Config.JUST_WATCH_URL) }
     }
