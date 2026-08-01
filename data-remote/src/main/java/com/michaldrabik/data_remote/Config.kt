@@ -13,5 +13,10 @@ object Config {
   const val OMDB_BASE_URL = "https://omdbapi.com/"
   const val OMDB_API_KEY = BuildConfig.OMDB_API_KEY
 
+  // TVDB is the only source that knows what time of day an episode airs. TMDB gives
+  // a date and nothing else, which is why everything used to land at midnight UTC.
+  const val TVDB_BASE_URL = "https://api4.thetvdb.com/v4/"
+  const val TVDB_API_KEY = BuildConfig.TVDB_API_KEY
+
   const val AWS_BASE_URL = "https://showly2.s3.eu-west-2.amazonaws.com/"
 }

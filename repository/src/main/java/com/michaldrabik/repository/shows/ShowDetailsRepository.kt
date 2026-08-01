@@ -7,11 +7,13 @@ import com.michaldrabik.data_local.utilities.TransactionsProvider
 import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.repository.mappers.Mappers
 import com.michaldrabik.repository.utilities.LocalIdResolver
+import com.michaldrabik.ui_model.AirTime
 import com.michaldrabik.ui_model.IdImdb
 import com.michaldrabik.ui_model.IdSlug
 import com.michaldrabik.ui_model.IdTmdb
 import com.michaldrabik.ui_model.IdTrakt
 import com.michaldrabik.ui_model.Show
+import timber.log.Timber
 import javax.inject.Inject
 
 class ShowDetailsRepository @Inject constructor(
@@ -36,7 +38,8 @@ class ShowDetailsRepository @Inject constructor(
 
       if (tmdbId != null) {
         val remoteShow = remoteSource.tmdb.fetchShowDetails(tmdbId)
-        val show = mappers.show.fromTmdb(remoteShow, localId = idTrakt.id)
+        val airTime = fetchAirTime(remoteShow.external_ids?.tvdb_id)
+        val show = mappers.show.fromTmdb(remoteShow, localId = idTrakt.id, airTime = airTime)
         localSource.shows.upsert(listOf(mappers.show.toDatabase(show)))
         return show
       }
@@ -62,9 +65,28 @@ class ShowDetailsRepository @Inject constructor(
     localId: Long,
   ): Show {
     val remoteShow = remoteSource.tmdb.fetchShowDetails(tmdbId)
-    val show = mappers.show.fromTmdb(remoteShow, localId = localId)
+    val airTime = fetchAirTime(remoteShow.external_ids?.tvdb_id)
+    val show = mappers.show.fromTmdb(remoteShow, localId = localId, airTime = airTime)
     localSource.shows.upsert(listOf(mappers.show.toDatabase(show)))
     return show
+  }
+
+  /**
+   * TVDB is the only source with a time of day. It is a second network call on top of
+   * the details fetch, and nothing else depends on it, so a failure here leaves the
+   * show with an unknown slot instead of failing the screen.
+   *
+   * The id comes from TMDB's `external_ids`. TVDB's own remote-id search is not used:
+   * it matches any entity whose id collides numerically and returns unrelated shows.
+   */
+  private suspend fun fetchAirTime(tvdbId: Long?): AirTime {
+    if (tvdbId == null || tvdbId <= 0) return AirTime.EMPTY
+    return try {
+      mappers.show.airTimeFromTvdb(remoteSource.tvdb.fetchSeries(tvdbId))
+    } catch (error: Throwable) {
+      Timber.w(error, "TVDB air time lookup failed for $tvdbId")
+      AirTime.EMPTY
+    }
   }
 
   suspend fun find(idImdb: IdImdb): Show? {

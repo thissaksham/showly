@@ -4,10 +4,12 @@ import com.michaldrabik.data_local.LocalDataSource
 import com.michaldrabik.data_remote.RemoteDataSource
 import com.michaldrabik.repository.mappers.Mappers
 import com.michaldrabik.repository.utilities.LocalIdResolver
+import com.michaldrabik.ui_model.AirTime
 import com.michaldrabik.ui_model.Episode
 import com.michaldrabik.ui_model.Season
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.michaldrabik.data_local.database.model.Show as ShowDb
 
 /**
  * Seasons and episodes from TMDB, keyed so that watch history survives the move
@@ -31,7 +33,8 @@ class ShowSeasonsRepository @Inject constructor(
    * it on the show endpoint, so this costs one request rather than a season sweep.
    */
   suspend fun loadNextEpisode(showLocalId: Long): Episode? {
-    val tmdbId = resolveTmdbId(showLocalId) ?: return null
+    val show = localSource.shows.getById(showLocalId)
+    val tmdbId = resolveTmdbId(showLocalId, show) ?: return null
     val next = remoteSource.tmdb.fetchShowDetails(tmdbId).next_episode_to_air ?: return null
     val tmdbEpisodeId = next.id ?: return null
 
@@ -39,18 +42,29 @@ class ShowSeasonsRepository @Inject constructor(
       .getAllByShowId(showLocalId)
       .find { it.seasonNumber == next.season_number && it.episodeNumber == next.episode_number }
 
-    return mappers.episode.fromTmdb(next, existing?.idTrakt ?: LocalIdResolver.newId(tmdbEpisodeId))
+    return mappers.episode.fromTmdb(
+      next,
+      existing?.idTrakt ?: LocalIdResolver.newId(tmdbEpisodeId),
+      airTimeOf(show),
+    )
   }
 
-  private suspend fun resolveTmdbId(showLocalId: Long): Long? =
-    localSource.shows
-      .getById(showLocalId)
-      ?.idTmdb
-      ?.takeIf { it > 0 }
-      ?: LocalIdResolver.tmdbIdOf(showLocalId)
+  private fun resolveTmdbId(
+    showLocalId: Long,
+    show: ShowDb?,
+  ): Long? = show?.idTmdb?.takeIf { it > 0 } ?: LocalIdResolver.tmdbIdOf(showLocalId)
+
+  /**
+   * The show's air slot, stored by ShowDetailsRepository when it fetched the details.
+   * Blank until that has happened, in which case episodes keep their date-only time.
+   */
+  private fun airTimeOf(show: ShowDb?): AirTime =
+    show?.let { AirTime(it.airtimeDay, it.airtimeTime, it.airtimeTimezone) } ?: AirTime.EMPTY
 
   suspend fun loadRemote(showLocalId: Long): List<Season> {
-    val tmdbId = resolveTmdbId(showLocalId) ?: return emptyList()
+    val show = localSource.shows.getById(showLocalId)
+    val tmdbId = resolveTmdbId(showLocalId, show) ?: return emptyList()
+    val airTime = airTimeOf(show)
 
     val localSeasons = localSource.seasons
       .getAllByShowId(showLocalId)
@@ -71,7 +85,7 @@ class ShowSeasonsRepository @Inject constructor(
             val episodeTmdbId = episode.id ?: return@mapNotNull null
             val existing = localEpisodes[seasonNumber to (episode.episode_number ?: -1)]
             val localId = existing?.idTrakt ?: LocalIdResolver.newId(episodeTmdbId)
-            mappers.episode.fromTmdb(episode, localId)
+            mappers.episode.fromTmdb(episode, localId, airTime)
           }
 
         val seasonLocalId = localSeasons[seasonNumber]?.idTrakt ?: LocalIdResolver.newId(seasonTmdbId)

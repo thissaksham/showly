@@ -33,6 +33,7 @@ android {
 
     buildConfigField("String", "TMDB_API_KEY", properties.getProperty("tmdbApiKey") ?: '""')
     buildConfigField("String", "OMDB_API_KEY", properties.getProperty("omdbApiKey") ?: '""')
+    buildConfigField("String", "TVDB_API_KEY", properties.getProperty("tvdbApiKey") ?: '""')
     buildConfigField("String", "VER_NAME", "\"${versions.versionName}\"")
     buildConfigField("int", "VER_CODE", "${versions.versionCode}")
   }

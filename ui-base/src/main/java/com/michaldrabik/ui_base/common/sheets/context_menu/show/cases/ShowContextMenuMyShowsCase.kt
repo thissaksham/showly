@@ -38,6 +38,13 @@ class ShowContextMenuMyShowsCase @Inject constructor(
     withContext(dispatchers.IO) {
       val show = Show.EMPTY.copy(ids = Ids.EMPTY.copy(traktId))
 
+      // The air time is written onto the show row by the details fetch, and seasons
+      // read it from there. Adding a show straight from search or discover skips the
+      // details screen, so without this every episode is stamped midnight UTC and the
+      // notifications are scheduled off it. Cached details are a local read, and a
+      // failure here only costs the air time, so it must not fail the add.
+      runCatching { showsRepository.detailsShow.load(traktId) }
+
       val seasons = showSeasonsRepository
         .loadRemote(traktId.id)
         .filter { it.episodes.isNotEmpty() }

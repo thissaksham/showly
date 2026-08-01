@@ -46,6 +46,16 @@ object OkHttpModule {
     .addInterceptor(httpLoggingInterceptor)
     .build()
 
+  // No interceptor: TVDB's bearer token is fetched by the api itself and passed
+  // per request, so there is nothing to inject into the client here.
+  @Provides
+  @Singleton
+  @Named("okHttpTvdb")
+  fun providesTvdbOkHttp(httpLoggingInterceptor: HttpLoggingInterceptor) =
+    createBaseOkHttpClient()
+      .addInterceptor(httpLoggingInterceptor)
+      .build()
+
   @Provides
   @Singleton
   @Named("okHttpAws")

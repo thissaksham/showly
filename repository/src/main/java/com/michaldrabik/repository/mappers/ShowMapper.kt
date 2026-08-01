@@ -4,6 +4,8 @@ import com.michaldrabik.common.extensions.nowUtcMillis
 import com.michaldrabik.data_remote.tmdb.model.TmdbDiscoveryItem
 import com.michaldrabik.data_remote.tmdb.model.TmdbSearchItem
 import com.michaldrabik.data_remote.tmdb.model.TmdbShowDetails
+import com.michaldrabik.data_remote.tvdb.model.TvdbSeries
+import com.michaldrabik.repository.utilities.AirTimeZones
 import com.michaldrabik.ui_model.AirTime
 import com.michaldrabik.ui_model.IdImdb
 import com.michaldrabik.ui_model.IdSlug
@@ -28,15 +30,29 @@ class ShowMapper @Inject constructor(
   private fun String?.toIsoInstant() = if (isNullOrBlank()) "" else "${this}T00:00:00Z"
 
   /**
+   * Turns TVDB's scheduling fields into an [AirTime]. The time is stored as TVDB
+   * gives it, alongside the zone it is local to, so nothing downstream has to know
+   * about countries.
+   */
+  fun airTimeFromTvdb(series: TvdbSeries?): AirTime {
+    val time = series?.airsTime?.takeIf { it.isNotBlank() } ?: return AirTime.EMPTY
+    val zone = AirTimeZones.zoneIdOf(series.originalCountry) ?: return AirTime.EMPTY
+    return AirTime(day = "", time = time, timezone = zone)
+  }
+
+  /**
    * Maps full show details from TMDB.
    *
    * [localId] comes from LocalIdResolver: an existing row keeps the id it already
    * has, so watch history stays attached. Certification needs an extra TMDB call
    * (`content_ratings`) and is left blank for now.
+   *
+   * [airTime] comes from TVDB, which is the only source that knows the time of day.
    */
   fun fromTmdb(
     details: TmdbShowDetails,
     localId: Long,
+    airTime: AirTime = AirTime.EMPTY,
   ) = Show(
     ids = Ids(
       trakt = IdTrakt(localId),
@@ -51,7 +67,7 @@ class ShowMapper @Inject constructor(
     overview = details.overview ?: "",
     firstAired = details.first_air_date.toIsoInstant(),
     runtime = details.runtimeMinutes,
-    airTime = AirTime(day = "", time = "", timezone = ""),
+    airTime = airTime,
     certification = "",
     network = details.networks?.firstOrNull()?.name ?: "",
     country = details.origin_country?.firstOrNull()?.lowercase() ?: "",
@@ -85,7 +101,7 @@ class ShowMapper @Inject constructor(
     overview = item.overview ?: "",
     firstAired = item.first_air_date.toIsoInstant(),
     runtime = -1,
-    airTime = AirTime(day = "", time = "", timezone = ""),
+    airTime = AirTime.EMPTY,
     certification = "",
     network = "",
     country = item.origin_country?.firstOrNull()?.lowercase() ?: "",
@@ -109,7 +125,7 @@ class ShowMapper @Inject constructor(
       overview = item.overview ?: "",
       firstAired = if (item.first_air_date.isNullOrBlank()) "" else "${item.first_air_date}T00:00:00Z",
       runtime = -1,
-      airTime = AirTime(day = "", time = "", timezone = ""),
+      airTime = AirTime.EMPTY,
       certification = "",
       network = "",
       country = "",
