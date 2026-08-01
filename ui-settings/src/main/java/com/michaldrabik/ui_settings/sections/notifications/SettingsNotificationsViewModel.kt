@@ -26,6 +26,7 @@ class SettingsNotificationsViewModel @Inject constructor(
   ChannelsDelegate by DefaultChannelsDelegate() {
 
   private val settingsState = MutableStateFlow<Settings?>(null)
+  private val moviesHourState = MutableStateFlow(12)
   private val loadingState = MutableStateFlow(false)
 
   fun loadSettings(context: Context) {
@@ -49,6 +50,13 @@ class SettingsNotificationsViewModel @Inject constructor(
     }
   }
 
+  fun setMoviesAnnouncementHour(hour: Int) {
+    viewModelScope.launch {
+      mainCase.setMoviesAnnouncementHour(hour)
+      moviesHourState.value = hour
+    }
+  }
+
   fun setWhenToNotify(delay: NotificationDelay) {
     viewModelScope.launch {
       mainCase.setWhenToNotify(delay)
@@ -58,6 +66,7 @@ class SettingsNotificationsViewModel @Inject constructor(
 
   private suspend fun refreshSettings() {
     settingsState.value = mainCase.getSettings()
+    moviesHourState.value = mainCase.getMoviesAnnouncementHour()
   }
 
   private suspend fun ensureNotificationsPermission(context: Context): Boolean {
@@ -74,10 +83,12 @@ class SettingsNotificationsViewModel @Inject constructor(
 
   val uiState = combine(
     settingsState,
+    moviesHourState,
     loadingState,
-  ) { s1, _ ->
+  ) { s1, hour, _ ->
     SettingsNotificationsUiState(
       settings = s1,
+      moviesAnnouncementHour = hour,
     )
   }.stateIn(
     scope = viewModelScope,

@@ -32,6 +32,14 @@ class SettingsNotificationsMainCase @Inject constructor(
     }
   }
 
+  fun getMoviesAnnouncementHour(): Int = settingsRepository.moviesAnnouncementHour.toInt()
+
+  suspend fun setMoviesAnnouncementHour(hour: Int) {
+    settingsRepository.moviesAnnouncementHour = hour.toLong()
+    // Already scheduled notifications keep the old time until they are rebuilt.
+    announcementManager.refreshMoviesAnnouncements()
+  }
+
   suspend fun setWhenToNotify(delay: NotificationDelay) {
     val settings = settingsRepository.load()
     settings.let {

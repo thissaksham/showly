@@ -57,6 +57,7 @@ class SettingsRepository @Inject constructor(
     private const val PROGRESS_DATE_SELECTION_TYPE = "PROGRESS_DATE_SELECTION_TYPE"
     private const val LOCALE_INITIALISED = "LOCALE_INITIALISED"
     private const val CLOUD_BACKUP_TIMESTAMP = "CLOUD_BACKUP_TIMESTAMP"
+    private const val MOVIES_ANNOUNCEMENT_HOUR = "MOVIES_ANNOUNCEMENT_HOUR"
   }
 
   suspend fun isInitialized() =
@@ -86,6 +87,12 @@ class SettingsRepository @Inject constructor(
   var language by StringPreference(preferences, LANGUAGE, DEFAULT_LANGUAGE)
   var country by StringPreference(preferences, COUNTRY, DEFAULT_COUNTRY)
   var dateFormat by StringPreference(preferences, DATE_FORMAT, DEFAULT_DATE_FORMAT)
+
+  /**
+   * Hour of the release day, in local time, when a movie notification fires. A movie
+   * has only a release date - no time - so one has to be picked; noon is the default.
+   */
+  var moviesAnnouncementHour by LongPreference(preferences, MOVIES_ANNOUNCEMENT_HOUR, 12)
 
   var progressUpcomingDays by LongPreference(preferences, PROGRESS_UPCOMING_DAYS, 30)
   var isProgressUpcomingCollapsed by BooleanPreference(preferences, PROGRESS_UPCOMING_COLLAPSED)

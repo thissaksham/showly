@@ -55,6 +55,8 @@
   <string name="textSettingsCloudBackupBackupNow">Backup Now</string>
   <string name="textSettingsCloudBackupRestore">Restore from Cloud</string>
   <string name="textSettingsCloudBackupDisconnect">Disconnect</string>
+  <string name="textSettingsMoviesNotificationsHourTitle">Movie Notification Time</string>
+  <string name="textSettingsMoviesNotificationsHourSummary">Time of day to notify about movies releasing. Movies have a release date but no time.</string>
   <string name="textSettingsCloudBackupSuccess">Cloud backup successful!</string>
   <string name="textSettingsCloudRestoreSuccess">Data restored successfully. App will restart.</string>
   <string name="textSettingsCloudBackupLastTimestamp">Last backup: %s</string>

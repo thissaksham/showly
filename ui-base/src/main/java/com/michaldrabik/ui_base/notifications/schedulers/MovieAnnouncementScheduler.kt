@@ -35,7 +35,6 @@ class MovieAnnouncementScheduler @Inject constructor(
 
   companion object {
     const val ANNOUNCEMENT_MOVIE_WORK_TAG = "ANNOUNCEMENT_MOVIE_WORK_TAG"
-    private const val MOVIE_THRESHOLD_HOUR = 12
   }
 
   private val logFormatter by lazy { DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy, HH:mm") }
@@ -69,7 +68,8 @@ class MovieAnnouncementScheduler @Inject constructor(
 
     val now = ZonedDateTime.now()
     val days = movie.released!!.toEpochDay() - nowUtcDay().toEpochDay()
-    val offset = now.withHour(MOVIE_THRESHOLD_HOUR).withMinute(0).toMillis() - now.toMillis()
+    val announcementHour = settingsRepository.moviesAnnouncementHour.toInt()
+    val offset = now.withHour(announcementHour).withMinute(0).toMillis() - now.toMillis()
     val delayed = (days * TimeUnit.DAYS.toMillis(1)) + offset
     val request = OneTimeWorkRequestBuilder<AnnouncementWorker>()
       .setInputData(data.build())

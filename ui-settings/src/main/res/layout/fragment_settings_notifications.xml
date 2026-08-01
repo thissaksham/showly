@@ -55,7 +55,6 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/settingsWhenToNotify"
     style="@style/Settings.ItemLayout"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/settingsShowsNotifications"
@@ -95,6 +94,53 @@
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@id/settingsWhenToNotifyDescription"
       app:layout_constraintTop_toTopOf="parent"
+      />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/settingsMoviesNotifyHour"
+    style="@style/Settings.ItemLayout"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/settingsWhenToNotify"
+    >
+
+    <TextView
+      android:id="@+id/settingsMoviesNotifyHourTitle"
+      style="@style/Settings.Title"
+      android:text="@string/textSettingsMoviesNotificationsHourTitle"
+      app:layout_constraintBottom_toTopOf="@id/settingsMoviesNotifyHourDescription"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintVertical_chainStyle="packed"
+      />
+
+    <TextView
+      android:id="@+id/settingsMoviesNotifyHourDescription"
+      style="@style/Settings.Summary"
+      android:layout_marginEnd="@dimen/spaceSmall"
+      android:text="@string/textSettingsMoviesNotificationsHourSummary"
+      app:layout_constrainedWidth="true"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@id/settingsMoviesNotifyHourValue"
+      app:layout_constraintHorizontal_bias="0"
+      app:layout_constraintHorizontal_chainStyle="spread_inside"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/settingsMoviesNotifyHourTitle"
+      />
+
+    <TextView
+      android:id="@+id/settingsMoviesNotifyHourValue"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textColor="?attr/colorAccent"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/settingsMoviesNotifyHourDescription"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:text="12:00"
       />
 
   </androidx.constraintlayout.widget.ConstraintLayout>

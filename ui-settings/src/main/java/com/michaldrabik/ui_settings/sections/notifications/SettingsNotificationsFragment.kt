@@ -23,6 +23,7 @@ import com.michaldrabik.ui_settings.databinding.FragmentSettingsNotificationsBin
 import com.michaldrabik.ui_settings.sections.notifications.SettingsNotificationsUiEvent.RequestNotificationsPermission
 import com.michaldrabik.ui_settings.sections.notifications.views.NotificationsRationaleView
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Locale
 
 @SuppressLint("InlinedApi")
 @AndroidEntryPoint
@@ -72,7 +73,27 @@ class SettingsNotificationsFragment :
       settings?.let {
         renderSettings(it)
       }
+      renderMoviesAnnouncementHour(moviesAnnouncementHour)
     }
+  }
+
+  private fun renderMoviesAnnouncementHour(hour: Int) {
+    with(binding) {
+      settingsMoviesNotifyHourValue.text = String.format(Locale.ENGLISH, "%02d:00", hour)
+      settingsMoviesNotifyHour.onClick { showMoviesHourDialog(hour) }
+    }
+  }
+
+  private fun showMoviesHourDialog(currentHour: Int) {
+    val hours = (0..23).toList()
+    val labels = hours.map { String.format(Locale.ENGLISH, "%02d:00", it) }.toTypedArray()
+
+    MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialog)
+      .setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.bg_dialog))
+      .setSingleChoiceItems(labels, hours.indexOf(currentHour)) { dialog, index ->
+        viewModel.setMoviesAnnouncementHour(hours[index])
+        dialog.dismiss()
+      }.show()
   }
 
   private fun renderSettings(settings: Settings) {

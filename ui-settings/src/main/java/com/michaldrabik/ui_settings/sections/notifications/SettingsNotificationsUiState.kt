@@ -4,4 +4,5 @@ import com.michaldrabik.ui_model.Settings
 
 data class SettingsNotificationsUiState(
   val settings: Settings? = null,
+  val moviesAnnouncementHour: Int = 12,
 )

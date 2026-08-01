@@ -36,7 +36,6 @@ class AnnouncementManager @Inject constructor(
 
   companion object {
     private const val MOVIE_MIN_THRESHOLD_DAYS = 30
-    private const val MOVIE_THRESHOLD_HOUR = 12
   }
 
   private val logFormatter by lazy { DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy, HH:mm") }
@@ -184,8 +183,9 @@ class AnnouncementManager @Inject constructor(
         it.released != null &&
           (!it.hasAired() || it.isToday()) &&
           it.released!!.toEpochDay() - nowUtcDay().toEpochDay() < MOVIE_MIN_THRESHOLD_DAYS &&
-          // We want movies notifications to come out the release day at 12:00 local time
-          ZonedDateTime.now().hour < MOVIE_THRESHOLD_HOUR
+          // A movie notification fires at the hour chosen in settings, so there is
+          // no point scheduling one for today once that hour has passed.
+          ZonedDateTime.now().hour < settingsRepository.moviesAnnouncementHour.toInt()
       }.forEach {
         movieAnnouncementScheduler.scheduleAnnouncement(context, it, language)
       }
