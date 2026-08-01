@@ -397,7 +397,7 @@ internal class BackupImportShowsRunner @Inject constructor(
   private suspend fun fetchShowDetails(show: BackupShow): Boolean {
     Timber.d("Fetching remote show details for ${show.traktId} ...")
     return try {
-      showsRepository.detailsShow.load(IdTrakt(show.traktId), force = true)
+      showsRepository.detailsShow.loadByTmdbId(tmdbId = show.tmdbId, localId = show.traktId)
       true
     } catch (error: Throwable) {
       rethrowCancellation(error) {

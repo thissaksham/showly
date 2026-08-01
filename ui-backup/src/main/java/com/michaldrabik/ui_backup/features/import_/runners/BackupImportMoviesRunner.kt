@@ -186,7 +186,7 @@ internal class BackupImportMoviesRunner @Inject constructor(
   private suspend fun fetchMovieDetails(movie: BackupMovie): Boolean {
     Timber.d("Fetching remote movie details for ${movie.traktId} ...")
     return try {
-      moviesRepository.movieDetails.load(IdTrakt(movie.traktId), force = true)
+      moviesRepository.movieDetails.loadByTmdbId(tmdbId = movie.tmdbId, localId = movie.traktId)
       true
     } catch (error: Throwable) {
       rethrowCancellation(error) {

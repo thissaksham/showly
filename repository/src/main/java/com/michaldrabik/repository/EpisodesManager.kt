@@ -247,12 +247,41 @@ class EpisodesManager @Inject constructor(
         seasonsToAdd.add(seasonDb)
       }
 
+      // This wipes the show and rebuilds it from the remote list, so anything the
+      // remote source does not list is dropped. TMDB catalogues far fewer specials
+      // than the data this app used to hold, which would silently delete episodes
+      // the user has already watched. Watched episodes with no remote counterpart
+      // are therefore carried over untouched, along with any season that only they
+      // still reference.
+      val remoteEpisodeKeys = remoteSeasons
+        .flatMap { season -> season.episodes.map { it.season to it.number } }
+        .toSet()
+      val remoteSeasonNumbers = remoteSeasons.map { it.number }.toSet()
+
+      // Ids are excluded if the rebuilt list already uses them: episodes are matched
+      // by number, but an id can still be reused across a renumbering, and the two
+      // rows would otherwise overwrite each other.
+      val rebuiltIds = episodesToAdd.map { it.idTrakt }.toSet()
+      val orphanedEpisodes = localEpisodes.filter {
+        it.isWatched &&
+          (it.seasonNumber to it.episodeNumber) !in remoteEpisodeKeys &&
+          it.idTrakt !in rebuiltIds
+      }
+      val orphanedSeasons = localSeasons.filter { local ->
+        local.seasonNumber !in remoteSeasonNumbers &&
+          orphanedEpisodes.any { it.seasonNumber == local.seasonNumber }
+      }
+
+      if (orphanedEpisodes.isNotEmpty()) {
+        Timber.d("Keeping ${orphanedEpisodes.size} watched episode(s) missing from remote.")
+      }
+
       transactions.withTransaction {
         episodesLocalSource.deleteAllForShow(show.traktId)
         seasonsLocalSource.deleteAllForShow(show.traktId)
 
-        seasonsLocalSource.upsert(seasonsToAdd)
-        episodesLocalSource.upsertChunked(episodesToAdd)
+        seasonsLocalSource.upsert(seasonsToAdd + orphanedSeasons)
+        episodesLocalSource.upsertChunked(episodesToAdd + orphanedEpisodes)
 
         syncLogLocalSource.upsert(EpisodesSyncLog(show.traktId, nowUtcMillis()))
       }

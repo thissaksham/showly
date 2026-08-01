@@ -48,6 +48,26 @@ class MovieDetailsRepository @Inject constructor(
       ?: error("Movie ${idTrakt.id} is not cached and has no TMDB id to fetch with.")
   }
 
+  /**
+   * Fetches details straight from TMDB and stores them under [localId].
+   *
+   * Restoring a backup needs this. The row does not exist locally yet, and the id in
+   * the backup is a Trakt one, which nothing can turn into a TMDB id on its own -
+   * [load] would fail and the movie would be skipped. The backup stores the TMDB id
+   * next to the Trakt id, so it is passed in directly and the original local id is
+   * kept.
+   */
+  suspend fun loadByTmdbId(
+    tmdbId: Long,
+    localId: Long,
+  ): Movie {
+    val remote = remoteSource.tmdb.fetchMovieDetails(tmdbId)
+    val movie = mappers.movie.fromTmdb(remote, localId = localId)
+    localSource.movies.upsert(listOf(mappers.movie.toDatabase(movie)))
+    localSource.moviesSyncLog.upsert(MoviesSyncLog(movie.traktId, nowUtcMillis()))
+    return movie
+  }
+
   suspend fun find(idImdb: IdImdb): Movie? {
     val localMovie = localSource.movies.getById(idImdb.id)
     if (localMovie != null) {
