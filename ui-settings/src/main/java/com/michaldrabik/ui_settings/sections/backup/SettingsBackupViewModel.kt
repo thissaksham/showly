@@ -54,6 +54,18 @@ class SettingsBackupViewModel @Inject constructor(
     }
   }
 
+  /**
+   * Drops the Google session and the Drive grant, so reconnecting shows the consent
+   * screen again. Needed when Drive access is revoked from outside the app: the
+   * cached account still signs in silently and every Drive call fails.
+   */
+  fun disconnectGoogleAccount(context: Context) {
+    CloudBackupWorker.cancel(context)
+    googleAuthManager.disconnect {
+      _isGoogleConnected.value = false
+    }
+  }
+
   fun runCloudBackup() {
     if (_isLoading.value) return
     viewModelScope.launch {

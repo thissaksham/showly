@@ -54,6 +54,7 @@
   <string name="textSettingsCloudBackupConnect">Connect Account</string>
   <string name="textSettingsCloudBackupBackupNow">Backup Now</string>
   <string name="textSettingsCloudBackupRestore">Restore from Cloud</string>
+  <string name="textSettingsCloudBackupDisconnect">Disconnect</string>
   <string name="textSettingsCloudBackupSuccess">Cloud backup successful!</string>
   <string name="textSettingsCloudRestoreSuccess">Data restored successfully. App will restart.</string>
   <string name="textSettingsCloudBackupLastTimestamp">Last backup: %s</string>

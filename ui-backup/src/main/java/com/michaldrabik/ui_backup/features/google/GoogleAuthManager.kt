@@ -35,4 +35,16 @@ class GoogleAuthManager @Inject constructor(
   fun signOut(onComplete: () -> Unit) {
     googleSignInClient.signOut().addOnCompleteListener { onComplete() }
   }
+
+  /**
+   * Signing out only clears the local session, which is not enough once Drive access
+   * has been revoked outside the app: the cached account is still returned, sign-in
+   * succeeds without showing the consent screen again, and every Drive call then
+   * fails. Revoking drops the grant as well, so the next sign-in asks properly.
+   */
+  fun disconnect(onComplete: () -> Unit) {
+    googleSignInClient.revokeAccess().addOnCompleteListener {
+      googleSignInClient.signOut().addOnCompleteListener { onComplete() }
+    }
+  }
 }

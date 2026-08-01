@@ -12,6 +12,7 @@ import com.michaldrabik.ui_base.BaseFragment
 import com.michaldrabik.ui_base.utilities.events.MessageEvent
 import com.michaldrabik.ui_base.utilities.extensions.launchAndRepeatStarted
 import com.michaldrabik.ui_base.utilities.extensions.onClick
+import com.michaldrabik.ui_base.utilities.extensions.showErrorSnackbar
 import com.michaldrabik.ui_base.utilities.extensions.visibleIf
 import com.michaldrabik.ui_base.utilities.viewBinding
 import com.michaldrabik.ui_settings.R
@@ -66,6 +67,9 @@ class SettingsBackupFragment : BaseFragment<SettingsBackupViewModel>(R.layout.fr
       settingsBackupCloudConnect.onClick {
         googleSignInLauncher.launch(googleAuthManager.getSignInIntent())
       }
+      settingsBackupCloudDisconnect.onClick {
+        viewModel.disconnectGoogleAccount(requireContext().applicationContext)
+      }
       settingsBackupCloudBackupNow.onClick {
         viewModel.runCloudBackup()
       }
@@ -114,7 +118,15 @@ class SettingsBackupFragment : BaseFragment<SettingsBackupViewModel>(R.layout.fr
 
   private fun handleError(error: Throwable?) {
     error?.let {
-      showSnack(MessageEvent.Error(R.string.errorGeneral))
+      // Google says exactly what is wrong - permission revoked, sign-in needed,
+      // no network. Showing "something went wrong" instead makes cloud backup
+      // impossible to diagnose from the device.
+      val message = it.message?.takeIf { msg -> msg.isNotBlank() }
+      if (message != null) {
+        binding.root.showErrorSnackbar(message)
+      } else {
+        showSnack(MessageEvent.Error(R.string.errorGeneral))
+      }
       viewModel.clearEvents()
     }
   }
