@@ -19,6 +19,9 @@ object Config {
   const val JUST_WATCH_URL = "https://www.justwatch.com/"
   const val TMDB_URL = "https://www.themoviedb.org/"
 
+  // TVDB's free tier is conditional on showing this link to the user.
+  const val TVDB_URL = "https://www.thetvdb.com/"
+
   const val MAIN_GRID_SPAN = 3
   const val MAIN_GRID_SPAN_TABLET = 6
   const val LISTS_GRID_SPAN = 4

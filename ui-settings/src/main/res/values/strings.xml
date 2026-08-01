@@ -35,6 +35,7 @@
   <string name="textSettingsWidgetsLabelsTitle">Titles</string>
   <string name="textSettingsWidgetsLabelsSummary">Display translucent widgets titles.</string>
   <string name="textSettingsStreamingsDisclaimer">Streaming services data is provided by</string>
+  <string name="textSettingsTvdbDisclaimer">Episode air times provided by TheTVDB.com</string>
   <string name="textSettingsStreamingServicesTitle">Streaming Services</string>
   <string name="textSettingsStreamingServicesMessage">Display streaming services data.</string>
   <string name="textSettingsProgressNextEpisodeTitle">Next Episode</string>

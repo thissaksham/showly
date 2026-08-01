@@ -47,11 +47,24 @@
       android:layout_marginStart="@dimen/spaceTiny"
       android:layout_marginEnd="@dimen/spaceSmall"
       android:adjustViewBounds="true"
-      app:layout_constraintBottom_toTopOf="@id/settingsJustWatchDisclaimer"
+      app:layout_constraintBottom_toTopOf="@id/settingsTvdbDisclaimer"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       app:srcCompat="@drawable/ic_tmdb"
+      />
+
+    <!-- Required by TVDB's free tier: a visible link to thetvdb.com. -->
+    <TextView
+      android:id="@+id/settingsTvdbDisclaimer"
+      style="@style/Settings.Summary"
+      android:layout_marginTop="@dimen/spaceNormal"
+      android:text="@string/textSettingsTvdbDisclaimer"
+      android:textColor="?android:attr/textColorSecondary"
+      app:layout_constraintBottom_toTopOf="@id/settingsJustWatchDisclaimer"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/settingsTmdbIcon"
       />
 
     <TextView
@@ -65,7 +78,7 @@
       app:layout_constraintEnd_toStartOf="@id/settingsJustWatchIcon"
       app:layout_constraintHorizontal_chainStyle="packed"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/settingsTmdbIcon"
+      app:layout_constraintTop_toBottomOf="@id/settingsTvdbDisclaimer"
       />
 
     <ImageView
