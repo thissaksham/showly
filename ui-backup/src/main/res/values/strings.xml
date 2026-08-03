@@ -10,6 +10,10 @@
 
   <string name="textBackupExportSuccess">Data exported successfully.</string>
   <string name="textBackupImportSuccess">Data imported successfully.</string>
+  <string name="textBackupImportSkipped">Imported, but %1$d items could not be fetched and were skipped.</string>
+  <string name="textBackupImportPreparing">Reading your backup…</string>
+  <string name="textBackupImportProgress">Importing %1$d of %2$d\n\n\"%3$s\"</string>
+  <string name="textBackupImportProgressUnknown">Importing…\n\n\"%1$s\"</string>
 
   <string name="errorImportCancelled">Data import has been cancelled.</string>
 
@@ -28,4 +32,36 @@
   <string name="textBackupExportOptionWeeklyButton">Scheduled to run every week</string>
 
   <string name="textBackupExportLastTimestamp">Last Backup: %s</string>
+
+  <string name="textCloudBackupTitle">Cloud Backup</string>
+  <string name="textCloudBackupDescription">Keep a copy of your shows and movies in your Google Drive. A backup runs automatically in the background, and the previous copy is always kept.</string>
+  <string name="textCloudBackupConnect">Connect Account</string>
+  <string name="textCloudBackupNow">Back Up Now</string>
+  <string name="textCloudBackupRestore">Restore…</string>
+  <string name="textCloudBackupDisconnect">Disconnect</string>
+  <string name="textCloudBackupDisconnectConfirm">Sign out and revoke this app\'s access to your Drive? Your backup is not deleted.</string>
+  <string name="textCloudBackupSuccess">Backed up to Google Drive.</string>
+  <string name="textCloudBackupInProgress">Backing up…</string>
+  <string name="textCloudBackupLastTimestamp">Last backup: %s</string>
+  <string name="textCloudBackupLastTimestampNever">No backup yet</string>
+  <string name="textCloudBackupShrinkTitle">Backup looks incomplete</string>
+  <string name="textCloudBackupShrinkMessage">Your cloud backup holds %1$d items, but this device only has %2$d. Replacing it would lose the difference.\n\nOverwrite anyway?</string>
+  <string name="textCloudBackupOverwrite">Overwrite</string>
+
+  <string name="textCloudRestorePickerTitle">Restore which backup?</string>
+  <string name="textCloudRestoreLatest">Latest</string>
+  <string name="textCloudRestorePrevious">Previous</string>
+  <string name="textCloudRestoreItems">%1$d items</string>
+  <string name="textCloudRestoreUnknownDate">date unknown</string>
+  <string name="textCloudRestoreStarted">Restore started. It keeps running if you leave this screen.</string>
+  <string name="textCloudRestoreInProgress">Restoring… you can leave this screen.</string>
+  <string name="textCloudRestoreSuccess">Restore complete. The app will restart.</string>
+  <string name="textCloudRestoreSkipped">Restored, but %1$d items could not be fetched and were skipped.</string>
+  <string name="errorCloudBackupGeneral">Something went wrong with the cloud backup.</string>
+  <string name="errorCloudBackupSignIn">Could not sign in to Google.</string>
+
+  <string name="textCloudRestoreNotificationTitle">Restoring from Google Drive</string>
+  <string name="textCloudRestoreNotificationStarting">Downloading your backup…</string>
+  <string name="textCloudRestoreNotificationProgress">%1$d of %2$d · %3$s</string>
+  <string name="textCloudRestoreKeepOpen">This can take several minutes. Keep your phone connected.</string>
 </resources>

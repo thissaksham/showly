@@ -95,11 +95,15 @@ class BackupImportFragment : BaseFragment<BackupImportViewModel>(R.layout.fragme
     )
   }
 
-  private fun showSuccessSnack() {
+  private fun showSuccessSnack(skippedCount: Int) {
     val host = (requireActivity() as SnackbarHost).provideSnackbarLayout()
-    snackbar = host.showInfoSnackbar(
-      message = getString(R.string.textBackupImportSuccess),
-    )
+    // Items that could not be fetched are left out and the import carries on. Saying
+    // nothing made a restore that dropped most of a library look like a clean one.
+    snackbar = if (skippedCount > 0) {
+      host.showErrorSnackbar(getString(R.string.textBackupImportSkipped, skippedCount))
+    } else {
+      host.showInfoSnackbar(getString(R.string.textBackupImportSuccess))
+    }
   }
 
   private fun showErrorSnack(error: Throwable) {
@@ -133,7 +137,7 @@ class BackupImportFragment : BaseFragment<BackupImportViewModel>(R.layout.fragme
       renderImportStatus(uiState)
 
       if (isSuccess) {
-        showSuccessSnack()
+        showSuccessSnack(skippedCount)
         viewModel.clearState()
       }
 
@@ -146,12 +150,20 @@ class BackupImportFragment : BaseFragment<BackupImportViewModel>(R.layout.fragme
 
   private fun renderImportStatus(uiState: BackupImportUiState) {
     with(binding) {
-      statusText.visibleIf(uiState.isImporting != Idle)
-      statusText.text = when (uiState.isImporting) {
+      val status = uiState.isImporting
+      statusText.visibleIf(status != Idle)
+      statusText.text = when (status) {
         is Idle -> ""
-        is Initializing -> "Importing..."
-        is Importing -> "Importing...\n\n\"${uiState.isImporting.title}\""
+        is Initializing -> getString(R.string.textBackupImportPreparing)
+        is Importing ->
+          if (status.hasCount) {
+            getString(R.string.textBackupImportProgress, status.current, status.total, status.title)
+          } else {
+            getString(R.string.textBackupImportProgressUnknown, status.title)
+          }
       }
+      // ponytail: the count stays in the text. The bar here is a circular spinner,
+      // and a determinate circle renders badly on Android.
     }
   }
 }

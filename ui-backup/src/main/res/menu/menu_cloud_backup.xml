@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  >
+
+  <!--
+    Disconnect lives here rather than on the main row: it is rare, it revokes the
+    Drive grant, and it is the one action on this screen worth not hitting by accident.
+  -->
+  <item
+    android:id="@+id/menuCloudDisconnect"
+    android:title="@string/textCloudBackupDisconnect"
+    app:showAsAction="never"
+    />
+
+</menu>

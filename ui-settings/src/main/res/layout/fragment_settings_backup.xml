@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
@@ -58,16 +57,15 @@
 
   </LinearLayout>
 
-  <!-- Changed to normal LinearLayout with manual padding to prevent ripple/click -->
+  <!--
+    Cloud backup has its own screen now, like Import and Export. It used to live here
+    inline, which meant four stacked buttons and a restore that died with the screen.
+  -->
   <LinearLayout
     android:id="@+id/settingsBackupCloud"
+    style="@style/Settings.ItemLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingStart="@dimen/spaceNormal"
-    android:paddingEnd="@dimen/spaceNormal"
-    android:paddingTop="14dp"
-    android:paddingBottom="14dp"
     >
 
     <TextView
@@ -80,80 +78,6 @@
       android:id="@+id/settingsBackupCloudDescription"
       style="@style/Settings.Summary"
       android:text="@string/textSettingsCloudBackupDescription"
-      />
-
-    <TextView
-      android:id="@+id/settingsBackupCloudTimestamp"
-      style="@style/Settings.Summary"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="@dimen/spaceSmall"
-      android:background="@drawable/bg_pill"
-      android:paddingHorizontal="@dimen/spaceSmall"
-      android:paddingVertical="2dp"
-      android:textColor="@color/colorWhite"
-      android:textSize="11sp"
-      tools:text="Last backup: 2 mins ago"
-      />
-
-    <com.google.android.material.button.MaterialButton
-      android:id="@+id/settingsBackupCloudConnect"
-      style="@style/RoundMaterialButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="@dimen/spaceNormal"
-      android:text="@string/textSettingsCloudBackupConnect"
-      android:textColor="@color/colorWhite"
-      />
-
-    <LinearLayout
-      android:id="@+id/settingsBackupCloudActions"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="@dimen/spaceNormal"
-      android:orientation="horizontal"
-      >
-
-      <com.google.android.material.button.MaterialButton
-        android:id="@+id/settingsBackupCloudBackupNow"
-        style="@style/RoundMaterialButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/textSettingsCloudBackupBackupNow"
-        android:textColor="@color/colorWhite"
-        />
-
-      <com.google.android.material.button.MaterialButton
-        android:id="@+id/settingsBackupCloudRestore"
-        style="@style/RoundTextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spaceSmall"
-        android:text="@string/textSettingsCloudBackupRestore"
-        android:textColor="@color/colorWhite"
-        />
-
-    </LinearLayout>
-
-    <!-- Own row: three buttons do not fit across a phone, and the third was
-         pushed off screen while the row grew to fit the wrapped text. -->
-    <com.google.android.material.button.MaterialButton
-      android:id="@+id/settingsBackupCloudDisconnect"
-      style="@style/RoundTextButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="@string/textSettingsCloudBackupDisconnect"
-      android:textColor="@color/colorWhite"
-      android:visibility="gone"
-      />
-
-    <ProgressBar
-      android:id="@+id/settingsBackupCloudProgress"
-      style="?android:attr/progressBarStyleSmall"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="@dimen/spaceSmall"
-      android:visibility="gone"
       />
 
   </LinearLayout>

@@ -6,6 +6,9 @@
 
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <!-- Restoring a backup re-fetches every show and takes many minutes. It runs as a
+       data sync foreground service so leaving the app does not kill it half way. -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
   <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -123,6 +126,18 @@
         android:value="true"
         />
     </service>
+
+    <!--
+      WorkManager declares this service without a foregroundServiceType. Asking to run
+      as dataSync against a service declaring none is rejected outright from API 34,
+      which kills the process rather than failing the work. The permission above is
+      not enough on its own - the type has to be declared here too.
+    -->
+    <service
+      android:name="androidx.work.impl.foreground.SystemForegroundService"
+      android:foregroundServiceType="dataSync"
+      tools:node="merge"
+      />
 
   </application>
 </manifest>

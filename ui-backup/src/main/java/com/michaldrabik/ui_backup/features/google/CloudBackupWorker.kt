@@ -56,6 +56,13 @@ class CloudBackupWorker @AssistedInject constructor(
       return Result.success() // Cannot backup without permission
     }
 
+    // A restore rebuilds the library over many minutes. Backing up while it is only
+    // part way through is how a full backup got replaced by a tenth of one.
+    if (CloudRestoreWorker.isPending(applicationContext)) {
+      Timber.i("Skipping periodic cloud backup: a restore is in progress.")
+      return Result.success()
+    }
+
     return try {
       Timber.i("Starting periodic cloud backup")
       cloudBackupUseCase().fold(
@@ -65,6 +72,11 @@ class CloudBackupWorker @AssistedInject constructor(
         },
         onFailure = { throw it }
       )
+    } catch (e: BackupShrinkException) {
+      // Deliberate refusal, not a fault. Retrying would only refuse again, and the
+      // stored backup is the one worth keeping.
+      Timber.w(e, "Periodic cloud backup refused: local library is much smaller than the backup")
+      Result.success()
     } catch (e: Exception) {
       Timber.e(e, "Periodic cloud backup failed")
       Logger.record(e, "CloudBackupWorker::doWork")

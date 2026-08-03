@@ -36,6 +36,7 @@ class BackupImportViewModel @Inject constructor(
   private val importingState = MutableStateFlow(initialState.isImporting)
   private val successState = MutableStateFlow(initialState.isSuccess)
   private val errorState = MutableStateFlow(initialState.isError)
+  private val skippedState = MutableStateFlow(initialState.skippedCount)
 
   init {
     backupImportWorker.statusListener = { status ->
@@ -52,7 +53,8 @@ class BackupImportViewModel @Inject constructor(
         delay(1.seconds)
         val importScheme = createImportData(jsonInput)
         if (importScheme != null) {
-          backupImportWorker.run(importScheme)
+          val result = backupImportWorker.run(importScheme)
+          skippedState.update { result.skippedCount }
           successState.update { true }
         }
       } catch (error: Throwable) {
@@ -99,17 +101,20 @@ class BackupImportViewModel @Inject constructor(
     importingState.update { Idle }
     successState.update { false }
     errorState.update { null }
+    skippedState.update { 0 }
   }
 
   val uiState = combine(
     importingState,
     successState,
     errorState,
-  ) { s1, s2, s3 ->
+    skippedState,
+  ) { s1, s2, s3, s4 ->
     BackupImportUiState(
       isImporting = s1,
       isSuccess = s2,
       isError = s3,
+      skippedCount = s4,
     )
   }.stateIn(
     scope = viewModelScope,

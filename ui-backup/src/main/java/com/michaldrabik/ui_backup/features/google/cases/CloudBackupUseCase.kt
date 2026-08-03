@@ -9,12 +9,12 @@ class CloudBackupUseCase @Inject constructor(
   private val googleDriveManager: GoogleDriveManager,
 ) {
 
-  companion object {
-    private const val BACKUP_FILE_NAME = "showly_plus_cloud_backup.json"
-  }
-
-  suspend operator fun invoke(): Result<Unit> {
+  /**
+   * [force] bypasses the guard that refuses to replace a large backup with a much
+   * smaller one. Pass it only once the user has been shown both sizes and agreed.
+   */
+  suspend operator fun invoke(force: Boolean = false): Result<Unit> {
     val json = createBackupJsonUseCase()
-    return googleDriveManager.uploadBackup(json, BACKUP_FILE_NAME)
+    return googleDriveManager.uploadBackup(jsonContent = json, force = force)
   }
 }

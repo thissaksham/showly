@@ -92,6 +92,7 @@ class App :
         createNotificationChannel(createChannel(AppNotificationChannel.SHOWS_INFO))
         createNotificationChannel(createChannel(AppNotificationChannel.EPISODES_ANNOUNCEMENTS))
         createNotificationChannel(createChannel(AppNotificationChannel.MOVIES_ANNOUNCEMENTS))
+        createNotificationChannel(createChannel(AppNotificationChannel.CLOUD_RESTORE))
       }
     }
 

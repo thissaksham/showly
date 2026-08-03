@@ -32,4 +32,15 @@ enum class NotificationChannel(
     NotificationManagerCompat.IMPORTANCE_DEFAULT,
     "movies_announcements",
   ),
+
+  /**
+   * Low importance on purpose: this is the ongoing notification that keeps a cloud
+   * restore alive in the background. It has to be visible, not attention grabbing.
+   */
+  CLOUD_RESTORE(
+    "Cloud Restore",
+    "Progress while restoring a backup from Google Drive",
+    NotificationManagerCompat.IMPORTANCE_LOW,
+    "cloud_restore",
+  ),
 }

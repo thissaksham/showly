@@ -13,13 +13,11 @@ import com.michaldrabik.data_local.database.model.WatchlistMovie
 import com.michaldrabik.repository.PinnedItemsRepository
 import com.michaldrabik.repository.movies.MoviesRepository
 import com.michaldrabik.repository.movies.ratings.MoviesRatingsRepository
-import com.michaldrabik.ui_backup.features.import_.model.BackupImportStatus.Importing
 import com.michaldrabik.ui_backup.model.BackupMovie
 import com.michaldrabik.ui_backup.model.BackupMovies
 import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
 import com.michaldrabik.ui_model.IdTrakt
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -102,7 +100,7 @@ internal class BackupImportMoviesRunner @Inject constructor(
   ) {
     for (movie in backupMovies.collectionHistory) {
       Timber.d("Importing movie ${movie.traktId} ...")
-      statusListener?.invoke(Importing(movie.title))
+      reportProgress(movie.title)
 
       if (localCollection.contains(movie.traktId)) {
         Timber.d("Movie already in collection. Skipping.")
@@ -131,7 +129,7 @@ internal class BackupImportMoviesRunner @Inject constructor(
   ) {
     for (movie in backupMovies.collectionWatchlist) {
       Timber.d("Importing movie ${movie.traktId} ...")
-      statusListener?.invoke(Importing(movie.title))
+      reportProgress(movie.title)
 
       if (localCollection.contains(movie.traktId)) {
         Timber.d("Movie already in collection. Skipping.")
@@ -160,7 +158,7 @@ internal class BackupImportMoviesRunner @Inject constructor(
   ) {
     for (movie in backupMovies.collectionDropped) {
       Timber.d("Importing movie ${movie.traktId} ...")
-      statusListener?.invoke(Importing(movie.title))
+      reportProgress(movie.title)
 
       if (localCollection.contains(movie.traktId)) {
         Timber.d("Movie already in collection. Skipping.")
@@ -190,9 +188,8 @@ internal class BackupImportMoviesRunner @Inject constructor(
       true
     } catch (error: Throwable) {
       rethrowCancellation(error) {
-        if (error is HttpException && error.code() == 404) {
-          Timber.w("Failed to fetch movie: ${movie.traktId} ${movie.title}")
-        }
+        Timber.w(error, "Failed to fetch movie: ${movie.traktId} ${movie.title}")
+        skipped.add(movie.title)
       }
       false
     }

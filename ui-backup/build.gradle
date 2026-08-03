@@ -67,5 +67,8 @@ dependencies {
 
   api libs.phoenix
 
+  testImplementation libs.junit
+  testImplementation libs.truth
+
   coreLibraryDesugaring libs.android.desugar
 }

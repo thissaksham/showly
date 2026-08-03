@@ -736,6 +736,13 @@
       app:launchSingleTop="true"
       app:popExitAnim="@anim/anim_fade_out"
       />
+    <action
+      android:id="@+id/actionSettingsFragmentToBackupCloud"
+      app:destination="@id/backupCloudFragment"
+      app:enterAnim="@anim/anim_fade_in"
+      app:launchSingleTop="true"
+      app:popExitAnim="@anim/anim_fade_out"
+      />
   </fragment>
 
   <fragment
@@ -781,6 +788,12 @@
     android:id="@+id/backupImportFragment"
     android:name="com.michaldrabik.ui_backup.features.import_.BackupImportFragment"
     android:label="fragmentBackupImport"
+    />
+
+  <fragment
+    android:id="@+id/backupCloudFragment"
+    android:name="com.michaldrabik.ui_backup.features.google.CloudBackupFragment"
+    android:label="fragmentBackupCloud"
     />
 
   <dialog

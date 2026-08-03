@@ -7,4 +7,6 @@ data class BackupImportUiState(
   val isImporting: BackupImportStatus = Idle,
   val isSuccess: Boolean = false,
   val isError: Throwable? = null,
+  /** Items whose details could not be fetched. They are left out of the import. */
+  val skippedCount: Int = 0,
 )

@@ -21,7 +21,6 @@ import com.michaldrabik.repository.mappers.Mappers
 import com.michaldrabik.repository.shows.ShowSeasonsRepository
 import com.michaldrabik.repository.shows.ShowsRepository
 import com.michaldrabik.repository.shows.ratings.ShowsRatingsRepository
-import com.michaldrabik.ui_backup.features.import_.model.BackupImportStatus.Importing
 import com.michaldrabik.ui_backup.model.BackupShow
 import com.michaldrabik.ui_backup.model.BackupShows
 import com.michaldrabik.ui_base.utilities.extensions.rethrowCancellation
@@ -29,7 +28,6 @@ import com.michaldrabik.ui_model.IdTrakt
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -87,7 +85,7 @@ internal class BackupImportShowsRunner @Inject constructor(
   ) {
     for (show in backupShows.collectionHistory) {
       Timber.d("Importing show ${show.traktId} ...")
-      statusListener?.invoke(Importing(show.title))
+      reportProgress(show.title)
 
       if (localCollection.contains(show.traktId)) {
         importExistingShowEpisodes(IdTrakt(show.traktId), backupShows)
@@ -131,7 +129,7 @@ internal class BackupImportShowsRunner @Inject constructor(
   ) {
     for (show in backupShows.collectionWatchlist) {
       Timber.d("Importing show ${show.traktId} ...")
-      statusListener?.invoke(Importing(show.title))
+      reportProgress(show.title)
 
       if (localCollection.contains(show.traktId)) {
         importExistingShowEpisodes(IdTrakt(show.traktId), backupShows)
@@ -169,7 +167,7 @@ internal class BackupImportShowsRunner @Inject constructor(
   ) {
     for (show in backupShows.collectionDropped) {
       Timber.d("Importing show ${show.traktId} ...")
-      statusListener?.invoke(Importing(show.title))
+      reportProgress(show.title)
 
       if (localCollection.contains(show.traktId)) {
         importExistingShowEpisodes(IdTrakt(show.traktId), backupShows)
@@ -401,9 +399,8 @@ internal class BackupImportShowsRunner @Inject constructor(
       true
     } catch (error: Throwable) {
       rethrowCancellation(error) {
-        if (error is HttpException && error.code() == 404) {
-          Timber.w("Failed to fetch show: ${show.traktId} ${show.title}")
-        }
+        Timber.w(error, "Failed to fetch show: ${show.traktId} ${show.title}")
+        skipped.add(show.title)
       }
       false
     }

@@ -52,16 +52,8 @@
   <string name="textSettingsBackupImportDescription">Import your backup file to restore data on this device.</string>
   <string name="textSettingsCloudBackupTitle">Cloud Backup</string>
   <string name="textSettingsCloudBackupDescription">Securely backup your data to Google Drive. Backup is performed periodically in the background.</string>
-  <string name="textSettingsCloudBackupConnect">Connect Account</string>
-  <string name="textSettingsCloudBackupBackupNow">Backup Now</string>
-  <string name="textSettingsCloudBackupRestore">Restore from Cloud</string>
-  <string name="textSettingsCloudBackupDisconnect">Disconnect</string>
   <string name="textSettingsMoviesNotificationsHourTitle">Movie Notification Time</string>
   <string name="textSettingsMoviesNotificationsHourSummary">Time of day to notify about movies releasing. Movies have a release date but no time.</string>
-  <string name="textSettingsCloudBackupSuccess">Cloud backup successful!</string>
-  <string name="textSettingsCloudRestoreSuccess">Data restored successfully. App will restart.</string>
-  <string name="textSettingsCloudBackupLastTimestamp">Last backup: %s</string>
-  <string name="textSettingsCloudBackupLastTimestampNever">Last backup: Never</string>
 
   <string name="textSettingsSpoilers">Spoilers</string>
   <string name="textSettingsSpoilersShows">Shows</string>
