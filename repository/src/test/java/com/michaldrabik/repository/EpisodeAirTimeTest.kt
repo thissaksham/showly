@@ -70,9 +70,21 @@ class EpisodeAirTimeTest {
 
   @Test
   fun `Should keep midnight UTC when TVDB has no air time`() {
-    val aired = airedAt("2026-08-07", showMapper.airTimeFromTvdb(TvdbSeries(null, "usa")))
+    val aired = airedAt("2026-08-07", showMapper.airTimeFromTvdb(TvdbSeries(null, "usa", null)))
 
     assertThat(aired).isEqualTo(instant("2026-08-07T00:00Z"))
+  }
+
+  @Test
+  fun `Should shift an early streaming date forward to the official air day`() {
+    // Lucky: TMDB says Tuesday (Aug 4), but TVDB says Wednesday (Aug 5) at 00:00.
+    val aired = airedAt(
+      airDate = "2026-08-04",
+      airTime = AirTime(day = "wednesday", time = "00:00", timezone = "America/New_York")
+    )
+
+    // Should land on Wednesday 5th, 09:30 AM IST (04:00 UTC)
+    assertThat(aired).isEqualTo(instant("2026-08-05T04:00Z"))
   }
 
   @Test
@@ -94,7 +106,7 @@ class EpisodeAirTimeTest {
   private fun airTime(
     time: String,
     country: String,
-  ) = showMapper.airTimeFromTvdb(TvdbSeries(airsTime = time, originalCountry = country))
+  ) = showMapper.airTimeFromTvdb(TvdbSeries(airsTime = time, originalCountry = country, airsDays = null))
 
   private fun airedAt(
     airDate: String?,

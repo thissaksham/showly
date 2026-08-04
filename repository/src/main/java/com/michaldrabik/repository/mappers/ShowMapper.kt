@@ -37,7 +37,8 @@ class ShowMapper @Inject constructor(
   fun airTimeFromTvdb(series: TvdbSeries?): AirTime {
     val time = series?.airsTime?.takeIf { it.isNotBlank() } ?: return AirTime.EMPTY
     val zone = AirTimeZones.zoneIdOf(series.originalCountry) ?: return AirTime.EMPTY
-    return AirTime(day = "", time = time, timezone = zone)
+    val day = series.airsDays?.asCommaSeparatedString() ?: ""
+    return AirTime(day = day, time = time, timezone = zone)
   }
 
   /**

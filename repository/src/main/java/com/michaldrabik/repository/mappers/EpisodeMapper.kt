@@ -31,13 +31,29 @@ class EpisodeMapper @Inject constructor() {
     airDate: String?,
     airTime: AirTime,
   ): ZonedDateTime? {
-    val date = airDate?.takeIf { it.isNotBlank() }?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+    var date = airDate?.takeIf { it.isNotBlank() }?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
       ?: return null
     val time = airTime.time.takeIf { it.isNotBlank() }?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
     val zone = airTime.timezone.takeIf { it.isNotBlank() }?.let { runCatching { ZoneId.of(it) }.getOrNull() }
+
     if (time == null || zone == null) {
       return date.atStartOfDay(ZoneOffset.UTC)
     }
+
+    // TMDB dates can be a day early for streaming shows to match the West Coast drop. Pair that
+    // with TVDB's 00:00 "official" slot and the episode lands 24h too soon. We look ahead to
+    // find the first of the show's official air days that matches or follows the TMDB date.
+    if (airTime.day.isNotBlank()) {
+      val officialDays = airTime.day.split(",")
+      for (i in 0..6) {
+        val candidate = date.plusDays(i.toLong())
+        if (officialDays.contains(candidate.dayOfWeek.name.lowercase())) {
+          date = candidate
+          break
+        }
+      }
+    }
+
     return date.atTime(time).atZone(zone)
   }
 
