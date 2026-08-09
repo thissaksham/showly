@@ -211,6 +211,14 @@ class EpisodesManager @Inject constructor(
       remoteSeasons.forEach { remoteSeason ->
         var isAnyEpisodeUnwatched = false
 
+        val existingSeason = seasonsLocalSource.getById(remoteSeason.ids.trakt.id)
+        if (existingSeason != null && existingSeason.idShowTrakt != show.traktId) {
+          Timber.e("Duplicate show detected! Season ${remoteSeason.ids.trakt.id} is already linked to show ${existingSeason.idShowTrakt}, but we are syncing show ${show.traktId}. Aborting sync to prevent progress loss.")
+          // Fix the mess in the database.
+          showsRepository.detailsShow.reconcileDuplicates()
+          return@coroutineScope
+        }
+
         remoteSeason.episodes.forEach { remoteEpisode ->
           var localEpisode = localEpisodes.find {
             it.episodeNumber == remoteEpisode.number &&

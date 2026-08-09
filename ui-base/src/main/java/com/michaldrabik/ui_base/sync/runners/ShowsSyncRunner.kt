@@ -37,6 +37,13 @@ class ShowsSyncRunner @Inject constructor(
   suspend fun run(): Int {
     Timber.i("Shows sync initialized.")
 
+    // Reconcile any duplicate shows created by the Trakt -> TMDB migration.
+    try {
+      showsRepository.detailsShow.reconcileDuplicates()
+    } catch (t: Throwable) {
+      Timber.e(t, "Duplicate reconciliation failed.")
+    }
+
     val showsToSync = showsRepository.loadCollectionSyncInfo()
       .filter { it.status != UNKNOWN.name }
 

@@ -54,6 +54,21 @@ interface ShowsDao :
   @Query("DELETE FROM shows where id_trakt == :traktId")
   override suspend fun deleteById(traktId: Long)
 
+  @Query("UPDATE seasons SET id_show_trakt = :mainShowId WHERE id_show_trakt = :duplicateShowId")
+  override suspend fun moveSeasons(duplicateShowId: Long, mainShowId: Long)
+
+  @Query("UPDATE episodes SET id_show_trakt = :mainShowId WHERE id_show_trakt = :duplicateShowId")
+  override suspend fun moveEpisodes(duplicateShowId: Long, mainShowId: Long)
+
+  @Query("UPDATE OR IGNORE shows_my_shows SET id_trakt = :mainShowId WHERE id_trakt = :duplicateShowId")
+  override suspend fun moveMyShow(duplicateShowId: Long, mainShowId: Long)
+
+  @Query("UPDATE OR IGNORE shows_see_later SET id_trakt = :mainShowId WHERE id_trakt = :duplicateShowId")
+  override suspend fun moveWatchlistShow(duplicateShowId: Long, mainShowId: Long)
+
+  @Query("UPDATE OR IGNORE shows_archive SET id_trakt = :mainShowId WHERE id_trakt = :duplicateShowId")
+  override suspend fun moveArchiveShow(duplicateShowId: Long, mainShowId: Long)
+
   @Transaction
   override suspend fun upsert(shows: List<Show>) {
     val result = insert(shows)
@@ -65,4 +80,7 @@ interface ShowsDao :
 
     if (updateList.isNotEmpty()) update(updateList)
   }
+
+  @Query("SELECT id_tmdb FROM shows WHERE id_tmdb > 0 GROUP BY id_tmdb HAVING COUNT(id_tmdb) > 1")
+  override suspend fun getDuplicatesByTmdbId(): List<Long>
 }

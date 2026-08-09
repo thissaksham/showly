@@ -28,4 +28,16 @@ interface ShowsLocalDataSource {
   suspend fun deleteById(traktId: Long)
 
   suspend fun upsert(shows: List<Show>)
+
+  suspend fun getDuplicatesByTmdbId(): List<Long>
+
+  suspend fun moveSeasons(duplicateShowId: Long, mainShowId: Long)
+
+  suspend fun moveEpisodes(duplicateShowId: Long, mainShowId: Long)
+
+  suspend fun moveMyShow(duplicateShowId: Long, mainShowId: Long)
+
+  suspend fun moveWatchlistShow(duplicateShowId: Long, mainShowId: Long)
+
+  suspend fun moveArchiveShow(duplicateShowId: Long, mainShowId: Long)
 }
